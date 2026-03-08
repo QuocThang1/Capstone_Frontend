@@ -89,7 +89,7 @@ export const AuthWrapper = (props) => {
         <>
             {appLoading ? (
                 <div className="loading">
-                    <Spinner />
+                    <Spinner fullScreen text="Loading..." />
                 </div>
             ) : (
                 <AuthContext.Provider value={{

@@ -1,39 +1,64 @@
-import { Spin } from "antd";
-import { LoadingOutlined } from "@ant-design/icons";
-
 const Spinner = ({
-    size = "large",
-    tip = "",
+    size = "default", // "small" | "default" | "large"
+    text = "",
     fullScreen = false,
-    style = {}
+    className = ""
 }) => {
-    const customIcon = <LoadingOutlined style={{ fontSize: size === "large" ? 48 : 24 }} spin />;
+    // Size mappings
+    const sizeClasses = {
+        small: "h-6 w-6",
+        default: "h-10 w-10",
+        large: "h-16 w-16"
+    };
 
+    const spinnerSize = sizeClasses[size] || sizeClasses.default;
+
+    const spinnerElement = (
+        <div className="flex flex-col items-center justify-center gap-4">
+            {/* Spinner SVG */}
+            <svg
+                className={`animate-spin text-[#4ADE80] ${spinnerSize}`}
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+            >
+                <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                ></circle>
+                <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+            </svg>
+
+            {/* Loading Text */}
+            {text && (
+                <p className="text-gray-600 font-medium text-center animate-pulse">
+                    {text}
+                </p>
+            )}
+        </div>
+    );
+
+    // Full screen spinner
     if (fullScreen) {
         return (
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '100vh',
-                width: '100%',
-                ...style
-            }}>
-                <Spin indicator={customIcon} size={size} tip={tip} />
+            <div className={`min-h-screen flex items-center justify-center bg-[#F6F8F7] ${className}`}>
+                {spinnerElement}
             </div>
         );
     }
 
+    // Regular spinner
     return (
-        <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '60px 0',
-            width: '100%',
-            ...style
-        }}>
-            <Spin indicator={customIcon} size={size} tip={tip} />
+        <div className={`flex items-center justify-center py-8 ${className}`}>
+            {spinnerElement}
         </div>
     );
 };

@@ -3,8 +3,9 @@ import { useForm } from "react-hook-form";
 import { signUpApi } from "../utils/Api/accountApi";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import ButtonSpinner from "../components/ButtonSpinner";
 
-const Register = () => {
+const RegisterPage = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -115,8 +116,8 @@ const Register = () => {
                                 }
                             })}
                             className={`w-full px-4 py-3 rounded-lg border ${errors.username
-                                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                    : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
+                                ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                                : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
                                 } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200`}
                             placeholder="Enter your username"
                         />
@@ -141,8 +142,8 @@ const Register = () => {
                                 }
                             })}
                             className={`w-full px-4 py-3 rounded-lg border ${errors.fullName
-                                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                    : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
+                                ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                                : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
                                 } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200`}
                             placeholder="Enter your full name"
                         />
@@ -168,8 +169,8 @@ const Register = () => {
                                     }
                                 })}
                                 className={`w-full px-4 py-3 rounded-lg border ${errors.email
-                                        ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                        : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
+                                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                                    : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
                                     } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200`}
                                 placeholder="your@email.com"
                             />
@@ -190,8 +191,8 @@ const Register = () => {
                                 })}
                                 maxLength={13}
                                 className={`w-full px-4 py-3 rounded-lg border ${errors.phone
-                                        ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                        : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
+                                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                                    : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
                                     } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200`}
                                 placeholder="0987654321"
                             />
@@ -214,8 +215,8 @@ const Register = () => {
                                     validate: validateAge
                                 })}
                                 className={`w-full px-4 py-3 rounded-lg border ${errors.dob
-                                        ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                        : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
+                                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                                    : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
                                     } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200`}
                             />
                             {errors.dob && (
@@ -233,8 +234,8 @@ const Register = () => {
                                     required: "Please select your gender"
                                 })}
                                 className={`w-full px-4 py-3 rounded-lg border ${errors.gender
-                                        ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                        : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
+                                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                                    : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
                                     } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200 bg-white cursor-pointer`}
                             >
                                 <option value="">Select gender</option>
@@ -269,8 +270,8 @@ const Register = () => {
                                     }
                                 })}
                                 className={`w-full px-4 py-3 pr-12 rounded-lg border ${errors.password
-                                        ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                        : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
+                                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                                    : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
                                     } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200`}
                                 placeholder="Enter your password"
                             />
@@ -310,8 +311,8 @@ const Register = () => {
                                     validate: (value) => value === password || "Passwords do not match"
                                 })}
                                 className={`w-full px-4 py-3 pr-12 rounded-lg border ${errors.confirmPassword
-                                        ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                        : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
+                                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                                    : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
                                     } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200`}
                                 placeholder="Confirm your password"
                             />
@@ -344,13 +345,7 @@ const Register = () => {
                         className="w-full bg-[#4ADE80] text-[#101A17] py-3 rounded-lg font-bold text-lg hover:bg-[#22D3EE] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-xl cursor-pointer flex items-center justify-center gap-2"
                     >
                         {loading ? (
-                            <span className="flex items-center justify-center">
-                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-[#101A17]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Creating Account...
-                            </span>
+                            <ButtonSpinner text="Creating Account..." />
                         ) : (
                             "Sign Up"
                         )}
@@ -375,4 +370,4 @@ const Register = () => {
     );
 };
 
-export default Register;
+export default RegisterPage;
