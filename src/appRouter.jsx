@@ -7,6 +7,8 @@ import AdminLayout from "./layout/adminLayout";
 import HomePage from "./pages/Home";
 import ProfilePage from "./pages/profile";
 import UserManagement from "./pages/Admin/User/userManagement";
+import UserLayout from "./layout/userLayout";
+import ForYou from "./pages/Admin/Project/forYou";
 
 
 const router = createBrowserRouter([
@@ -45,6 +47,19 @@ const router = createBrowserRouter([
             <UserManagement />
           </ProtectedRoute>
       }
+    ],
+  },
+  {
+    path: "/projects",
+    element: <UserLayout />,
+    children: [
+      {
+        index: true,
+        element:
+          <ProtectedRoute allowedRoles={["admin", "user"]}>
+            <ForYou />
+          </ProtectedRoute>
+      },
     ],
   },
 ]);
