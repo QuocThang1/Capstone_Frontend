@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
 
-const AdminTopBar = ({ currentPageTitle }) => {
+const TopBar = ({ currentPageTitle }) => {
     const navigate = useNavigate();
     const { auth } = useContext(AuthContext);
 
@@ -54,4 +54,4 @@ const AdminTopBar = ({ currentPageTitle }) => {
     );
 };
 
-export default AdminTopBar;
+export default TopBar;

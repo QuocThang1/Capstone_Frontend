@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import AdminSidebar from "../components/AdminSidebar";
-import AdminTopBar from "../components/AdminTopBar";
+import TopBar from "../components/topBar";
 
 const AdminLayout = () => {
     const location = useLocation();
@@ -31,7 +31,7 @@ const AdminLayout = () => {
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto">
                 {/* Top Bar Component */}
-                <AdminTopBar currentPageTitle={getCurrentPageTitle()} />
+                <TopBar currentPageTitle={getCurrentPageTitle()} />
 
                 {/* Content Area */}
                 <div className="p-8">
