@@ -1,186 +1,173 @@
-import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/auth.context";
-import { toast } from "react-toastify";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { CloseOutlined, MenuOutlined, MoonOutlined, SunOutlined } from "@ant-design/icons";
+import { Drawer } from "antd";
+import { AuthModal } from "./AuthModal";
+import { useTheme } from "../context/theme.context";
 
-const Header = () => {
-    const navigate = useNavigate();
-    const { auth, setAuth } = useContext(AuthContext);
-    const [showDropdown, setShowDropdown] = useState(false);
+export function Header() {
+  const [scrolled, setScrolled] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [modalState, setModalState] = useState({ isOpen: false, mode: "signup" });
+  const { theme, toggleTheme } = useTheme();
 
-    const handleLogout = () => {
-        localStorage.removeItem("access_token");
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", fn);
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
 
-        setAuth({
-            isAuthenticated: false,
-            user: {
-                _id: "",
-                email: "",
-                fullName: "",
-                username: "",
-                dob: "",
-                gender: "",
-                phone: "",
-                role: "",
-            },
-        });
+  const scrollTo = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    setDrawerOpen(false);
+  };
 
-        toast.success("Logged out successfully!");
-        navigate("/");
-        setShowDropdown(false);
-    };
+  const navLinks = [
+    { label: "Platform", id: "platform" },
+    { label: "Industries", id: "industries" },
+    { label: "Features", id: "features" },
+    { label: "Resources", id: "footer" },
+  ];
 
-    return (
-        <header className="bg-[#101A17] text-white py-4 px-8 flex justify-between items-center">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-                <span className="font-bold text-lg">Capstone</span>
+  return (
+    <>
+      <motion.header
+        initial={{ y: -60, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
+        className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4"
+      >
+        <div
+          className="nav-glass w-full rounded-2xl px-6 flex items-center justify-between"
+          style={{
+            maxWidth: 1200,
+            height: 64,
+            boxShadow: scrolled ? "0 8px 32px rgba(15,23,42,0.08)" : "0 2px 12px rgba(15,23,42,0.04)",
+            transition: "box-shadow 0.3s ease",
+          }}
+        >
+          {/* Logo */}
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="flex items-center gap-2.5"
+          >
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #6366F1, #8B5CF6)" }}
+            >
+              <span className="font-display font-black text-white text-sm">T</span>
             </div>
+            <span className="font-display font-black text-xl" style={{ color: "#0F172A" }}>
+              TASKA
+            </span>
+          </button>
 
-            <nav className="flex gap-6">
-                <a href="#" className="hover:text-[#4ADE80] transition-colors duration-300">Home</a>
-                <a href="#" className="hover:text-[#4ADE80] transition-colors duration-300">Features</a>
-                <a href="#" className="hover:text-[#4ADE80] transition-colors duration-300">Pricing</a>
-                <a href="#" className="hover:text-[#4ADE80] transition-colors duration-300">About</a>
-                <a href="#" className="hover:text-[#4ADE80] transition-colors duration-300">Support</a>
-            </nav>
+          {/* Center nav */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navLinks.map((item) => (
+              <button
+                key={item.label}
+                onClick={() => scrollTo(item.id)}
+                className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-slate-50"
+                style={{ color: "#475569" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "#6366F1")}
+                onMouseLeave={e => (e.currentTarget.style.color = "#475569")}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
 
-            <div className="flex items-center gap-3">
-                {auth.isAuthenticated ? (
-                    // User authenticated - Show welcome message and dropdown
-                    <div className="relative">
-                        <button
-                            onClick={() => setShowDropdown(!showDropdown)}
-                            className="flex items-center gap-2 bg-[#1a2924] px-4 py-2 rounded-lg hover:bg-[#2a3934] transition-all duration-300"
-                        >
-                            {/* Avatar */}
-                            <div className="w-8 h-8 bg-gradient-to-br from-[#4ADE80] to-[#22D3EE] rounded-full flex items-center justify-center font-bold text-[#101A17]">
-                                {auth.user.fullName?.charAt(0).toUpperCase() || auth.user.username?.charAt(0).toUpperCase() || "U"}
-                            </div>
+          {/* Right actions */}
+          <div className="hidden md:flex items-center gap-3">
+            <button
+              className="text-sm font-semibold px-4 py-2 transition-colors"
+              style={{ color: "#475569" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#6366F1")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#475569")}
+              onClick={() => setModalState({ isOpen: true, mode: "login" })}
+            >
+              Log in
+            </button>
+            <button
+              onClick={() => setModalState({ isOpen: true, mode: "signup" })}
+              className="btn-indigo text-sm px-5 py-2.5 rounded-lg"
+            >
+              Start Free Trial
+            </button>
+            <motion.button
+              className="text-sm font-semibold px-4 py-2 transition-colors text-slate-600 hover:text-indigo-500"
+              onClick={toggleTheme}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{ rotate: theme === "dark" ? 0 : 180 }}
+              transition={{ duration: 0.3 }}
+            >
+              <motion.div
+                key={theme}
+                initial={{ rotate: -180, scale: 0 }}
+                animate={{ rotate: 0, scale: 1 }}
+                exit={{ rotate: 180, scale: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {theme === "dark" ? <MoonOutlined /> : <SunOutlined />}
+              </motion.div>
+            </motion.button>
+          </div>
 
-                            {/* Welcome text */}
-                            <div className="flex flex-col items-start">
-                                <span className="text-xs text-gray-400">Welcome</span>
-                                <span className="text-sm font-semibold text-[#4ADE80]">
-                                    {auth.user.fullName || auth.user.username}
-                                </span>
-                            </div>
+          {/* Mobile hamburger */}
+          <button
+            className="md:hidden p-2"
+            onClick={() => setDrawerOpen(true)}
+            style={{ color: "#475569" }}
+          >
+            <MenuOutlined style={{ fontSize: 20 }} />
+          </button>
+        </div>
+      </motion.header>
 
-                            {/* Dropdown icon */}
-                            <svg
-                                className={`w-4 h-4 transition-transform duration-300 ${showDropdown ? "rotate-180" : ""}`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
+      {/* Mobile drawer */}
+      <Drawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        placement="right"
+        style={{ width: 280 }}
+        closeIcon={<CloseOutlined />}
+        styles={{ body: { padding: "24px 16px" } }}
+        title={
+          <span className="font-display font-black text-lg" style={{ color: "#0F172A" }}>
+            TASKA
+          </span>
+        }
+      >
+        <div className="flex flex-col gap-2">
+          {navLinks.map((item) => (
+            <button
+              key={item.label}
+              onClick={() => scrollTo(item.id)}
+              className="text-left px-4 py-3 rounded-xl text-sm font-semibold transition-colors"
+              style={{ color: "#475569" }}
+            >
+              {item.label}
+            </button>
+          ))}
+          <div className="mt-4 pt-4" style={{ borderTop: "1px solid #E2E8F0" }}>
+            <button
+              className="w-full btn-indigo py-3 rounded-xl text-sm"
+              onClick={() => setModalState({ isOpen: true, mode: "signup" })}
+            >
+              Start Free Trial
+            </button>
+          </div>
+        </div>
+      </Drawer>
 
-                        {/* Dropdown Menu */}
-                        {showDropdown && (
-                            <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-2 z-50">
-                                {/* User Info */}
-                                <div className="px-4 py-3 border-b border-gray-200">
-                                    <p className="text-sm font-semibold text-[#101A17]">{auth.user.fullName}</p>
-                                    <p className="text-xs text-gray-500">{auth.user.email}</p>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                        {auth.user.role === "admin" ? "Administrator" : "User"}
-                                    </p>
-                                </div>
-
-                                {/* Menu Items */}
-                                <div className="py-1">
-                                    <button
-                                        onClick={() => {
-                                            navigate("/profile");
-                                            setShowDropdown(false);
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#4ADE80] hover:bg-opacity-10 hover:text-[#101A17] transition-colors duration-200 flex items-center gap-2 cursor-pointer"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
-                                        My Profile
-                                    </button>
-
-                                    <button
-                                        onClick={() => {
-                                            navigate("/projects");
-                                            setShowDropdown(false);
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#4ADE80] hover:bg-opacity-10 hover:text-[#101A17] transition-colors duration-200 flex items-center gap-2 cursor-pointer"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                                        </svg>
-                                        My Projects
-                                    </button>
-
-                                    <button
-                                        onClick={() => {
-                                            navigate("/settings");
-                                            setShowDropdown(false);
-                                        }}
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#4ADE80] hover:bg-opacity-10 hover:text-[#101A17] transition-colors duration-200 flex items-center gap-2 cursor-pointer"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        Settings
-                                    </button>
-
-                                    {auth.user.role === "admin" && (
-                                        <button
-                                            onClick={() => {
-                                                navigate("/admin");
-                                                setShowDropdown(false);
-                                            }}
-                                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-[#4ADE80] hover:bg-opacity-10 hover:text-[#101A17] transition-colors duration-200 flex items-center gap-2 cursor-pointer"
-                                        >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                            </svg>
-                                            Admin Dashboard
-                                        </button>
-                                    )}
-                                </div>
-
-                                {/* Logout */}
-                                <div className="border-t border-gray-200 pt-1">
-                                    <button
-                                        onClick={handleLogout}
-                                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200 flex items-center gap-2 cursor-pointer"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                        </svg>
-                                        Logout
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                ) : (
-                    // User not authenticated - Show Sign In and Sign Up buttons
-                    <>
-                        <button
-                            className="text-white hover:text-[#4ADE80] transition-all duration-300 font-medium hover:scale-110 cursor-pointer"
-                            onClick={() => navigate("/login")}
-                        >
-                            Sign In
-                        </button>
-                        <button
-                            className="bg-[#4ADE80] text-[#101A17] px-5 py-2 rounded font-semibold hover:bg-[#22D3EE] hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer"
-                            onClick={() => navigate("/register")}
-                        >
-                            Sign Up
-                        </button>
-                    </>
-                )}
-            </div>
-        </header>
-    );
-};
-
-export default Header;
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({ isOpen: false, mode: modalState.mode })}
+        mode={modalState.mode}
+      />
+    </>
+  );
+}
