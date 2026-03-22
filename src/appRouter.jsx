@@ -8,7 +8,8 @@ import HomePage from "./pages/Home";
 import ProfilePage from "./pages/profile";
 import UserManagement from "./pages/Admin/User/userManagement";
 import UserLayout from "./layout/userLayout";
-import ForYou from "./pages/Admin/Project/forYou";
+import ForYou from "./pages/Project/forYou";
+import ProjectManagement from "./pages/Project/projectManagement";
 
 
 const router = createBrowserRouter([
@@ -60,6 +61,13 @@ const router = createBrowserRouter([
             <ForYou />
           </ProtectedRoute>
       },
+      {
+        path: "management",
+        element:
+          <ProtectedRoute allowedRoles={["admin", "user"]}>
+            <ProjectManagement />
+          </ProtectedRoute>
+      }
     ],
   },
 ]);
