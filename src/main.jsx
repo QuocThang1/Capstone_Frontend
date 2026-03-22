@@ -1,16 +1,10 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { ToastContainer } from "react-toastify";
-import { AuthWrapper } from "./context/auth.wrapper.jsx";
-import 'react-toastify/dist/ReactToastify.css';
-import AppRouter from './appRouter.jsx'
-import './index.css'
+import { createRoot } from "react-dom/client";
+import Home from "./pages/home";
+import { ThemeProvider } from "./context/theme.context";
+import "./index.css";
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <AuthWrapper>
-      <AppRouter />
-      <ToastContainer position="top-right" newestOnTop />
-    </AuthWrapper>
-  </StrictMode>,
-)
+createRoot(document.getElementById("root")).render(
+  <ThemeProvider>
+    <Home />
+  </ThemeProvider>
+);
