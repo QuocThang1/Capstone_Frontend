@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CloseOutlined, CheckCircleOutlined, GoogleOutlined, GithubOutlined } from "@ant-design/icons";
 import { AuthContext } from "../context/auth.context";
-import { loginApi, signUpApi } from "../utils/Api/accountApi";
+import { loginApi, signUpApi, sendOtpApi, verifyOtpApi } from "../utils/Api/accountApi";
 import { toast } from "react-toastify";
 
 // Success Step Component
@@ -210,6 +210,11 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
           <p className="text-slate-500 dark:text-slate-400">
             Just a few more details to get started
           </p>
+          {(errors.email || errors.general) && (
+            <p className="text-sm mt-2 text-red-500">
+              {errors.email || errors.general}
+            </p>
+          )}
         </div>
 
         <div className="space-y-4">
@@ -431,8 +436,28 @@ export function AuthModal({ isOpen, onClose, mode = "signup", initialEmail = "",
         setErrors({ email: "Invalid email address" });
         return;
       }
+
       setErrors({});
-      setCurrentStep(2);
+      setIsSubmitting(true);
+
+      try {
+        const res = await sendOtpApi(formData.email);
+
+        if (res.EC === 0) {
+          toast.success(res.EM || "OTP sent to your email.");
+          setCurrentStep(2);
+        } else {
+          const message = res.EM || "Failed to send OTP";
+          setErrors({ general: message });
+        }
+      } catch (error) {
+        console.error("sendOtp error:", error);
+        const msg = error?.response?.data?.EM || "Failed to send OTP, please retry.";
+        setErrors({ general: msg });
+      } finally {
+        setIsSubmitting(false);
+      }
+
       return;
     }
 
@@ -441,8 +466,28 @@ export function AuthModal({ isOpen, onClose, mode = "signup", initialEmail = "",
         setErrors({ otp: "Please enter a 6-digit code" });
         return;
       }
+
       setErrors({});
-      setCurrentStep(3);
+      setIsSubmitting(true);
+
+      try {
+        const res = await verifyOtpApi(formData.email, formData.otp);
+
+        if (res.EC === 0) {
+          toast.success(res.EM || "OTP verified.");
+          setCurrentStep(3);
+        } else {
+          const message = res.EM || "OTP invalid or expired.";
+          setErrors({ otp: message });
+        }
+      } catch (error) {
+        console.error("verifyOtp error:", error);
+        const msg = error?.response?.data?.EM || "OTP verification failed.";
+        setErrors({ otp: msg });
+      } finally {
+        setIsSubmitting(false);
+      }
+
       return;
     }
 
@@ -496,16 +541,19 @@ export function AuthModal({ isOpen, onClose, mode = "signup", initialEmail = "",
           }, 1200);
         } else {
           const errorMessage = res.EM || "Registration failed";
+          // During signup step 3, show email conflicts as general error
           if (errorMessage.toLowerCase().includes("email")) {
-            setErrors({ email: errorMessage });
+            setErrors({ general: errorMessage });
           } else {
             setErrors({ general: errorMessage });
           }
+          toast.error(errorMessage);
         }
       } catch (error) {
         console.error("Signup error:", error);
         const errorMessage = error?.response?.data?.EM || "An error occurred during signup";
         setErrors({ general: errorMessage });
+        toast.error(errorMessage);
       } finally {
         setIsSubmitting(false);
       }

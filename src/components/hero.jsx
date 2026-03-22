@@ -1,6 +1,7 @@
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useContext } from "react";
 import { AuthModal } from "./AuthModal";
+import { AuthContext } from "../context/auth.context";
 
 function WorkflowStream() {
   const stages = [
@@ -133,6 +134,7 @@ export function Hero() {
     initialEmail: "",
     initialStep: 1,
   });
+  const { isAuthenticated, user } = useContext(AuthContext);
 
   const quickStartEmail = (rawEmail) => {
     const trimmed = rawEmail.trim();
@@ -202,54 +204,84 @@ export function Hero() {
 
             {/* Email CTA */}
             <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible" id="hero-cta">
-              {submitted ? (
-                <div className="rounded-2xl px-6 py-5 flex items-center gap-4 max-w-lg"
-                  style={{ background: "var(--panel-bg)", border: "1px solid var(--panel-border)" }}>
-                  <span className="text-2xl">🎉</span>
-                  <div>
-                    <div className="font-semibold text-sm" style={{ color: "var(--badge-text)" }}>You're in!</div>
-                    <div className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                      We'll reach out to {email} within 24 hours.
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <form
-                  className="flex flex-col sm:flex-row gap-3 max-w-lg"
-                  onSubmit={e => { e.preventDefault(); if (email) setSubmitted(true); }}
-                >
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="Enter your work email"
-                    className="flex-1 px-5 py-4 rounded-xl text-sm font-medium"
-                    style={{
-                      border: emailError ? "1px solid #EF4444" : "1px solid var(--surface-border)",
-                      outline: "none",
-                      background: "var(--panel-bg)",
-                      color: "var(--text-main)",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.16)",
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleGetStarted}
-                    className="btn-indigo px-7 py-4 rounded-xl text-sm whitespace-nowrap"
+              <AnimatePresence mode="wait">
+                {isAuthenticated && user ? (
+                  <motion.div
+                    key="authenticated-cta"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.5 }}
+                    className="flex flex-col sm:flex-row gap-3 max-w-lg"
                   >
-                    Get Started Free
-                  </button>
-                </form>
-              )}
-              {emailError && (
-                <p className="text-sm mt-2" style={{ color: "#EF4444" }}>
-                  {emailError}
+                    <button
+                      onClick={() => window.location.href = "/profile"}
+                      className="btn-indigo px-7 py-4 rounded-xl text-sm whitespace-nowrap"
+                    >
+                      Go to Dashboard
+                    </button>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="unauthenticated-cta"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {submitted ? (
+                      <div className="rounded-2xl px-6 py-5 flex items-center gap-4 max-w-lg"
+                        style={{ background: "var(--panel-bg)", border: "1px solid var(--panel-border)" }}>
+                        <span className="text-2xl">🎉</span>
+                        <div>
+                          <div className="font-semibold text-sm" style={{ color: "var(--badge-text)" }}>You're in!</div>
+                          <div className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                            We'll reach out to {email} within 24 hours.
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <form
+                        className="flex flex-col sm:flex-row gap-3 max-w-lg"
+                        onSubmit={e => { e.preventDefault(); if (email) setSubmitted(true); }}
+                      >
+                        <input
+                          type="email"
+                          required
+                          value={email}
+                          onChange={e => setEmail(e.target.value)}
+                          placeholder="Enter your work email"
+                          className="flex-1 px-5 py-4 rounded-xl text-sm font-medium"
+                          style={{
+                            border: emailError ? "1px solid #EF4444" : "1px solid var(--surface-border)",
+                            outline: "none",
+                            background: "var(--panel-bg)",
+                            color: "var(--text-main)",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.16)",
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleGetStarted}
+                          className="btn-indigo px-7 py-4 rounded-xl text-sm whitespace-nowrap"
+                        >
+                          Get Started Free
+                        </button>
+                      </form>
+                    )}
+                    {emailError && (
+                      <p className="text-sm mt-2" style={{ color: "#EF4444" }}>
+                        {emailError}
+                      </p>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              {!isAuthenticated && (
+                <p className="text-xs mt-3" style={{ color: "var(--info-text)" }}>
+                  No credit card required · 14-day trial · Cancel anytime
                 </p>
               )}
-              <p className="text-xs mt-3" style={{ color: "var(--info-text)" }}>
-                No credit card required · 14-day trial · Cancel anytime
-              </p>
             </motion.div>
 
             {/* Social proof */}

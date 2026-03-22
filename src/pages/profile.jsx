@@ -10,7 +10,7 @@ const ProfilePage = () => {
     const [loading, setLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const navigate = useNavigate();
-    const { auth, setAuth } = useContext(AuthContext);
+    const { user, setAuth } = useContext(AuthContext);
 
     const {
         register,
@@ -29,22 +29,22 @@ const ProfilePage = () => {
         },
     });
 
-    // Populate form with auth.user data on component mount
+    // Populate form with user data on component mount
     useEffect(() => {
-        if (auth.user) {
+        if (user) {
             // Format date for input type="date"
-            const formattedDob = auth.user.dob ? new Date(auth.user.dob).toISOString().split('T')[0] : "";
+            const formattedDob = user.dob ? new Date(user.dob).toISOString().split('T')[0] : "";
 
             reset({
-                username: auth.user.username || "",
-                fullName: auth.user.fullName || "",
-                email: auth.user.email || "",
-                phone: auth.user.phone || "",
+                username: user.username || "",
+                fullName: user.fullName || "",
+                email: user.email || "",
+                phone: user.phone || "",
                 dob: formattedDob,
-                gender: auth.user.gender || "",
+                gender: user.gender || "",
             });
         }
-    }, [auth.user, reset]);
+    }, [user, reset]);
 
     const onSubmit = async (data) => {
         setLoading(true);
@@ -57,9 +57,9 @@ const ProfilePage = () => {
 
                 // Update auth context with new data
                 setAuth({
-                    ...auth,
+                    isAuthenticated: true,
                     user: {
-                        ...auth.user,
+                        ...user,
                         username: data.username,
                         fullName: data.fullName,
                         email: data.email,
@@ -82,16 +82,16 @@ const ProfilePage = () => {
     };
 
     const handleCancel = () => {
-        // Reset form to auth.user data
-        const formattedDob = auth.user.dob ? new Date(auth.user.dob).toISOString().split('T')[0] : "";
+        // Reset form to user data
+        const formattedDob = user.dob ? new Date(user.dob).toISOString().split('T')[0] : "";
 
         reset({
-            username: auth.user.username || "",
-            fullName: auth.user.fullName || "",
-            email: auth.user.email || "",
-            phone: auth.user.phone || "",
+            username: user.username || "",
+            fullName: user.fullName || "",
+            email: user.email || "",
+            phone: user.phone || "",
             dob: formattedDob,
-            gender: auth.user.gender || "",
+            gender: user.gender || "",
         });
 
         setIsEditing(false);
@@ -136,12 +136,12 @@ const ProfilePage = () => {
                         <div className="flex items-center gap-4">
                             {/* Avatar */}
                             <div className="w-20 h-20 bg-gradient-to-br from-[#4ADE80] to-[#22D3EE] rounded-full flex items-center justify-center text-3xl font-bold text-[#101A17]">
-                                {auth.user.fullName?.charAt(0).toUpperCase() || auth.user.username?.charAt(0).toUpperCase() || "U"}
+                                {user?.fullName?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || "U"}
                             </div>
                             <div>
-                                <h1 className="text-3xl font-bold text-[#101A17]">{auth.user.fullName || "User Profile"}</h1>
+                                <h1 className="text-3xl font-bold text-[#101A17]">{user?.fullName || "User Profile"}</h1>
                                 <p className="text-gray-600 mt-1">
-                                    {auth.user.role === "admin" ? "Administrator" : "User"}
+                                    {user?.role === "admin" ? "Administrator" : "User"}
                                 </p>
                             </div>
                         </div>

@@ -1,15 +1,17 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useContext } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { CloseOutlined, MenuOutlined, MoonOutlined, SunOutlined } from "@ant-design/icons";
 import { Drawer } from "antd";
 import { AuthModal } from "./AuthModal";
 import { useTheme } from "../context/theme.context";
+import { AuthContext } from "../context/auth.context";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [modalState, setModalState] = useState({ isOpen: false, mode: "signup" });
   const { theme, toggleTheme } = useTheme();
+  const { isAuthenticated, user } = useContext(AuthContext);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
@@ -57,7 +59,7 @@ export function Header() {
             >
               <span className="font-display font-black text-white text-sm">T</span>
             </div>
-            <span className="font-display font-black text-xl" style={{ color: "#0F172A" }}>
+            <span className="font-display font-black text-xl text-[#0F172A] dark:text-white">
               TASKA
             </span>
           </button>
@@ -80,21 +82,54 @@ export function Header() {
 
           {/* Right actions */}
           <div className="hidden md:flex items-center gap-3">
-            <button
-              className="text-sm font-semibold px-4 py-2 transition-colors"
-              style={{ color: "#475569" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#6366F1")}
-              onMouseLeave={e => (e.currentTarget.style.color = "#475569")}
-              onClick={() => setModalState({ isOpen: true, mode: "login" })}
-            >
-              Log in
-            </button>
-            <button
-              onClick={() => setModalState({ isOpen: true, mode: "signup" })}
-              className="btn-indigo text-sm px-5 py-2.5 rounded-lg"
-            >
-              Start Free Trial
-            </button>
+            <AnimatePresence mode="wait">
+              {isAuthenticated && user ? (
+                <motion.button
+                  key="profile"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.35 }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-slate-800/70 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200"
+                  onClick={() => (window.location.href = "/profile")}
+                >
+                  <div
+                    className="w-10 h-10 rounded-full ring-1 ring-slate-200 dark:ring-slate-600 flex items-center justify-center font-semibold text-sm"
+                    style={{ background: "#7C3AED", color: "white" }}
+                  >
+                    {user.fullName?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+                  <span className="text-sm font-medium text-slate-900 dark:text-white">
+                    {user.fullName || "User"}
+                  </span>
+                </motion.button>
+              ) : (
+                <motion.div
+                  key="auth-buttons"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex items-center gap-3"
+                >
+                  <button
+                    className="text-sm font-semibold px-4 py-2 transition-colors"
+                    style={{ color: "#475569" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#6366F1")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#475569")}
+                    onClick={() => setModalState({ isOpen: true, mode: "login" })}
+                  >
+                    Log in
+                  </button>
+                  <button
+                    onClick={() => setModalState({ isOpen: true, mode: "signup" })}
+                    className="btn-indigo text-sm px-5 py-2.5 rounded-lg"
+                  >
+                    Start Free Trial
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <motion.button
               className="text-sm font-semibold px-4 py-2 transition-colors text-slate-600 hover:text-indigo-500"
               onClick={toggleTheme}
@@ -152,12 +187,22 @@ export function Header() {
             </button>
           ))}
           <div className="mt-4 pt-4" style={{ borderTop: "1px solid #E2E8F0" }}>
-            <button
-              className="w-full btn-indigo py-3 rounded-xl text-sm"
-              onClick={() => setModalState({ isOpen: true, mode: "signup" })}
-            >
-              Start Free Trial
-            </button>
+            {isAuthenticated && user ? (
+              <button
+                className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-left"
+                style={{ color: "#6366F1", background: "#E0E7FF" }}
+                onClick={() => { window.location.href = "/profile"; setDrawerOpen(false); }}
+              >
+                {user.fullName || "Profile"}
+              </button>
+            ) : (
+              <button
+                className="w-full btn-indigo py-3 rounded-xl text-sm"
+                onClick={() => { setModalState({ isOpen: true, mode: "signup" }); setDrawerOpen(false); }}
+              >
+                Start Free Trial
+              </button>
+            )}
           </div>
         </div>
       </Drawer>
