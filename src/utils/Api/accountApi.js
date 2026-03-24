@@ -5,10 +5,10 @@ const signUpApi = (userData) => {
     return axios.post(URL_API, userData);
 };
 
-const loginApi = (username, password) => {
+const loginApi = (usernameOrEmail, password) => {
     const URL_API = "/v1/api/account/login";
     const data = {
-        username: username,
+        usernameOrEmail: usernameOrEmail,
         password: password,
     };
 
@@ -33,4 +33,14 @@ const updateProfileApi = (profileData) => {
     return axios.put(URL_API, data);
 };
 
-export { signUpApi, loginApi, getAccountApi, updateProfileApi };
+const sendOtpApi = (email) => {
+    const URL_API = "/v1/api/account/send-otp";
+    return axios.post(URL_API, { email });
+};
+
+const verifyOtpApi = (email, otp) => {
+    const URL_API = "/v1/api/account/verify-otp";
+    return axios.post(URL_API, { email, otp });
+};
+
+export { signUpApi, loginApi, getAccountApi, updateProfileApi, sendOtpApi, verifyOtpApi };

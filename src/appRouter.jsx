@@ -4,7 +4,7 @@ import RegisterPage from "./pages/register";
 import LoginPage from "./pages/login";
 import GeneralLayout from "./layout/generalLayout";
 import AdminLayout from "./layout/adminLayout";
-import HomePage from "./pages/Home";
+import HomePage from "./pages/home";
 import ProfilePage from "./pages/profile";
 import UserManagement from "./pages/Admin/User/userManagement";
 import UserLayout from "./layout/userLayout";

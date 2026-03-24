@@ -93,7 +93,11 @@ export const AuthWrapper = (props) => {
                 </div>
             ) : (
                 <AuthContext.Provider value={{
-                    auth, setAuth, appLoading, setAppLoading: async () => {
+                    ...auth,
+                    auth,
+                    setAuth,
+                    appLoading,
+                    setAppLoading: async () => {
                         try {
                             const res = await getAccountApi();
                             if (res && res.data) {
