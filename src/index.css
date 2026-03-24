@@ -76,11 +76,20 @@
 }
 
 @layer base {
+  html, body, #root {
+    min-height: 100vh;
+    min-width: 100vw;
+    overflow-x: hidden;
+  }
+
   * { @apply border-border; }
   body {
     @apply font-sans antialiased;
     background: #F8FAFC; /* Light background */
     color: #0F172A; /* Light primary text */
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
     transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
   }
 

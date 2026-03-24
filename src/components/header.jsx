@@ -5,6 +5,7 @@ import { Drawer } from "antd";
 import { AuthModal } from "./AuthModal";
 import { useTheme } from "../context/theme.context";
 import { AuthContext } from "../context/auth.context";
+import { useNavigate } from "react-router-dom";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -12,6 +13,7 @@ export function Header() {
   const [modalState, setModalState] = useState({ isOpen: false, mode: "signup" });
   const { theme, toggleTheme } = useTheme();
   const { isAuthenticated, user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
@@ -91,10 +93,10 @@ export function Header() {
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.35 }}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-slate-800/70 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200"
-                  onClick={() => (window.location.href = "/profile")}
+                  onClick={() => navigate("/admin")}
                 >
                   <div
-                    className="w-10 h-10 rounded-full ring-1 ring-slate-200 dark:ring-slate-600 flex items-center justify-center font-semibold text-sm"
+                    className="w-10 h-10 rounded-full ring-1 ring-slate-20x0 dark:ring-slate-600 flex items-center justify-center font-semibold text-sm"
                     style={{ background: "#7C3AED", color: "white" }}
                   >
                     {user.fullName?.charAt(0)?.toUpperCase() || "U"}
@@ -191,7 +193,7 @@ export function Header() {
               <button
                 className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-left"
                 style={{ color: "#6366F1", background: "#E0E7FF" }}
-                onClick={() => { window.location.href = "/profile"; setDrawerOpen(false); }}
+                onClick={() => { navigate("/profile"); setDrawerOpen(false); }}
               >
                 {user.fullName || "Profile"}
               </button>

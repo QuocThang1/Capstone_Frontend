@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useContext } from "react";
 import { AuthModal } from "./AuthModal";
 import { AuthContext } from "../context/auth.context";
+import { useNavigate } from "react-router-dom";
 
 function WorkflowStream() {
   const stages = [
@@ -135,6 +136,7 @@ export function Hero() {
     initialStep: 1,
   });
   const { isAuthenticated, user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const quickStartEmail = (rawEmail) => {
     const trimmed = rawEmail.trim();
@@ -215,7 +217,7 @@ export function Hero() {
                     className="flex flex-col sm:flex-row gap-3 max-w-lg"
                   >
                     <button
-                      onClick={() => window.location.href = "/profile"}
+                      onClick={() => navigate("/profile")}
                       className="btn-indigo px-7 py-4 rounded-xl text-sm whitespace-nowrap"
                     >
                       Go to Dashboard
