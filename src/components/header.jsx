@@ -1,19 +1,68 @@
 import { useState, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CloseOutlined, MenuOutlined, MoonOutlined, SunOutlined } from "@ant-design/icons";
-import { Drawer } from "antd";
+import { CloseOutlined, MenuOutlined, MoonOutlined, SunOutlined, LogoutOutlined } from "@ant-design/icons";
+import { Drawer, Dropdown } from "antd";
 import { AuthModal } from "./AuthModal";
 import { useTheme } from "../context/theme.context";
 import { AuthContext } from "../context/auth.context";
 import { useNavigate } from "react-router-dom";
 
-export function Header() {
+export const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modalState, setModalState] = useState({ isOpen: false, mode: "signup" });
   const { theme, toggleTheme } = useTheme();
-  const { isAuthenticated, user } = useContext(AuthContext);
+  const { isAuthenticated, user, setAuth } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    setAuth({
+      isAuthenticated: false,
+      user: {
+        _id: "",
+        email: "",
+        fullName: "",
+        username: "",
+        dob: "",
+        gender: "",
+        phone: "",
+        role: "",
+      },
+    });
+    setDropdownOpen(false);
+    navigate("/");
+  };
+
+  const profileMenuItems = [
+    {
+      key: "admin",
+      label: "Admin",
+      onClick: () => {
+        navigate("/admin");
+        setDropdownOpen(false);
+      },
+    },
+    {
+      key: "projects",
+      label: "Projects",
+      onClick: () => {
+        navigate("/projects");
+        setDropdownOpen(false);
+      },
+    },
+    {
+      type: "divider",
+    },
+    {
+      key: "logout",
+      label: "Logout",
+      danger: true,
+      icon: <LogoutOutlined />,
+      onClick: handleLogout,
+    },
+  ];
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
@@ -86,25 +135,32 @@ export function Header() {
           <div className="hidden md:flex items-center gap-3">
             <AnimatePresence mode="wait">
               {isAuthenticated && user ? (
-                <motion.button
-                  key="profile"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.35 }}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-slate-800/70 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200"
-                  onClick={() => navigate("/admin")}
+                <Dropdown
+                  menu={{ items: profileMenuItems }}
+                  open={dropdownOpen}
+                  onOpenChange={setDropdownOpen}
+                  trigger={["click"]}
+                  placement="bottomRight"
                 >
-                  <div
-                    className="w-10 h-10 rounded-full ring-1 ring-slate-20x0 dark:ring-slate-600 flex items-center justify-center font-semibold text-sm"
-                    style={{ background: "#7C3AED", color: "white" }}
+                  <motion.button
+                    key="profile"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.35 }}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-slate-800/70 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200"
                   >
-                    {user.fullName?.charAt(0)?.toUpperCase() || "U"}
-                  </div>
-                  <span className="text-sm font-medium text-slate-900 dark:text-white">
-                    {user.fullName || "User"}
-                  </span>
-                </motion.button>
+                    <div
+                      className="w-10 h-10 rounded-full ring-1 ring-slate-20x0 dark:ring-slate-600 flex items-center justify-center font-semibold text-sm"
+                      style={{ background: "#7C3AED", color: "white" }}
+                    >
+                      {user.fullName?.charAt(0)?.toUpperCase() || "U"}
+                    </div>
+                    <span className="text-sm font-medium text-slate-900 dark:text-white">
+                      {user.fullName || "User"}
+                    </span>
+                  </motion.button>
+                </Dropdown>
               ) : (
                 <motion.div
                   key="auth-buttons"
@@ -217,4 +273,4 @@ export function Header() {
       />
     </>
   );
-}
+};

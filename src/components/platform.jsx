@@ -88,16 +88,14 @@ const steps = [
   },
 ];
 
-function edgeKey(e) {
-  return `${e.from}-${e.to}`;
-}
+const edgeKey = (e) => `${e.from}-${e.to}`;
 
 // Helper function to render icons with dynamic color
-function renderIcon(IconComponent, isActive, color) {
-  return <IconComponent style={{ color: isActive ? color : "white" }} />;
-}
+const renderIcon = (IconComponent, isActive, color) => (
+  <IconComponent style={{ color: isActive ? color : "white" }} />
+);
 
-function InteractiveDiagram({ activeStep }) {
+const InteractiveDiagram = ({ activeStep }) => {
   const step = steps.find(s => s.id === activeStep);
   const highlightedNodes = new Set(step?.highlightNodes ?? []);
   const highlightedEdges = new Set((step?.highlightEdges ?? []).map(edgeKey));
@@ -259,9 +257,9 @@ function InteractiveDiagram({ activeStep }) {
       </AnimatePresence>
     </svg>
   );
-}
+};
 
-export function Platform() {
+export const Platform = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const [activeStep, setActiveStep] = useState("detect");
@@ -544,4 +542,4 @@ export function Platform() {
       </div>
     </section>
   );
-}
+};

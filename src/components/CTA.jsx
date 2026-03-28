@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { CheckCircleFilled } from "@ant-design/icons";
 import { AuthModal } from "./AuthModal";
 
-export function CTA() {
+export const CTA = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const [email, setEmail] = useState("");
@@ -118,4 +118,4 @@ export function CTA() {
       />
     </section>
   );
-}
+  };

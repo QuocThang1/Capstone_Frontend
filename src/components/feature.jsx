@@ -149,7 +149,7 @@ const cards = [
   },
 ];
 
-export function Features() {
+export const Features = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
@@ -222,4 +222,4 @@ export function Features() {
       </div>
     </section>
   );
-}
+};

@@ -16,7 +16,7 @@ const securityBadges = [
   { icon: "🌍", label: "GDPR Compliant" },
 ];
 
-export function Footer() {
+export const Footer = () => {
   return (
     <footer id="footer" className="bg-slate-950 text-white">
       {/* Security strip */}
@@ -109,4 +109,4 @@ export function Footer() {
       </div>
     </footer>
   );
-}
+};

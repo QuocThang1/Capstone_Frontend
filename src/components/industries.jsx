@@ -69,7 +69,7 @@ const industries = [
   },
 ];
 
-export function Industries() {
+export const Industries = () => {
   const [active, setActive] = useState("engineering");
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
@@ -230,4 +230,4 @@ export function Industries() {
       </div>
     </section>
   );
-}
+  };

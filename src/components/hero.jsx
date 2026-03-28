@@ -4,7 +4,7 @@ import { AuthModal } from "./AuthModal";
 import { AuthContext } from "../context/auth.context";
 import { useNavigate } from "react-router-dom";
 
-function WorkflowStream() {
+const WorkflowStream = () => {
   const stages = [
     { label: "Backlog", color: "#94A3B8", count: 12 },
     { label: "In Progress", color: "#6366F1", count: 7 },
@@ -125,7 +125,7 @@ const fadeUp = {
   }),
 };
 
-export function Hero() {
+export const Hero = () => {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [emailError, setEmailError] = useState("");
@@ -343,4 +343,4 @@ export function Hero() {
       />
     </section>
   );
-}
+};

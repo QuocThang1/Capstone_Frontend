@@ -7,7 +7,7 @@ import { SocialProof } from "../components/socialProof";
 import { CTA } from "../components/CTA";
 import { Footer } from "../components/footer";
 
-function Home() {
+const Home = () => {
   return (
     <div className="min-h-screen">
       <Header />
@@ -19,9 +19,8 @@ function Home() {
         <SocialProof />
         <CTA />
       </main>
-      <Footer />
     </div>
   );
-}
+};
 
 export default Home;
