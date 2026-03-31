@@ -2,7 +2,6 @@ import { useContext, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Bell, Sun, Moon, Search, LogOut, ChevronDown } from "lucide-react";
 import { AuthContext } from "../../context/auth.context";
-import { useTheme } from "../../context/theme.context";
 import useDarkMode from "../../hooks/useDarkMode";
 import { toast } from "react-toastify";
 import { Dropdown } from "antd";
@@ -87,9 +86,9 @@ const TopBar = () => {
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm font-medium text-slate-400 dark:text-slate-500">
-        <span>TASKA</span>
+      {/* Logo and Breadcrumb */}
+      <div className="flex items-center gap-3 text-sm font-medium text-slate-400 dark:text-slate-500">
+        TASKA
         <span className="text-slate-300 dark:text-slate-700">/</span>
         <span className="text-slate-800 dark:text-slate-100 font-semibold">
           {currentPage}

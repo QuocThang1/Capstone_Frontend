@@ -1,25 +1,37 @@
-import { useContext } from "react";
+import { useState, useEffect } from "react";
 
 const useDarkMode = () => {
-  // Check if dark mode is enabled by looking at document/body classes
-  const isDark = document.documentElement.classList.contains("dark");
+  const [isDark, setIsDark] = useState(() => {
+    // Initialize from localStorage or DOM
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      return savedTheme === "dark";
+    }
+    return document.documentElement.classList.contains("dark");
+  });
+
+  // Listen for custom theme change events
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    };
+
+    window.addEventListener("themechange", handleThemeChange);
+    return () => window.removeEventListener("themechange", handleThemeChange);
+  }, []);
 
   const toggle = () => {
     const html = document.documentElement;
-    const body = document.body;
 
     if (isDark) {
       html.classList.remove("dark");
-      body.classList.remove("dark");
       localStorage.setItem("theme", "light");
+      setIsDark(false);
     } else {
       html.classList.add("dark");
-      body.classList.add("dark");
       localStorage.setItem("theme", "dark");
+      setIsDark(true);
     }
-
-    // Trigger a re-render by dispatching a custom event
-    window.dispatchEvent(new CustomEvent("themechange"));
   };
 
   return { isDark, toggle };

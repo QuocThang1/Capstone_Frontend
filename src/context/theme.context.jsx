@@ -12,19 +12,23 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    // Load from localStorage or default to 'dark'
-    const saved = localStorage.getItem('taska-theme');
-    return saved || 'dark';
+    // Load from localStorage (same key as useDarkMode)
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      return saved;
+    }
+    // Check if dark mode is already applied from useDarkMode
+    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
   });
 
   useEffect(() => {
     // Persist to localStorage
-    localStorage.setItem('taska-theme', theme);
-    // Apply to body
+    localStorage.setItem('theme', theme);
+    // Apply to html element (where Tailwind dark mode looks for it)
     if (theme === 'dark') {
-      document.body.classList.add('dark');
+      document.documentElement.classList.add('dark');
     } else {
-      document.body.classList.remove('dark');
+      document.documentElement.classList.remove('dark');
     }
   }, [theme]);
 
