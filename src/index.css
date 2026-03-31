@@ -93,7 +93,7 @@
     transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
   }
 
-  body.dark {
+  html.dark body {
     background: #020617; /* Dark background */
     color: #F8FAFC; /* Dark primary text */
     --surface: #0F172A;
@@ -129,7 +129,7 @@
   transition: background 0.5s ease, border-color 0.5s ease;
 }
 
-.dark .nav-glass {
+html.dark .nav-glass {
   background: rgba(15, 23, 42, 0.8); /* Dark glass fill */
   border: 1px solid rgba(255, 255, 255, 0.05); /* Dark glass border */
 }
@@ -142,7 +142,7 @@
   transition: background 0.5s ease, border-color 0.5s ease;
 }
 
-.dark .glass-card {
+html.dark .glass-card {
   background: rgba(15, 23, 42, 0.85); /* Dark glass */
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
@@ -155,7 +155,7 @@
   transition: background 0.5s ease;
 }
 
-.dark .modal-overlay {
+html.dark .modal-overlay {
   background: rgba(15, 23, 42, 0.8);
 }
 .bento-card {
@@ -200,69 +200,69 @@
   background: #0F172A;
 }
 
-.dark .mesh-bg {
+html.dark .mesh-bg {
   background:
     radial-gradient(ellipse 80% 60% at 20% 10%, rgba(99,102,241,0.24) 0%, transparent 70%),
     radial-gradient(ellipse 60% 40% at 80% 80%, rgba(236,72,153,0.2) 0%, transparent 70%),
     #020617;
 }
 
-.dark .bento-card {
+html.dark .bento-card {
   background: #0F172A !important;
   border-color: rgba(148,163,184,0.25) !important;
   box-shadow: 0 20px 60px rgba(0,0,0,0.45) !important;
 }
 
-.dark .platform-panel {
+html.dark .platform-panel {
   background: #020617 !important;
   border: 1px solid rgba(148,163,184,0.2) !important;
   box-shadow: 0 40px 120px rgba(0,0,0,0.45) !important;
 }
 
-.dark .stats-card {
+html.dark .stats-card {
   background: rgba(255,255,255,0.07) !important;
   border-color: rgba(148,163,184,0.20) !important;
 }
 
-.dark .hero-dashboard, .dark .dark-section {
+html.dark .hero-dashboard, html.dark .dark-section {
   background: #020617 !important;
 }
 
 /* Override Tailwind defaults in dark when inline styles are not available */
-.dark .bg-white,
-.dark .bg-white\/5,
-.dark .bg-white\/10,
-.dark .bg-white\/20,
-.dark .bg-slate-50,
-.dark .bg-slate-100 {
+html.dark .bg-white,
+html.dark .bg-white\/5,
+html.dark .bg-white\/10,
+html.dark .bg-white\/20,
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 {
   background-color: var(--surface) !important;
 }
 
-.dark .border-slate-200,
-.dark .border-white\/10,
-.dark .border-white\/20,
-.dark .border-white\/30 {
+html.dark .border-slate-200,
+html.dark .border-white\/10,
+html.dark .border-white\/20,
+html.dark .border-white\/30 {
   border-color: var(--surface-border) !important;
 }
 
-.dark .text-slate-900,
-.dark .text-slate-600,
-.dark .text-slate-500,
-.dark .text-slate-400 {
+html.dark .text-slate-900,
+html.dark .text-slate-600,
+html.dark .text-slate-500,
+html.dark .text-slate-400 {
   color: var(--text-main) !important;
 }
 
-.dark .text-white\/70,
-.dark .text-white\/75,
-.dark .text-white\/40,
-.dark .text-white\/50 {
+html.dark .text-white\/70,
+html.dark .text-white\/75,
+html.dark .text-white\/40,
+html.dark .text-white\/50 {
   color: var(--text-secondary) !important;
 }
 
-.dark .shadow,
-.dark .shadow-sm,
-.dark .shadow-md,
-.dark .shadow-lg,
+html.dark .shadow,
+html.dark .shadow-sm,
+html.dark .shadow-md,
+html.dark .shadow-lg,
 .dark .shadow-xl,
 .dark .shadow-2xl {
   box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35) !important;
