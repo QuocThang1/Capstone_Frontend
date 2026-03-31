@@ -1,11 +1,11 @@
-import { Header } from "../components/header";
-import { Hero } from "../components/hero";
-import { Features } from "../components/feature";
-import { Industries } from "../components/industries";
-import { Platform } from "../components/platform";
-import { SocialProof } from "../components/socialProof";
-import { CTA } from "../components/CTA";
-import { Footer } from "../components/footer";
+import { Header } from "../components/homePage/header";
+import { Hero } from "../components/homePage/hero";
+import { Features } from "../components/homePage/feature";
+import { Industries } from "../components/homePage/industries";
+import { Platform } from "../components/homePage/platform";
+import { SocialProof } from "../components/homePage/socialProof";
+import { CTA } from "../components/homePage/CTA";
+import { Footer } from "../components/homePage/footer";
 
 const Home = () => {
   return (

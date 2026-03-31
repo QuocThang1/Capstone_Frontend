@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import AdminSidebar from "../components/AdminSidebar";
-import TopBar from "../components/topBar";
+import AdminSidebar from "../components/mainPage/AdminSidebar";
+import TopBar from "../components/mainPage/topBar";
 
 const AdminLayout = () => {
     const location = useLocation();

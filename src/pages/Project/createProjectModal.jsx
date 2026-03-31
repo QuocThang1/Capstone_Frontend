@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { createProjectApi } from '../../utils/Api/projectApi';
-import ButtonSpinner from '../../components/buttonSpinner';
+import ButtonSpinner from '../../components/ButtonSpinner';
 import { useState, useEffect } from 'react';
 
 const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {

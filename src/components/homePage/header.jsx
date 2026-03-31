@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CloseOutlined, MenuOutlined, MoonOutlined, SunOutlined, LogoutOutlined } from "@ant-design/icons";
 import { Drawer, Dropdown } from "antd";
 import { AuthModal } from "./AuthModal";
-import { useTheme } from "../context/theme.context";
-import { AuthContext } from "../context/auth.context";
+import { useTheme } from "../../context/theme.context";
+import { AuthContext } from "../../context/auth.context";
 import { useNavigate } from "react-router-dom";
 
 export const Header = () => {
