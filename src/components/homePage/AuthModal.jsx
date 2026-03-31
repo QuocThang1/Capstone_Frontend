@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CloseOutlined, CheckCircleOutlined, GoogleOutlined, GithubOutlined } from "@ant-design/icons";
-import { AuthContext } from "../context/auth.context";
-import { loginApi, signUpApi, sendOtpApi, verifyOtpApi } from "../utils/Api/accountApi";
+import { AuthContext } from "../../context/auth.context";
+import { loginApi, signUpApi, sendOtpApi, verifyOtpApi } from "../../utils/Api/accountApi";
 import { toast } from "react-toastify";
 
 // Success Step Component

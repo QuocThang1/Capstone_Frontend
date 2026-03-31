@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useContext } from "react";
 import { AuthModal } from "./AuthModal";
-import { AuthContext } from "../context/auth.context";
+import { AuthContext } from "../../context/auth.context";
 import { useNavigate } from "react-router-dom";
 
 const WorkflowStream = () => {
