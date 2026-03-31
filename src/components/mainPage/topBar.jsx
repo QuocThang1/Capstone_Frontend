@@ -2,8 +2,6 @@ import { useContext, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Bell, Sun, Moon, Search, LogOut, ChevronDown } from "lucide-react";
 import { AuthContext } from "../../context/auth.context";
-import { useTheme } from "../../context/theme.context";
-import useUser from "../../hooks/useUser";
 import useDarkMode from "../../hooks/useDarkMode";
 import { toast } from "react-toastify";
 import { Dropdown } from "antd";
@@ -88,9 +86,9 @@ const TopBar = () => {
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm font-medium text-slate-400 dark:text-slate-500">
-        <span>TASKA</span>
+      {/* Logo and Breadcrumb */}
+      <div className="flex items-center gap-3 text-sm font-medium text-slate-400 dark:text-slate-500">
+        TASKA
         <span className="text-slate-300 dark:text-slate-700">/</span>
         <span className="text-slate-800 dark:text-slate-100 font-semibold">
           {currentPage}
@@ -147,11 +145,7 @@ const TopBar = () => {
                 {auth.user.fullName || "User"}
               </span>
               <span className="text-[10px] font-medium text-indigo-600 dark:text-indigo-400 mt-0.5">
-                {auth.user.role === "SYSTEM_ADMIN"
-                  ? "System Admin"
-                  : auth.user.role === "PROJECT_ADMIN"
-                  ? "Project Admin"
-                  : "User"}
+                {auth.user.role ? auth.user.role.charAt(0).toUpperCase() + auth.user.role.slice(1) : "Role"}
               </span>
             </div>
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-sm flex-shrink-0">
