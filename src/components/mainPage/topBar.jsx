@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Bell, Sun, Moon, Search, LogOut, ChevronDown } from "lucide-react";
 import { AuthContext } from "../../context/auth.context";
 import { useTheme } from "../../context/theme.context";
-import useUser from "../../hooks/useUser";
 import useDarkMode from "../../hooks/useDarkMode";
 import { toast } from "react-toastify";
 import { Dropdown } from "antd";
@@ -147,11 +146,7 @@ const TopBar = () => {
                 {auth.user.fullName || "User"}
               </span>
               <span className="text-[10px] font-medium text-indigo-600 dark:text-indigo-400 mt-0.5">
-                {auth.user.role === "SYSTEM_ADMIN"
-                  ? "System Admin"
-                  : auth.user.role === "PROJECT_ADMIN"
-                  ? "Project Admin"
-                  : "User"}
+                {auth.user.role ? auth.user.role.charAt(0).toUpperCase() + auth.user.role.slice(1) : "Role"}
               </span>
             </div>
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-sm flex-shrink-0">
