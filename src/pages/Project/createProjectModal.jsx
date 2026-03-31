@@ -1,12 +1,11 @@
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
-import { createProjectApi } from '../../utils/Api/projectApi';
 import ButtonSpinner from '../../components/ButtonSpinner';
-import { useState, useEffect } from 'react';
+import { useEffect, useContext } from 'react';
+import { ProjectContext } from '../../context/project.context';
 
 const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
     const { register, handleSubmit, formState: { errors }, reset, watch } = useForm();
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { actionLoading } = useContext(ProjectContext); // Get loading state from context
 
     const projectKey = watch('key', '');
 
@@ -16,23 +15,9 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
         }
     }, [isOpen, reset]);
 
-    const onSubmit = async (data) => {
-        setIsSubmitting(true);
-        try {
-            const res = await createProjectApi(data);
-            if (res && res.EC === 0) {
-                toast.success(res.EM || "Project created successfully!");
-                onProjectCreated(res.data); // Callback to update parent component
-                onClose(); // Close modal on success
-            } else {
-                toast.error(res.EM || "Failed to create project.");
-            }
-        } catch (error) {
-            console.error("Failed to create project:", error);
-            toast.error(error?.response?.data?.EM || "An error occurred while creating the project.");
-        } finally {
-            setIsSubmitting(false);
-        }
+    // The onSubmit function now just calls the callback
+    const onSubmit = (data) => {
+        onProjectCreated(data);
     };
 
     if (!isOpen) return null;
@@ -41,9 +26,9 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
             <div className="relative bg-white w-screen h-screen flex flex-col">
                 {/* Header */}
-                <div className="flex justify-between items-center p-5 border-b border-gray-200">
-                    <h2 className="text-2xl font-bold text-[#101A17]">Create Project</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                <div className="flex justify-between items-center p-5 border-b border-slate-200">
+                    <h2 className="text-2xl font-bold text-slate-800">Create Project</h2>
+                    <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-100 cursor-pointer">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -56,21 +41,21 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                         {/* Left Side - Form */}
                         <div className="w-full md:w-1/2 p-8 space-y-6">
                             <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                                <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">
                                     Name <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     id="name"
                                     {...register("name", { required: "Project name is required" })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#4ADE80] focus:border-transparent transition"
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                                     placeholder="E.g., Marketing Campaign"
                                 />
                                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
                             </div>
 
                             <div>
-                                <label htmlFor="key" className="block text-sm font-medium text-gray-700 mb-1">
+                                <label htmlFor="key" className="block text-sm font-medium text-slate-700 mb-1">
                                     Key <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -79,41 +64,42 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                                     {...register("key", {
                                         required: "Project key is required",
                                         pattern: {
+                                            value: /^[A-Z0-9]{2,10}$/,
                                             message: "Key must be 2-10 uppercase letters or numbers (e.g., 'PROJ')."
                                         }
                                     })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#4ADE80] focus:border-transparent transition uppercase"
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition uppercase"
                                     placeholder="E.g., PROJ"
                                 />
                                 {errors.key && <p className="text-red-500 text-xs mt-1">{errors.key.message}</p>}
-                                <p className="text-xs text-gray-500 mt-1">The project key is a unique identifier for your project's issues.</p>
+                                <p className="text-xs text-slate-500 mt-1">The project key is a unique identifier for your project's issues.</p>
                             </div>
 
                             <div>
-                                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                                <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1">
                                     Description
                                 </label>
                                 <textarea
                                     id="description"
                                     {...register("description")}
                                     rows="4"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#4ADE80] focus:border-transparent transition"
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                                     placeholder="Describe your project..."
                                 ></textarea>
                             </div>
                         </div>
 
                         {/* Right Side - Illustration */}
-                        <div className="w-full md:w-1/2 bg-gray-50 p-8 flex flex-col items-center justify-center border-l border-gray-200">
+                        <div className="w-full md:w-1/2 bg-slate-50 p-8 flex flex-col items-center justify-center border-l border-slate-200">
                             <img
                                 src="https://jira-clone.fly.dev/static/media/project-illustration.0f207c41cf549450b4b5.svg"
                                 alt="Project Illustration"
                                 className="max-w-xs w-full"
                             />
-                            <div className="mt-6 text-center bg-green-100 border border-green-300 text-green-900 rounded-md p-4">
+                            <div className="mt-6 text-center bg-indigo-100 border border-indigo-200 text-indigo-800 rounded-md p-4">
                                 <p className="font-semibold">You're creating a new project!</p>
                                 <p className="text-sm mt-1">
-                                    Your project issues will be identified by a key, like <span className="font-mono bg-green-200 px-1 rounded">{projectKey.toUpperCase() || 'PROJ'}-1</span>.
+                                    Your project issues will be identified by a key, like <span className="font-mono bg-indigo-200 px-1 rounded">{projectKey.toUpperCase() || 'PROJ'}-1</span>.
                                 </p>
                             </div>
                         </div>
@@ -121,21 +107,21 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end items-center p-5 border-t border-gray-200 bg-gray-50">
+                <div className="flex justify-end items-center p-5 border-t border-slate-200 bg-slate-50">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 cursor-pointer"
+                        className="px-6 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400 cursor-pointer"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         onClick={handleSubmit(onSubmit)}
-                        disabled={isSubmitting}
-                        className="ml-3 inline-flex justify-center px-6 py-2 text-sm font-medium text-[#101A17] bg-[#4ADE80] border border-transparent rounded-md shadow-sm hover:bg-[#3dbb6d] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4ADE80] disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer"
+                        disabled={actionLoading}
+                        className="ml-3 inline-flex justify-center px-6 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300 disabled:cursor-not-allowed cursor-pointer"
                     >
-                        {isSubmitting ? <ButtonSpinner /> : "Create Project"}
+                        {actionLoading ? <ButtonSpinner /> : "Create Project"}
                     </button>
                 </div>
             </div>

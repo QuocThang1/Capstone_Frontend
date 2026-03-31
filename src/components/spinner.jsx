@@ -17,7 +17,7 @@ const Spinner = ({
         <div className="flex flex-col items-center justify-center gap-4">
             {/* Spinner SVG */}
             <svg
-                className={`animate-spin text-[#4ADE80] ${spinnerSize}`}
+                className={`animate-spin text-indigo-600 ${spinnerSize}`}
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -49,7 +49,7 @@ const Spinner = ({
     // Full screen spinner
     if (fullScreen) {
         return (
-            <div className={`min-h-screen flex items-center justify-center bg-[#F6F8F7] ${className}`}>
+            <div className={`min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 ${className}`}>
                 {spinnerElement}
             </div>
         );

@@ -4,11 +4,11 @@ import {
   Users, Shield, ClipboardList, ArrowLeftRight, Settings2,
   LogOut, Plus, ArrowLeft, FolderOpen
 } from "lucide-react";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState } from "react";
 import { cn } from "../../lib/utils";
 import { AuthContext } from "../../context/auth.context";
+import { ProjectContext } from "../../context/project.context"; // Import ProjectContext
 import { toast } from "react-toastify";
-import { getMyProjectsApi } from "../../utils/Api/projectApi";
 import CreateProjectModal from "../../pages/Project/createProjectModal";
 
 const NavItem = ({ to, icon: Icon, label, badge, isActive }) => {
@@ -51,32 +51,11 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { auth, setAuth } = useContext(AuthContext);
-  const { user } = auth; // Get user from AuthContext
+  const { user } = auth;
 
-  // State for projects and create modal
-  const [projects, setProjects] = useState([]);
+  // Get projects and creation function from context
+  const { allProjects, createProject } = useContext(ProjectContext);
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
-
-  // Fetch projects on component mount
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const res = await getMyProjectsApi();
-        if (res && res.EC === 0) {
-          setProjects(res.data);
-        } else {
-          toast.error(res.EM || "Failed to fetch projects.");
-        }
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-        toast.error("An error occurred while fetching projects.");
-      }
-    };
-
-    if (auth.isAuthenticated) {
-      fetchProjects();
-    }
-  }, [auth.isAuthenticated]);
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
@@ -88,10 +67,14 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
     navigate("/");
   };
 
-  const handleProjectCreated = (newProject) => {
-    setProjects(prevProjects => [newProject, ...prevProjects]);
-    // Optionally navigate to the new project page
-    // navigate(`/projects/${newProject._id}`);
+  // Use the createProject function from context
+  const handleProjectCreated = async (projectData) => {
+    const newProject = await createProject(projectData);
+    if (newProject) {
+      setCreateModalOpen(false);
+      // Optionally navigate to the new project page
+      // navigate(`/projects/${newProject._id}`);
+    }
   };
 
   const isActiveRoute = (route) => pathname === route;
@@ -170,12 +153,12 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
             </div>
             {!isCollapsed && (
               <div className="space-y-0.5">
-                {projects.length === 0 && (
+                {allProjects.length === 0 && (
                   <p className="px-3 py-1.5 text-xs text-slate-500 dark:text-slate-400 italic">
                     No projects yet.
                   </p>
                 )}
-                {projects.slice(0, 3).map((project) => (
+                {allProjects.slice(0, 3).map((project) => (
                   <button
                     key={project._id}
                     title={project.name}
@@ -188,7 +171,7 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
                     <span className="truncate">{project.name}</span>
                   </button>
                 ))}
-                {projects.length > 3 && (
+                {allProjects.length > 3 && (
                   <button
                     onClick={() => navigate("/projects/management")}
                     className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-lg text-xs text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors cursor-pointer"

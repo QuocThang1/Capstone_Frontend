@@ -32,16 +32,10 @@ const deleteProjectApi = (projectId) => {
     return axios.delete(URL_API);
 };
 
-const getMyProjectsApi = () => {
-    const URL_API = "/v1/api/projects/my-projects";
-    return axios.get(URL_API);
-};
-
 export {
     createProjectApi,
     getAllProjectsApi,
     getProjectByIdApi,
     updateProjectApi,
     deleteProjectApi,
-    getMyProjectsApi,
 };
