@@ -408,7 +408,7 @@ const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitt
   </motion.div>
 );
 
-export function AuthModal({ isOpen, onClose, mode = "signup", initialEmail = "", initialStep = 1 }) {
+export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "", initialStep = 1 }) => {
   const [modalMode, setModalMode] = useState(mode); // "signup" or "login"
   const [currentStep, setCurrentStep] = useState(initialStep); // 1: email, 2: otp, 3: profile
   const [formData, setFormData] = useState({
@@ -726,4 +726,4 @@ export function AuthModal({ isOpen, onClose, mode = "signup", initialEmail = "",
       )}
     </AnimatePresence>
   );
-}
+};

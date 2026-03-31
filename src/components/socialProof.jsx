@@ -1,7 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 
-export function SocialProof() {
+export const SocialProof = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
@@ -86,4 +86,4 @@ export function SocialProof() {
       </div>
     </section>
   );
-}
+  };
