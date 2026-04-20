@@ -1,4 +1,4 @@
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { RouterProvider, createBrowserRouter, Navigate } from "react-router-dom";
 import ProtectedRoute from "./route/ProtectedRoute";
 import GeneralLayout from "./layout/generalLayout";
 import AdminLayout from "./layout/adminLayout";
@@ -7,7 +7,12 @@ import ProfilePage from "./pages/profile";
 import UserManagement from "./pages/Admin/User/userManagement";
 import UserLayout from "./layout/userLayout";
 import ForYou from "./pages/Project/forYou";
-import ProjectManagement from "./pages/Project/projectManagement";
+import ProjectManagement from "./pages/Project/ProjectManagement/projectManagement";
+import ProjectPage from "./pages/Project/ProjectDetail/projectPage";
+import Summary from "./pages/Project/ProjectDetail/summary";
+import Board from "./pages/Project/ProjectDetail/board";
+import Backlog from "./pages/Project/ProjectDetail/Backlog/backlog";
+
 // Coming Soon Pages
 import OverviewDashboard from "./pages/Monitor/OverviewDashboard";
 import RealTimeEventLog from "./pages/Monitor/RealTimeEventLog";
@@ -73,6 +78,32 @@ const router = createBrowserRouter([
           <ProtectedRoute allowedRoles={["admin", "user"]}>
             <ProjectManagement />
           </ProtectedRoute>
+      },
+      {
+        path: ":projectId",
+        element: (
+          <ProtectedRoute allowedRoles={["admin", "user"]}>
+            <ProjectPage />
+          </ProtectedRoute>
+        ),
+        children: [
+          {
+            index: true,
+            element: <Navigate to="summary" replace />,
+          },
+          {
+            path: "summary",
+            element: <Summary />,
+          },
+          {
+            path: "board",
+            element: <Board />,
+          },
+          {
+            path: "backlog",
+            element: <Backlog />,
+          },
+        ]
       }
     ],
   },

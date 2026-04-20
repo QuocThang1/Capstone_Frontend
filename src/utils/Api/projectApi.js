@@ -32,10 +32,34 @@ const deleteProjectApi = (projectId) => {
     return axios.delete(URL_API);
 };
 
+const addMemberToProjectApi = (projectId, email, role = 'member') => {
+    const URL_API = `/v1/api/projects/${projectId}/members`;
+    return axios.post(URL_API, { email, role });
+};
+
+const getProjectMembersApi = (projectId) => {
+    const URL_API = `/v1/api/projects/${projectId}/members`;
+    return axios.get(URL_API);
+};
+
+const updateBoardColumnsApi = (projectId, boardColumns) => {
+    const URL_API = `/v1/api/projects/${projectId}/board-columns`;
+    return axios.put(URL_API, boardColumns);
+};
+
+const updateIssueTypesApi = (projectId, issueTypes) => {
+    const URL_API = `/v1/api/projects/${projectId}/issue-types`;
+    return axios.put(URL_API, issueTypes);
+};
+
 export {
     createProjectApi,
     getAllProjectsApi,
     getProjectByIdApi,
     updateProjectApi,
     deleteProjectApi,
+    addMemberToProjectApi,
+    getProjectMembersApi,
+    updateBoardColumnsApi,
+    updateIssueTypesApi,
 };

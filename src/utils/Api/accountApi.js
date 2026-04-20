@@ -43,4 +43,14 @@ const verifyOtpApi = (email, otp) => {
     return axios.post(URL_API, { email, otp });
 };
 
-export { signUpApi, loginApi, getAccountApi, updateProfileApi, sendOtpApi, verifyOtpApi };
+const toggleStarProjectApi = (projectId) => {
+    const URL_API = `/v1/api/account/toggle-star`;
+    return axios.post(URL_API, { projectId });
+};
+
+const getStarredProjectsApi = () => {
+    const URL_API = `/v1/api/account/starred-projects`;
+    return axios.get(URL_API);
+};
+
+export { signUpApi, loginApi, getAccountApi, updateProfileApi, sendOtpApi, verifyOtpApi, toggleStarProjectApi, getStarredProjectsApi };

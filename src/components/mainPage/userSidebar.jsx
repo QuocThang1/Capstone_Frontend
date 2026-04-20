@@ -9,7 +9,7 @@ import { cn } from "../../lib/utils";
 import { AuthContext } from "../../context/auth.context";
 import { ProjectContext } from "../../context/project.context"; // Import ProjectContext
 import { toast } from "react-toastify";
-import CreateProjectModal from "../../pages/Project/createProjectModal";
+import CreateProjectModal from "../../pages/Project/ProjectManagement/createProjectModal";
 import useDarkMode from "../../hooks/useDarkMode";
 
 const NavItem = ({ to, icon: Icon, label, badge, isActive, isCollapsed }) => {
@@ -19,7 +19,7 @@ const NavItem = ({ to, icon: Icon, label, badge, isActive, isCollapsed }) => {
 
   if (isCollapsed) {
     return (
-      <div 
+      <div
         className="relative group"
         onMouseEnter={(e) => {
           const rect = e.currentTarget.querySelector('button').getBoundingClientRect();
@@ -42,9 +42,9 @@ const NavItem = ({ to, icon: Icon, label, badge, isActive, isCollapsed }) => {
         >
           {/* Left indicator line for active state */}
           {isActive && <div className="absolute left-0 top-2 bottom-2 w-[2px] bg-indigo-600 dark:bg-indigo-400 rounded-r-full" />}
-          
+
           <Icon className="w-5 h-5" />
-          
+
           {/* Badge overlay - constrained within button */}
           {badge && (
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-purple-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center flex-shrink-0">
@@ -52,10 +52,10 @@ const NavItem = ({ to, icon: Icon, label, badge, isActive, isCollapsed }) => {
             </span>
           )}
         </button>
-        
+
         {/* Tooltip - using fixed positioning to escape sidebar overflow clipping */}
         {tooltipPos && (
-          <div 
+          <div
             className="pointer-events-none fixed z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200"
             style={{
               top: `${tooltipPos.top}px`,
@@ -86,12 +86,12 @@ const NavItem = ({ to, icon: Icon, label, badge, isActive, isCollapsed }) => {
     >
       {/* Left indicator line for active state */}
       {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-indigo-600 dark:bg-indigo-400 rounded-r-full" />}
-      
+
       <Icon className="w-5 h-5 flex-shrink-0" />
-      
+
       {/* Label with visibility transition */}
       <span className="text-[13px] font-medium transition-opacity duration-300">{label}</span>
-      
+
       {/* Badge with visibility transition */}
       {badge && (
         <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-purple-500 text-white flex-shrink-0 transition-opacity duration-300">
@@ -228,7 +228,7 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
           {isCollapsed ? (
             <button
               onClick={() => setCreateModalOpen(true)}
-              className="w-10 h-10 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200 rounded-lg flex-shrink-0"
+              className="w-10 h-10 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200 rounded-lg flex-shrink-0 cursor-pointer"
               title="New project"
             >
               <Plus className="w-5 h-5" />
@@ -241,14 +241,14 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
                 </span>
                 <button
                   onClick={() => setCreateModalOpen(true)}
-                  className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
+                  className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200 cursor-pointer"
                   title="New project"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
               <div className="space-y-1">
-                {projects.length === 0 && (
+                {allProjects.length === 0 && (
                   <p className="px-3 py-2 text-[13px] text-slate-400 dark:text-slate-500 italic">
                     No projects yet.
                   </p>
@@ -257,7 +257,7 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
                   <button
                     key={project._id}
                     onClick={() => navigate(`/projects/${project._id}`)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200 cursor-pointer"
                   >
                     <div className="flex items-center justify-center w-6 h-6 rounded bg-slate-100 dark:bg-slate-900 text-[11px] font-bold text-slate-500 dark:text-slate-500 flex-shrink-0">
                       {project.key ? project.key.slice(0, 1).toUpperCase() : project.name.charAt(0).toUpperCase()}
@@ -268,7 +268,7 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
                 {allProjects.length > 3 && (
                   <button
                     onClick={() => navigate("/projects/management")}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200 cursor-pointer rounded-lg"
                   >
                     <FolderOpen className="w-4 h-4" />
                     <span>More projects</span>

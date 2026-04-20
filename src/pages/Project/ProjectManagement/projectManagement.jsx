@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useContext } from 'react';
-import { ProjectContext } from '../../context/project.context';
-import Spinner from '../../components/spinner';
+import { ProjectContext } from '../../../context/project.context';
+import Spinner from '../../../components/spinner';
 import CreateProjectModal from './createProjectModal';
 import EditProjectModal from './editProjectModal';
 import DeleteProjectModal from './deleteProjectModal';
@@ -143,7 +143,7 @@ const ProjectManagement = () => {
                 </div>
 
                 {/* Projects Table */}
-                <div className="bg-white dark:bg-slate-800 shadow-md rounded-lg overflow-hidden">
+                <div className="bg-white dark:bg-slate-800 shadow-md rounded-lg">
                     {loading ? (
                         <div className="flex justify-center items-center h-64"><Spinner /></div>
                     ) : (
@@ -158,7 +158,7 @@ const ProjectManagement = () => {
                             </thead>
                             <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
                                 {allProjects.length > 0 ? allProjects.map((project) => (
-                                    <tr key={project._id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                                    <tr key={project._id} onClick={() => navigate(`/projects/${project._id}`)} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/50 rounded-md">
@@ -176,17 +176,17 @@ const ProjectManagement = () => {
                                             {project.members.find(m => m.role === 'leader')?.accountId?.fullName || project.members[0]?.accountId?.fullName || 'N/A'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative">
-                                            <button onClick={() => setActiveDropdown(activeDropdown === project._id ? null : project._id)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
+                                            <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(activeDropdown === project._id ? null : project._id); }} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
                                                 <MoreHorizontal className="w-5 h-5" />
                                             </button>
                                             {activeDropdown === project._id && (
                                                 <div ref={dropdownRef} className="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white dark:bg-slate-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
                                                     <div className="py-1">
-                                                        <button onClick={() => handleOpenEditModal(project)} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors">
+                                                        <button onClick={(e) => { e.stopPropagation(); handleOpenEditModal(project); }} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors">
                                                             <Edit className="w-4 h-4" />
                                                             <span>Edit</span>
                                                         </button>
-                                                        <button onClick={() => handleOpenDeleteModal(project)} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer transition-colors">
+                                                        <button onClick={(e) => { e.stopPropagation(); handleOpenDeleteModal(project); }} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer transition-colors">
                                                             <Trash2 className="w-4 h-4" />
                                                             <span>Delete</span>
                                                         </button>
