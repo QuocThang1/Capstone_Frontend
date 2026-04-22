@@ -1,16 +1,19 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import { X, Trash2, User, Calendar, Star, Type, ChevronsRight } from 'lucide-react';
-import { updateIssueApi, createSubtaskApi, getSubtaskApi } from '../../../../utils/Api/issueApi';
-import { getProjectMembersApi } from '../../../../utils/Api/projectApi';
-import Spinner from '../../../../components/spinner';
+import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizontal, Plus, Columns } from 'lucide-react';
+import { updateIssueApi, createSubtaskApi, getSubtaskApi } from '../../../../../utils/Api/issueApi';
+import { getProjectMembersApi } from '../../../../../utils/Api/projectApi';
+import Spinner from '../../../../../components/spinner';
+import SubtaskRow from '../../../../../components/projectPage/Backlog/SubtaskRow';
 
-const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onOpenDeleteModal }) => {
+const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteRequest, subtaskTrigger }) => {
     const [projectMembers, setProjectMembers] = useState([]);
     const [subtasks, setSubtasks] = useState([]);
     const [loadingSubtasks, setLoadingSubtasks] = useState(false);
     const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
+    const [isSubtasksVisible, setSubtasksVisible] = useState(true);
+    const subtaskInputRef = useRef(null);
 
     const { register, handleSubmit, reset, watch } = useForm();
     const assigneeValue = watch('assigneeId');
@@ -29,7 +32,6 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onOpenDeleteM
         }
     }, [issue, reset]);
 
-    // Fetch project members
     useEffect(() => {
         const fetchMembers = async () => {
             try {
@@ -40,7 +42,6 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onOpenDeleteM
         fetchMembers();
     }, [project._id]);
 
-    // Fetch subtasks for the current issue
     const fetchSubtasks = useCallback(async () => {
         if (!issue || issue.parentId) {
             setSubtasks([]);
@@ -64,21 +65,14 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onOpenDeleteM
 
     useEffect(() => {
         fetchSubtasks();
-    }, [fetchSubtasks]);
-
+    }, [fetchSubtasks, subtaskTrigger]);
 
     const onSubmit = async (data) => {
         try {
-            const updateData = {
-                ...data,
-                assigneeId: data.assigneeId === "null" ? null : data.assigneeId,
-                storyPoints: Number(data.storyPoints) || 0,
-                startDate: data.startDate || null,
-                dueDate: data.dueDate || null
-            };
+            const updateData = { ...data, assigneeId: data.assigneeId === "null" ? null : data.assigneeId, storyPoints: Number(data.storyPoints) || 0, startDate: data.startDate || null, dueDate: data.dueDate || null };
             const res = await updateIssueApi(issue._id, updateData);
             if (res.EC === 0) {
-                toast.success("Issue updated!");
+                toast.success(res.EM || "Issue updated!");
                 onDataUpdate();
             } else {
                 toast.error(res.EM);
@@ -94,10 +88,10 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onOpenDeleteM
             const subtaskData = { parentId: issue._id, title: newSubtaskTitle };
             const res = await createSubtaskApi(subtaskData);
             if (res.EC === 0) {
-                toast.success("Subtask created!");
-                setSubtasks(prev => [...prev, res.data]); // Cập nhật UI ngay lập tức
+                toast.success(res.EM || "Subtask created!");
+                setSubtasks(prev => [...prev, res.data]);
                 setNewSubtaskTitle('');
-                onDataUpdate(); // Vẫn gọi để đồng bộ toàn bộ state ở Backlog
+                onDataUpdate();
             } else {
                 toast.error(res.EM);
             }
@@ -106,23 +100,27 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onOpenDeleteM
         }
     };
 
+    const handleAddSubtaskClick = () => {
+        subtaskInputRef.current?.focus();
+    };
+
     const priorityOptions = ["Highest", "High", "Medium", "Low", "Lowest"];
+    const subtasksDone = subtasks.filter(s => project.boardColumns[project.boardColumns.length - 1].name === s.status).length;
+    const progress = subtasks.length > 0 ? (subtasksDone / subtasks.length) * 100 : 0;
 
     return (
         <div className="fixed top-0 right-0 h-full w-1/3 bg-white dark:bg-slate-900 shadow-2xl z-30 flex flex-col border-l border-slate-200 dark:border-slate-700">
             <header className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
                 <span className="text-sm text-slate-500">{issue?.issueKey}</span>
                 <div className="flex items-center gap-2">
-                    <button onClick={onOpenDeleteModal} className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
-                        <Trash2 className="w-5 h-5 text-slate-500" />
-                    </button>
-                    <button onClick={onClose} className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
-                        <X className="w-5 h-5 text-slate-500" />
-                    </button>
+                    {/* Sửa ở đây: gọi onDeleteRequest với issue cha */}
+                    <button onClick={() => onDeleteRequest(issue)} className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"><Trash2 className="w-5 h-5 text-slate-500" /></button>
+                    <button onClick={onClose} className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"><X className="w-5 h-5 text-slate-500" /></button>
                 </div>
             </header>
             <main className="flex-grow p-6 overflow-y-auto">
                 <form onBlur={handleSubmit(onSubmit)}>
+                    {/* Form fields... */}
                     <input {...register("title")} className="text-2xl font-bold bg-transparent w-full focus:outline-none focus:bg-slate-100 dark:focus:bg-slate-800 rounded-md p-2" />
                     <div className="mt-6 space-y-4">
                         <h3 className="text-sm font-semibold text-slate-500">Description</h3>
@@ -158,33 +156,51 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onOpenDeleteM
                 </form>
                 {!issue?.parentId && (
                     <div className="mt-8">
-                        <h3 className="text-sm font-semibold text-slate-500 mb-2">Subtasks</h3>
-                        {loadingSubtasks ? <div className="flex justify-center py-4"><Spinner /></div> : (
-                            <div className="space-y-2 mb-2">
-                                {subtasks.map(sub => (
-                                    <div key={sub._id} className="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
-                                        <span className="text-xs font-semibold text-slate-500">{sub.issueKey}</span>
-                                        <span className="text-sm flex-grow text-slate-800 dark:text-slate-200">{sub.title}</span>
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => setSubtasksVisible(!isSubtasksVisible)} className="p-1 -m-1 cursor-pointer"><ChevronDown className={`w-5 h-5 transition-transform ${isSubtasksVisible ? '' : '-rotate-90'}`} /></button>
+                                <h3 className="text-sm font-semibold text-slate-500">Subtasks</h3>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button className="p-1 -m-1 text-slate-500 hover:text-slate-800 cursor-pointer"><MoreHorizontal className="w-5 h-5" /></button>
+                                <button className="p-1 -m-1 text-slate-500 hover:text-slate-800 cursor-pointer"><Columns className="w-5 h-5" /></button>
+                                <button onClick={handleAddSubtaskClick} className="p-1 -m-1 text-slate-500 hover:text-slate-800 cursor-pointer"><Plus className="w-5 h-5" /></button>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-full bg-slate-200 rounded-full h-1 dark:bg-slate-700">
+                                <div className="bg-blue-600 h-1 rounded-full" style={{ width: `${progress}%` }}></div>
+                            </div>
+                            <span className="text-xs text-slate-500 whitespace-nowrap">{Math.round(progress)}% Done</span>
+                        </div>
+
+                        {isSubtasksVisible && (
+                            <div className="border border-slate-200 dark:border-slate-700 rounded-md">
+                                <div className="grid grid-cols-[minmax(0,1fr)_120px_100px_40px] items-center gap-4 px-2 py-1 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+                                    <span className="text-xs font-bold text-slate-500">Work</span>
+                                    <span className="text-xs font-bold text-slate-500 text-center">Assignee</span>
+                                    <span className="text-xs font-bold text-slate-500 text-center">Status</span>
+                                    <span></span>
+                                </div>
+                                {loadingSubtasks ? <div className="flex justify-center py-4"><Spinner /></div> : (
+                                    <div>
+                                        {subtasks.map(sub => (
+                                            <SubtaskRow
+                                                key={sub._id}
+                                                subtask={sub}
+                                                projectMembers={projectMembers}
+                                                boardColumns={project.boardColumns}
+                                                onUpdate={fetchSubtasks}
+                                                onDelete={() => onDeleteRequest(sub)}
+                                            />
+                                        ))}
                                     </div>
-                                ))}
+                                )}
                             </div>
                         )}
-                        <div className="relative">
-                            <input
-                                type="text"
-                                value={newSubtaskTitle}
-                                onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                                placeholder="Create a new subtask..."
-                                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800"
-                            />
-                            {newSubtaskTitle && (
-                                <button
-                                    onClick={handleCreateSubtask}
-                                    className="absolute right-1 top-1/2 -translate-y-1/2 px-4 py-1 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
-                                >
-                                    Create
-                                </button>
-                            )}
+                        <div className="relative mt-2">
+                            <input ref={subtaskInputRef} type="text" value={newSubtaskTitle} onChange={(e) => setNewSubtaskTitle(e.target.value)} placeholder="Create a new subtask..." className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800" />
+                            {newSubtaskTitle && (<button onClick={handleCreateSubtask} className="absolute right-1 top-1/2 -translate-y-1/2 px-4 py-1 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 cursor-pointer">Create</button>)}
                         </div>
                     </div>
                 )}

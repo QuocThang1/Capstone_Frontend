@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { ChevronDown, MoreHorizontal, Edit, Trash2, Plus } from 'lucide-react';
 import { createIssueApi } from '../../../utils/Api/issueApi';
 import { toast } from 'react-toastify';
@@ -22,10 +24,11 @@ const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSel
     const [isDropdownOpen, setDropdownOpen] = useState(false);
     const isBacklog = sprint.name === 'Backlog';
 
+    const { setNodeRef, isOver } = useDroppable({ id: sprint._id });
+
     const formattedStartDate = formatDate(sprint.startDate);
     const formattedEndDate = formatDate(sprint.endDate);
 
-    // Tính tổng story points
     const totalStoryPoints = issues.reduce((sum, issue) => sum + (issue.storyPoints || 0), 0);
 
     useEffect(() => {
@@ -44,7 +47,7 @@ const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSel
                 toast.success("Issue created!");
                 setCreatingIssue(false);
                 setNewIssueTitle('');
-                onDataUpdate(); // Báo cho Backlog.jsx tải lại dữ liệu
+                onDataUpdate();
             } else {
                 toast.error(res.EM);
             }
@@ -78,7 +81,6 @@ const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSel
                 </div>
                 {!isBacklog && (
                     <div className="flex items-center gap-2 relative">
-                        {/* Hiển thị tổng story points */}
                         <span className="text-sm font-semibold text-slate-500">{totalStoryPoints} story points</span>
                         <button className="px-3 py-1 text-sm font-medium bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer">Start sprint</button>
                         <button onClick={() => setDropdownOpen(prev => !prev)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer"><MoreHorizontal className="w-5 h-5" /></button>
@@ -93,36 +95,38 @@ const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSel
                     </div>
                 )}
             </div>
-            <div className="p-2 space-y-2">
-                {issues.map(issue => (
-                    <IssueRow key={issue._id} issue={issue} onSelect={onIssueSelect} onOpenDeleteModal={onOpenDeleteIssueModal} />
-                ))}
-                {isCreatingIssue ? (
-                    <div className="bg-white dark:bg-slate-800 rounded-md border border-blue-500 shadow-sm p-2 flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                            <select value={selectedIssueType} onChange={(e) => setSelectedIssueType(e.target.value)} className="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
-                                {project.issueTypes.map(type => (<option key={type.name} value={type.name}>{type.name}</option>))}
-                            </select>
-                            <input ref={createIssueInputRef} type="text" value={newIssueTitle} onChange={(e) => setNewIssueTitle(e.target.value)} placeholder="What needs to be done?" className="flex-grow bg-transparent focus:outline-none px-1 py-0.5 text-slate-800 dark:text-slate-200" onKeyDown={(e) => e.key === 'Enter' && handleCreateIssue()} />
+            <SortableContext items={issues.map(i => i._id)} strategy={verticalListSortingStrategy}>
+                <div ref={setNodeRef} className={`p-2 space-y-2 transition-colors min-h-[80px] ${isOver ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
+                    {issues.map(issue => (
+                        <IssueRow key={issue._id} issue={issue} onSelect={onIssueSelect} onOpenDeleteModal={onOpenDeleteIssueModal} />
+                    ))}
+                    {isCreatingIssue ? (
+                        <div className="bg-white dark:bg-slate-800 rounded-md border border-blue-500 shadow-sm p-2 flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                                <select value={selectedIssueType} onChange={(e) => setSelectedIssueType(e.target.value)} className="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                                    {project.issueTypes.map(type => (<option key={type.name} value={type.name}>{type.name}</option>))}
+                                </select>
+                                <input ref={createIssueInputRef} type="text" value={newIssueTitle} onChange={(e) => setNewIssueTitle(e.target.value)} placeholder="What needs to be done?" className="flex-grow bg-transparent focus:outline-none px-1 py-0.5 text-slate-800 dark:text-slate-200" onKeyDown={(e) => e.key === 'Enter' && handleCreateIssue()} />
+                            </div>
+                            <div className="flex items-center justify-end gap-2">
+                                <button onClick={() => { setCreatingIssue(false); setNewIssueTitle(''); }} className="px-5 py-2 text-sm font-semibold rounded-md bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer">Cancel</button>
+                                <button onClick={handleCreateIssue} disabled={actionLoading} className="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 cursor-pointer">
+                                    {actionLoading ? <ButtonSpinner /> : 'Create'}
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex items-center justify-end gap-2">
-                            <button onClick={() => { setCreatingIssue(false); setNewIssueTitle(''); }} className="px-5 py-2 text-sm font-semibold rounded-md bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer">Cancel</button>
-                            <button onClick={handleCreateIssue} disabled={actionLoading} className="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 cursor-pointer">
-                                {actionLoading ? <ButtonSpinner /> : 'Create'}
-                            </button>
+                    ) : (
+                        <button onClick={() => setCreatingIssue(true)} className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 p-2 rounded-md w-full hover:bg-slate-200 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+                            <Plus className="w-4 h-4" /><span>Create issue</span>
+                        </button>
+                    )}
+                    {issues.length === 0 && !isCreatingIssue && (
+                        <div className="flex items-center justify-center min-h-[60px]">
+                            <p className="text-sm text-slate-400 text-center">{isBacklog ? "Issues that aren't in any sprint will appear here." : "Drag issues here to add them to this sprint."}</p>
                         </div>
-                    </div>
-                ) : (
-                    <button onClick={() => setCreatingIssue(true)} className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 p-2 rounded-md w-full hover:bg-slate-200 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
-                        <Plus className="w-4 h-4" /><span>Create issue</span>
-                    </button>
-                )}
-                {issues.length === 0 && !isCreatingIssue && (
-                    <div className="flex items-center justify-center min-h-[60px]">
-                        <p className="text-sm text-slate-400 text-center">{isBacklog ? "Issues that aren't in any sprint will appear here." : "Drag issues here to add them to this sprint."}</p>
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
+            </SortableContext>
         </div>
     );
 };
