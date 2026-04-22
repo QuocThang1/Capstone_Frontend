@@ -1,4 +1,4 @@
-import ButtonSpinner from '../../../../components/ButtonSpinner';
+import ButtonSpinner from '../../../../../components/ButtonSpinner';
 import { X, AlertTriangle } from 'lucide-react';
 
 const DeleteSprintModal = ({ isOpen, onClose, onConfirm, loading, sprint }) => {

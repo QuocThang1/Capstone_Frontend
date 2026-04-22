@@ -1,9 +1,26 @@
 import { useState, useRef, useEffect } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { CheckSquare, MoreHorizontal, Trash2, Edit } from 'lucide-react';
 
 const IssueRow = ({ issue, onSelect, onOpenDeleteModal }) => {
     const [isMenuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
+
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: issue._id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 10 : 'auto', // Đảm bảo item đang kéo nổi lên trên
+    };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -27,14 +44,26 @@ const IssueRow = ({ issue, onSelect, onOpenDeleteModal }) => {
         setMenuOpen(false);
     };
 
+    // Ngăn việc click để chọn issue khi đang kéo
     const handleRowClick = () => {
-        onSelect(issue);
+        if (!isDragging) {
+            onSelect(issue);
+        }
     };
 
     return (
-        <div onClick={handleRowClick} className="flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer group">
+        <div
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+            onClick={handleRowClick}
+            className={`flex items-center justify-between p-2 rounded group touch-none cursor-pointer ${isDragging ? 'bg-blue-100 dark:bg-blue-900/50 shadow-lg' : 'hover:bg-slate-100 dark:hover:bg-slate-700/50'}`}
+        >
             <div className="flex items-center gap-3">
-                <CheckSquare className="w-4 h-4 text-green-500" />
+                <div>
+                    <CheckSquare className="w-4 h-4 text-green-500" />
+                </div>
                 <span className="text-xs font-semibold text-slate-500">{issue.issueKey}</span>
                 <span className="text-sm text-slate-800 dark:text-slate-200">{issue.title}</span>
             </div>
