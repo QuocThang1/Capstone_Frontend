@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { updateBoardColumnsApi } from '../../../utils/Api/projectApi';
 import { X, Plus, GripVertical, Trash2 } from 'lucide-react';
 import ButtonSpinner from '../../../components/ButtonSpinner';
+import { cn } from '../../../lib/utils';
 
 const EditBoardColumnsModal = ({ isOpen, onClose, project, onColumnsUpdate }) => {
     const { register, control, handleSubmit, reset, formState: { isSubmitting } } = useForm({
@@ -49,7 +50,7 @@ const EditBoardColumnsModal = ({ isOpen, onClose, project, onColumnsUpdate }) =>
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex justify-center items-center p-4">
+        <div className="fixed inset-0 z-50 flex justify-center items-center p-4 bg-black/50" onClick={onClose}>
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md border-2 border-slate-300 dark:border-slate-700" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white">Edit Board Columns</h2>
@@ -60,23 +61,34 @@ const EditBoardColumnsModal = ({ isOpen, onClose, project, onColumnsUpdate }) =>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="p-6">
                     <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
-                        {fields.map((field, index) => (
-                            <div key={field.id} className="flex items-center gap-2">
-                                <GripVertical className="w-5 h-5 text-slate-400 cursor-grab" />
-                                <input
-                                    {...register(`boardColumns.${index}.name`, { required: "Column name is required" })}
-                                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800"
-                                    placeholder="Column Name"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => remove(index)}
-                                    className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-full cursor-pointer"
-                                >
-                                    <Trash2 className="w-5 h-5" />
-                                </button>
-                            </div>
-                        ))}
+                        {fields.map((field, index) => {
+                            const isDoneColumn = field.name === 'Done';
+                            return (
+                                <div key={field.id} className="flex items-center gap-2">
+                                    <GripVertical className="w-5 h-5 text-slate-400 cursor-grab" />
+                                    <input
+                                        {...register(`boardColumns.${index}.name`, { required: "Column name is required" })}
+                                        className={cn(
+                                            "w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800",
+                                            isDoneColumn && "bg-slate-100 dark:bg-slate-700 cursor-not-allowed"
+                                        )}
+                                        placeholder="Column Name"
+                                        disabled={isDoneColumn}
+                                    />
+                                    {isDoneColumn ? (
+                                        <div className="w-10 h-10 flex-shrink-0"></div> // Placeholder to keep alignment
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => remove(index)}
+                                            className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-full cursor-pointer flex-shrink-0"
+                                        >
+                                            <Trash2 className="w-5 h-5" />
+                                        </button>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
 
                     <button
