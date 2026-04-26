@@ -256,8 +256,8 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
                 {allProjects.slice(0, 3).map((project) => (
                   <button
                     key={project._id}
-                    onClick={() => navigate(`/projects/${project._id}`)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200 cursor-pointer"
+                    onClick={() => navigate(`/projects/${project._id}/overview`)}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
                   >
                     <div className="flex items-center justify-center w-6 h-6 rounded bg-slate-100 dark:bg-slate-900 text-[11px] font-bold text-slate-500 dark:text-slate-500 flex-shrink-0">
                       {project.key ? project.key.slice(0, 1).toUpperCase() : project.name.charAt(0).toUpperCase()}
@@ -277,136 +277,7 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
               </div>
             </div>
           )}
-
-          {/* Divider - responsive sizing */}
-          <div className={cn(
-            "bg-slate-200 dark:bg-slate-800 flex-shrink-0 transition-all duration-300",
-            isCollapsed ? "w-8 h-px" : "w-full h-px"
-          )} />
-
-          {/* Monitor */}
-          <div className={cn(
-            "transition-all duration-300",
-            isCollapsed ? "w-full flex flex-col gap-1 items-center" : "w-full"
-          )}>
-            {!isCollapsed && (
-              <p className="px-3 mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Monitor
-              </p>
-            )}
-            <div className={isCollapsed ? "w-full flex flex-col gap-1 items-center" : "space-y-1"}>
-              <NavItem
-                to="/overview"
-                icon={LayoutDashboard}
-                label="Overview Dashboard"
-                isActive={isActiveRoute("/overview")}
-                isCollapsed={isCollapsed}
-              />
-              <NavItem
-                to="/events"
-                icon={Activity}
-                label="Real-time Event Log"
-                isActive={isActiveRoute("/events")}
-                isCollapsed={isCollapsed}
-              />
-            </div>
-          </div>
-
-          {/* Intelligence */}
-          <div className={cn(
-            "transition-all duration-300",
-            isCollapsed ? "w-full flex flex-col gap-1 items-center" : "w-full"
-          )}>
-            {!isCollapsed && (
-              <p className="px-3 mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Intelligence
-              </p>
-            )}
-            <div className={isCollapsed ? "w-full flex flex-col gap-1 items-center" : "space-y-1"}>
-              <NavItem
-                to="/process"
-                icon={GitBranch}
-                label="Process Flow"
-                isActive={isActiveRoute("/process")}
-                isCollapsed={isCollapsed}
-              />
-              <NavItem
-                to="/bottlenecks"
-                icon={Zap}
-                label="Bottleneck Detector"
-                badge="ML"
-                isActive={isActiveRoute("/bottlenecks")}
-                isCollapsed={isCollapsed}
-              />
-            </div>
-          </div>
-
-          {/* Management */}
-          <div className={cn(
-            "transition-all duration-300",
-            isCollapsed ? "w-full flex flex-col gap-1 items-center" : "w-full"
-          )}>
-            {!isCollapsed && (
-              <p className="px-3 mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Management
-              </p>
-            )}
-            <div className={isCollapsed ? "w-full flex flex-col gap-1 items-center" : "space-y-1"}>
-              <NavItem
-                to="/team"
-                icon={Users}
-                label="Team Health"
-                isActive={isActiveRoute("/team")}
-                isCollapsed={isCollapsed}
-              />
-              <NavItem
-                to="/rbac"
-                icon={Shield}
-                label="RBAC & Permissions"
-                isActive={isActiveRoute("/rbac")}
-                isCollapsed={isCollapsed}
-              />
-              <NavItem
-                to="/audit"
-                icon={ClipboardList}
-                label="Audit Logs"
-                isActive={isActiveRoute("/audit")}
-                isCollapsed={isCollapsed}
-              />
-            </div>
-          </div>
-
-          {/* Operations */}
-          <div className={cn(
-            "transition-all duration-300",
-            isCollapsed ? "w-full flex flex-col gap-1 items-center" : "w-full"
-          )}>
-            {!isCollapsed && (
-              <p className="px-3 mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Operations
-              </p>
-            )}
-            <div className={isCollapsed ? "w-full flex flex-col gap-1 items-center" : "space-y-1"}>
-              <NavItem
-                to="/data"
-                icon={ArrowLeftRight}
-                label="Import/Export Data"
-                isActive={isActiveRoute("/data")}
-                isCollapsed={isCollapsed}
-              />
-              <NavItem
-                to="/automation"
-                icon={Settings2}
-                label="Automation Rules"
-                isActive={isActiveRoute("/automation")}
-                isCollapsed={isCollapsed}
-              />
-            </div>
-          </div>
         </div>
-
-
-
         {/* Footer Section - User Profile & Actions */}
         <div className={cn(
           "mt-auto transition-all duration-300 flex flex-col gap-3",
