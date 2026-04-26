@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { Type, Trash2 } from 'lucide-react';
-import { updateIssueApi } from '../../../utils/Api/issueApi';
+import { updateIssueApi } from '../../../../utils/Api/issueApi';
 
 const SubtaskRow = ({ subtask, projectMembers, boardColumns, onUpdate, onDelete }) => {
     const [status, setStatus] = useState(subtask.status);
