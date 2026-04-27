@@ -1,16 +1,8 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-// import { getHistoryApi } from '../../../../../utils/Api/issueApi'; // Giả sử bạn có API này
+import { getHistoryByIssueApi } from '../../../../utils/Api/historyApi';
 import Spinner from '../../../spinner';
-
-const HistoryItem = ({ entry }) => {
-    // Tùy chỉnh cách hiển thị cho từng loại lịch sử
-    return (
-        <div className="text-sm text-slate-600 dark:text-slate-400 py-2 border-b border-slate-200 dark:border-slate-700">
-            <strong>{entry.user}</strong> {entry.action} on {new Date(entry.timestamp).toLocaleString()}
-        </div>
-    );
-}
+import HistoryItem from './historyItem';
 
 const HistorySection = ({ issueId }) => {
     const [history, setHistory] = useState([]);
@@ -21,19 +13,16 @@ const HistorySection = ({ issueId }) => {
             if (!issueId) return;
             setLoading(true);
             try {
-                // const res = await getHistoryApi(issueId);
-                // if (res && res.EC === 0) {
-                //     setHistory(res.data);
-                // }
-                // --- Dữ liệu giả lập ---
-                console.log("Fetching history for issue:", issueId);
-                setHistory([
-                    { _id: '1', user: 'Dinh To Quoc Thang', action: 'updated the description', timestamp: new Date() },
-                    { _id: '2', user: 'Dinh To Quoc Thang', action: 'changed the status from "To Do" to "In Progress"', timestamp: new Date() },
-                ]);
-                // --- Kết thúc dữ liệu giả lập ---
+                const res = await getHistoryByIssueApi(issueId);
+                if (res && res.EC === 0) {
+                    // Sắp xếp lịch sử từ mới nhất đến cũ nhất
+                    const sortedHistory = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    setHistory(sortedHistory);
+                } else {
+                    toast.error(res.EM || "Failed to fetch history.");
+                }
             } catch (error) {
-                toast.error(error.message || "Failed to fetch history.");
+                toast.error(error?.response?.data?.EM || "An error occurred while fetching history.");
             } finally {
                 setLoading(false);
             }
@@ -43,15 +32,15 @@ const HistorySection = ({ issueId }) => {
     }, [issueId]);
 
     if (loading) {
-        return <div className='flex justify-center'><Spinner /></div>;
+        return <div className='flex justify-center py-4'><Spinner /></div>;
     }
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-1 divide-y divide-slate-200 dark:divide-slate-700">
             {history.length > 0 ? (
                 history.map(entry => <HistoryItem key={entry._id} entry={entry} />)
             ) : (
-                <p className="text-sm text-slate-500">No history for this issue yet.</p>
+                <p className="text-sm text-slate-500 text-center py-4">No activity history for this issue yet.</p>
             )}
         </div>
     );
