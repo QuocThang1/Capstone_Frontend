@@ -44,6 +44,7 @@ export const ProjectProvider = ({ children }) => {
             fetchAllProjects();
         } else {
             setAllProjects([]);
+            setPagination({ page: 1, totalPages: 1 });
         }
     }, [auth.isAuthenticated]);
 

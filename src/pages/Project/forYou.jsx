@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { AuthContext } from "@/context/auth.context";
-import { getMyProjectsApi } from "@/utils/Api/projectApi";
+import { getAllProjectsApi } from "@/utils/Api/projectApi";
 
 // Mock hook for events data (replace with real API when available)
 const useListEvents = () => ({
@@ -167,7 +167,7 @@ const ProjectAdminView = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await getMyProjectsApi();
+        const res = await getAllProjectsApi();
         if (res && res.EC === 0) {
           setProjects(res.data || []);
         }
@@ -339,11 +339,10 @@ const ForYou = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`text-[14px] font-medium transition-colors pb-3 whitespace-nowrap ${
-                activeTab === tab
+              className={`text-[14px] font-medium transition-colors pb-3 whitespace-nowrap ${activeTab === tab
                   ? "text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 -mb-[1px] relative z-10"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-              }`}
+                }`}
             >
               {tab}
               {tab === "Assigned to me" && (

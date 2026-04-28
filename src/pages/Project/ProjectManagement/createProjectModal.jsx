@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
-import ButtonSpinner from '../../components/ButtonSpinner';
+import ButtonSpinner from '../../../components/ButtonSpinner';
 import { useEffect, useContext } from 'react';
-import { ProjectContext } from '../../context/project.context';
+import { ProjectContext } from '../../../context/project.context';
 
 const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
     const { register, handleSubmit, formState: { errors }, reset, watch } = useForm();

@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
-import ButtonSpinner from "../../components/ButtonSpinner";
+import ButtonSpinner from "../../../components/ButtonSpinner";
 import { X } from "lucide-react";
 
 const EditProjectModal = ({ isOpen, onClose, project, onProjectUpdated, loading }) => {
