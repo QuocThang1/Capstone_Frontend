@@ -47,6 +47,17 @@ const updateBoardColumnsApi = (projectId, boardColumns) => {
     return axios.put(URL_API, boardColumns);
 };
 
+const deleteBoardColumnApi = (projectId, columnName, targetColumnName = null) => {
+    const URL_API = `/v1/api/projects/${projectId}/board-columns/${encodeURIComponent(columnName)}`;
+
+    const data = {};
+    if (targetColumnName) {
+        data.targetColumnName = targetColumnName;
+    }
+
+    return axios.delete(URL_API, { data });
+};
+
 const updateIssueTypesApi = (projectId, issueTypes) => {
     const URL_API = `/v1/api/projects/${projectId}/issue-types`;
     return axios.put(URL_API, issueTypes);
@@ -62,4 +73,5 @@ export {
     getProjectMembersApi,
     updateBoardColumnsApi,
     updateIssueTypesApi,
+    deleteBoardColumnApi,
 };

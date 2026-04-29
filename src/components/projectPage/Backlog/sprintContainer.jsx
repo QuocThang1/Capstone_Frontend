@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { ChevronDown, MoreHorizontal, Edit, Trash2, Plus } from 'lucide-react';
-import { createIssueApi } from '../../../utils/Api/issueApi';
 import { toast } from 'react-toastify';
+import { ChevronDown, MoreHorizontal, Edit, Trash2, Plus } from 'lucide-react';
+
+import { createIssueApi } from '../../../utils/Api/issueApi';
 import IssueRow from './issueRow';
 import ButtonSpinner from '../../ButtonSpinner';
 
@@ -13,7 +14,7 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 };
 
-const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSelect, onOpenDeleteIssueModal, onDataUpdate }) => {
+const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSelect, onOpenDeleteIssueModal, onDataUpdate, onStartSprint, onCompleteSprint }) => {
     const [isCreatingIssue, setCreatingIssue] = useState(false);
     const [newIssueTitle, setNewIssueTitle] = useState('');
     const [selectedIssueType, setSelectedIssueType] = useState(project.issueTypes?.[0]?.name || '');
@@ -44,10 +45,10 @@ const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSel
             const issueData = { projectId: project._id, sprintId: sprint._id, title: newIssueTitle, type: selectedIssueType };
             const res = await createIssueApi(issueData);
             if (res && res.EC === 0) {
-                toast.success("Issue created!");
+                toast.success(res.EM);
                 setCreatingIssue(false);
                 setNewIssueTitle('');
-                onDataUpdate();
+                onDataUpdate(); // Trigger data refetch in parent
             } else {
                 toast.error(res.EM);
             }
@@ -68,6 +69,14 @@ const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSel
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    const handleSprintAction = () => {
+        if (sprint.status === 'pending') {
+            onStartSprint(sprint._id);
+        } else if (sprint.status === 'active') {
+            onCompleteSprint(sprint._id);
+        }
+    };
+
     return (
         <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 mb-4">
             <div className="flex items-center justify-between p-2 border-b border-slate-200 dark:border-slate-700">
@@ -75,6 +84,7 @@ const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSel
                     <button className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer"><ChevronDown className="w-5 h-5" /></button>
                     <div className="flex items-baseline gap-2">
                         <h3 className="font-semibold text-slate-800 dark:text-slate-200">{sprint.name}</h3>
+                        {sprint.status === 'active' && <span className="px-2 py-0.5 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Active</span>}
                         {formattedStartDate && formattedEndDate && (<span className="text-sm text-slate-500 dark:text-slate-400">{formattedStartDate} – {formattedEndDate}</span>)}
                     </div>
                     <span className="text-sm text-slate-500">({issues.length} issues)</span>
@@ -82,7 +92,14 @@ const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSel
                 {!isBacklog && (
                     <div className="flex items-center gap-2 relative">
                         <span className="text-sm font-semibold text-slate-500">{totalStoryPoints} story points</span>
-                        <button className="px-3 py-1 text-sm font-medium bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer">Start sprint</button>
+                        {sprint.status !== 'completed' && (
+                            <button
+                                onClick={handleSprintAction}
+                                className="px-3 py-1 text-sm font-medium bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer"
+                            >
+                                {sprint.status === 'pending' ? 'Start sprint' : 'Complete sprint'}
+                            </button>
+                        )}
                         <button onClick={() => setDropdownOpen(prev => !prev)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer"><MoreHorizontal className="w-5 h-5" /></button>
                         {isDropdownOpen && (
                             <div ref={dropdownRef} className="origin-top-right absolute right-0 mt-8 w-40 rounded-md shadow-lg bg-white dark:bg-slate-900 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">

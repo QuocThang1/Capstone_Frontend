@@ -5,7 +5,10 @@ import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizo
 import { updateIssueApi, createSubtaskApi, getSubtaskApi } from '../../../../../utils/Api/issueApi';
 import { getProjectMembersApi } from '../../../../../utils/Api/projectApi';
 import Spinner from '../../../../../components/spinner';
-import SubtaskRow from '../../../../../components/projectPage/Backlog/SubtaskRow';
+import SubtaskRow from '../../../../../components/projectPage/Backlog/IssueDetail/subtaskRow';
+import { cn } from '../../../../../lib/utils';
+import CommentSection from '../../../../../components/projectPage/Backlog/IssueDetail/commentSection';
+import HistorySection from '../../../../../components/projectPage/Backlog/IssueDetail/historySection';
 
 const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteRequest, subtaskTrigger }) => {
     const [projectMembers, setProjectMembers] = useState([]);
@@ -13,6 +16,7 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
     const [loadingSubtasks, setLoadingSubtasks] = useState(false);
     const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
     const [isSubtasksVisible, setSubtasksVisible] = useState(true);
+    const [activeActivityTab, setActiveActivityTab] = useState('comments');
     const subtaskInputRef = useRef(null);
 
     const { register, handleSubmit, reset, watch } = useForm();
@@ -113,14 +117,12 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
             <header className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
                 <span className="text-sm text-slate-500">{issue?.issueKey}</span>
                 <div className="flex items-center gap-2">
-                    {/* Sửa ở đây: gọi onDeleteRequest với issue cha */}
                     <button onClick={() => onDeleteRequest(issue)} className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"><Trash2 className="w-5 h-5 text-slate-500" /></button>
                     <button onClick={onClose} className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"><X className="w-5 h-5 text-slate-500" /></button>
                 </div>
             </header>
             <main className="flex-grow p-6 overflow-y-auto">
                 <form onBlur={handleSubmit(onSubmit)}>
-                    {/* Form fields... */}
                     <input {...register("title")} className="text-2xl font-bold bg-transparent w-full focus:outline-none focus:bg-slate-100 dark:focus:bg-slate-800 rounded-md p-2" />
                     <div className="mt-6 space-y-4">
                         <h3 className="text-sm font-semibold text-slate-500">Description</h3>
@@ -204,6 +206,40 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                         </div>
                     </div>
                 )}
+
+                {/* Activity Section */}
+                <div className="mt-8">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-3">Activity</h3>
+                    <div className="flex items-center border-b border-slate-200 dark:border-slate-700">
+                        <button
+                            onClick={() => setActiveActivityTab('comments')}
+                            className={cn(
+                                "px-4 py-2 text-sm font-medium cursor-pointer",
+                                activeActivityTab === 'comments'
+                                    ? "border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                            )}
+                        >
+                            Comments
+                        </button>
+                        <button
+                            onClick={() => setActiveActivityTab('history')}
+                            className={cn(
+                                "px-4 py-2 text-sm font-medium cursor-pointer",
+                                activeActivityTab === 'history'
+                                    ? "border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                            )}
+                        >
+                            History
+                        </button>
+                    </div>
+
+                    <div className="mt-4">
+                        {activeActivityTab === 'comments' && <CommentSection issueId={issue?._id} />}
+                        {activeActivityTab === 'history' && <HistorySection issueId={issue?._id} />}
+                    </div>
+                </div>
             </main>
         </div>
     );
