@@ -21,9 +21,21 @@ const deleteSprintApi = (sprintId) => {
     return axios.delete(URL_API);
 };
 
+const startSprintApi = (sprintId) => {
+    const URL_API = `/v1/api/sprints/${sprintId}/start`;
+    return axios.post(URL_API);
+}
+
+const completeSprintApi = (sprintId) => {
+    const URL_API = `/v1/api/sprints/${sprintId}/complete`;
+    return axios.post(URL_API);
+}
+
 export {
     createSprintApi,
     getSprintsByProjectApi,
     updateSprintApi,
     deleteSprintApi,
+    startSprintApi,
+    completeSprintApi,
 };

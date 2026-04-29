@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useOutletContext } from 'react-router-dom';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { getSprintsByProjectApi, createSprintApi, updateSprintApi, deleteSprintApi } from '../../../../utils/Api/sprintApi';
+import { getSprintsByProjectApi, createSprintApi, updateSprintApi, deleteSprintApi, startSprintApi, completeSprintApi } from '../../../../utils/Api/sprintApi';
 import { getIssuesByProjectApi, deleteIssueApi, updateIssueApi } from '../../../../utils/Api/issueApi';
 import { toast } from 'react-toastify';
 import Spinner from '../../../../components/spinner';
@@ -156,7 +156,11 @@ const Backlog = () => {
         setActionLoading(true);
         try {
             const res = await updateSprintApi(sprintId, data);
-            toast.success(res.EM || "Sprint updated!");
+            if (res && res.EC === 0) {
+                toast.success(res.EM || "Sprint updated!");
+            } else {
+                toast.error(res.EM || "Failed to update sprint.");
+            }
             handleCloseSprintModals();
             fetchData();
         } catch (error) {
@@ -170,7 +174,11 @@ const Backlog = () => {
         setActionLoading(true);
         try {
             const res = await deleteSprintApi(sprintId);
-            toast.success(res.EM || "Sprint deleted!");
+            if (res && res.EC === 0) {
+                toast.success(res.EM || "Sprint deleted!");
+            } else {
+                toast.error(res.EM || "Failed to delete sprint.");
+            }
             handleCloseSprintModals();
             fetchData();
         } catch (error) {
@@ -179,6 +187,35 @@ const Backlog = () => {
             setActionLoading(false);
         }
     };
+
+    const handleStartSprint = async (sprintId) => {
+        try {
+            const res = await startSprintApi(sprintId);
+            if (res && res.EC === 0) {
+                toast.success(res.EM);
+                fetchData();
+            } else {
+                toast.error(res.EM);
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.EM || "Failed to start sprint.");
+        }
+    };
+
+    const handleCompleteSprint = async (sprintId) => {
+        try {
+            const res = await completeSprintApi(sprintId);
+            if (res && res.EC === 0) {
+                toast.success(res.EM);
+                fetchData();
+            } else {
+                toast.error(res.EM);
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.EM || "Failed to complete sprint.");
+        }
+    };
+
 
     // --- Các hàm xử lý Issue ---
     const handleDataUpdate = () => {
@@ -215,7 +252,9 @@ const Backlog = () => {
 
     // Tách sprints ra để render
     const backlogSprint = sprints.find(s => s.name === 'Backlog');
-    const regularSprints = sprints.filter(s => s.name !== 'Backlog').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const regularSprints = sprints
+        .filter(s => s.name !== 'Backlog' && s.status !== 'completed')
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     if (loading) {
         return <div className="flex justify-center items-center p-8"><Spinner /></div>;
@@ -238,6 +277,8 @@ const Backlog = () => {
                                     onIssueSelect={setSelectedIssue}
                                     onOpenDeleteIssueModal={handleOpenDeleteIssueModal}
                                     onDataUpdate={handleDataUpdate}
+                                    onStartSprint={handleStartSprint}
+                                    onCompleteSprint={handleCompleteSprint}
                                 />
                             ))}
                         </div>
