@@ -334,3 +334,26 @@ html.dark .shadow-lg,
 ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.2); border-radius: 3px; }
 
 input[type="search"]::-webkit-search-cancel-button { display: none; }
+
+/* react-datepicker theme tweaks */
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #8B5CF6 !important;
+  color: white !important;
+}
+
+.react-datepicker__day:hover {
+  background-color: #c0a8f9 !important;
+}
+
+.react-datepicker__header {
+  background-color: #f3f0ff;
+  border-bottom: none;
+}
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker__input-container input {
+  width: 100%;
+}
