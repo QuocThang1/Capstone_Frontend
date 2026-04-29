@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { getProjectByIdApi } from '../../../utils/Api/projectApi';
+import { getIssuesByProjectApi } from '../../../utils/Api/issueApi';
 import { getStarredProjectsApi, toggleStarProjectApi } from '../../../utils/Api/accountApi';
 import Spinner from '../../../components/spinner';
 import { toast } from 'react-toastify';
@@ -16,6 +17,7 @@ const ProjectPage = () => {
     const navigate = useNavigate();
 
     const [project, setProject] = useState(null);
+    const [issues, setIssues] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -45,11 +47,26 @@ const ProjectPage = () => {
         }
     };
 
+    const fetchIssuesData = async () => {
+        try {
+            const issuesRes = await getIssuesByProjectApi(projectId);
+            if (issuesRes && issuesRes.EC === 0) {
+                setIssues(issuesRes.data || []);
+            } else {
+                throw new Error(issuesRes.EM || 'Failed to fetch issues.');
+            }
+        } catch (err) {
+            toast.error(err.message || 'Failed to fetch issues.');
+        }
+    };
 
     useEffect(() => {
         const fetchInitialData = async () => {
             setLoading(true);
-            await fetchProjectData(); // Fetch project data first
+            await Promise.all([
+                fetchProjectData(),
+                fetchIssuesData()
+            ]);
 
             try {
                 const starredRes = await getStarredProjectsApi();
@@ -107,12 +124,14 @@ const ProjectPage = () => {
         setter(true);
     };
 
-    const handleColumnsUpdate = (updatedColumns) => {
-        setProject(prev => ({ ...prev, boardColumns: updatedColumns }));
+    const handleColumnsUpdate = () => {
+        fetchProjectData();
+        fetchIssuesData();
     };
 
-    const handleTypesUpdate = (updatedTypes) => {
-        setProject(prev => ({ ...prev, issueTypes: updatedTypes }));
+    const handleTypesUpdate = () => {
+        fetchProjectData();
+        fetchIssuesData();
     };
 
     if (loading) {
@@ -199,7 +218,7 @@ const ProjectPage = () => {
 
                 <main className="flex-grow">
                     <div className="max-w-7xl mx-auto">
-                        <Outlet context={{ project, fetchProjectData }} />
+                        <Outlet context={{ project, setProject, issues, setIssues, fetchProjectData, fetchIssuesData }} />
                     </div>
                 </main>
             </div>

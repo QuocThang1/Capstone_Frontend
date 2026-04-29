@@ -10,7 +10,7 @@ import ForYou from "./pages/Project/forYou";
 import ProjectManagement from "./pages/Project/ProjectManagement/projectManagement";
 import ProjectPage from "./pages/Project/ProjectDetail/projectPage";
 import Summary from "./pages/Project/ProjectDetail/summary";
-import Board from "./pages/Project/ProjectDetail/board";
+import Board from "./pages/Project/ProjectDetail/Board/board";
 import Backlog from "./pages/Project/ProjectDetail/Backlog/backlog";
 
 // Coming Soon Pages
