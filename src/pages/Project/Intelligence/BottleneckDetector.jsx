@@ -4,6 +4,10 @@ import { motion } from "framer-motion";
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 280, damping: 22 } } };
+const summaryItem = { hidden: { opacity: 0, scale: 0.95 }, show: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 260, damping: 20 } } };
+const summaryContainer = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } } };
+const filterItem = { hidden: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 300, damping: 25 } } };
+const filterContainer = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05, delayChildren: 0.3 } } };
 
 const BOTTLENECKS = [
   {
@@ -71,7 +75,12 @@ const trendIcon = {
 function BottleneckCard({ bn, expanded, onToggle }) {
   return (
     <motion.div variants={item}>
-      <div
+      <motion.div
+        layout
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className={`bg-white dark:bg-slate-900 rounded-2xl border shadow-sm transition-all ${
           expanded
             ? "border-indigo-300 dark:border-indigo-700 shadow-indigo-100 dark:shadow-none"
@@ -108,7 +117,13 @@ function BottleneckCard({ bn, expanded, onToggle }) {
         </button>
 
         {expanded && (
-          <div className="px-5 pb-5 border-t border-slate-100 dark:border-slate-800 pt-4 space-y-4">
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="px-5 pb-5 border-t border-slate-100 dark:border-slate-800 pt-4 space-y-4"
+          >
             <p className="text-sm text-slate-600 dark:text-slate-400">{bn.description}</p>
             <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 border border-indigo-100 dark:border-indigo-800">
               <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1.5">AI Suggestion</p>
@@ -122,9 +137,9 @@ function BottleneckCard({ bn, expanded, onToggle }) {
                 Apply Fix
               </button>
             </div>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
@@ -153,37 +168,42 @@ const BottleneckDetector = () => {
       </div>
 
       {/* Summary row */}
-      <div className="grid grid-cols-3 gap-4">
+      <motion.div variants={summaryContainer} initial="hidden" animate="show" className="grid grid-cols-3 gap-4">
         {[
           { label: "Critical", count: 1, color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-900/20 border-rose-100 dark:border-rose-900" },
           { label: "Medium", count: 2, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-900" },
           { label: "Low", count: 1, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-100 dark:border-indigo-900" },
         ].map((s) => (
-          <div key={s.label} className={`rounded-2xl p-5 border ${s.bg}`}>
+          <motion.div key={s.label} variants={summaryItem} className={`rounded-2xl p-5 border ${s.bg}`}>
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{s.label}</p>
             <p className={`text-4xl font-bold mt-1 ${s.color}`}>{s.count}</p>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Filter + list */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          {filters.map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                filter === f
-                  ? "bg-indigo-600 text-white"
-                  : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-indigo-700"
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-          <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">{filtered.length} detected</span>
-        </div>
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="flex items-center gap-2">
+          <motion.div variants={filterContainer} initial="hidden" animate="show" className="flex items-center gap-2">
+            {filters.map((f) => (
+              <motion.button
+                key={f}
+                variants={filterItem}
+                onClick={() => setFilter(f)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                  filter === f
+                    ? "bg-indigo-600 text-white"
+                    : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-indigo-700"
+                }`}
+              >
+                {f}
+              </motion.button>
+            ))}
+          </motion.div>
+          <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="ml-auto text-xs text-slate-400 dark:text-slate-500">{filtered.length} detected</motion.span>
+        </motion.div>
 
         <motion.div variants={container} initial="hidden" animate="show" className="space-y-3">
           {filtered.map((bn) => (

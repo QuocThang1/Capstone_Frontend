@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Zap, ArrowUpRight, Filter, DownloadCloud, Activity } from "lucide-react";
+
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
+const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 

@@ -79,7 +79,7 @@ const RBACPermissions = () => {
           { role: "PROJECT_ADMIN", count: USERS.filter((u) => u.role === "PROJECT_ADMIN").length, desc: "Project-level access" },
           { role: "USER", count: USERS.filter((u) => u.role === "USER").length, desc: "Read & create access" },
         ].map((r) => (
-          <div key={r.role} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+          <div key={r.role} className="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200">
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${roleColors[r.role]}`}>{roleLabels[r.role]}</span>
             <p className="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-3">{r.count}</p>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{r.desc}</p>

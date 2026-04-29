@@ -9,10 +9,9 @@ import ProfilePage from "./pages/profile";
 import UserManagement from "./pages/Admin/User/userManagement";
 import ForYou from "./pages/Project/forYou";
 import ProjectManagement from "./pages/Project/ProjectManagement/projectManagement";
-import ProjectPage from "./pages/Project/ProjectDetail/projectPage";
-import Summary from "./pages/Project/ProjectDetail/summary";
-import Board from "./pages/Project/ProjectDetail/Board/board";
-import Backlog from "./pages/Project/ProjectDetail/Backlog/backlog";
+import ProjectPage from "./pages/Project/projectPage";
+import Board from "./pages/Project/Monitor/board";
+import Backlog from "./pages/Project/Management/Backlog/backlog";
 
 // Coming Soon Pages
 import OverviewDashboard from "./pages/Monitor/OverviewDashboard";
@@ -88,6 +87,21 @@ const router = createBrowserRouter([
             <ProjectDetailsLayout />
           </ProtectedRoute>,
         children: [
+          // Board and Backlog
+          {
+            path: "board",
+            element:
+              <ProtectedRoute allowedRoles={["admin", "user"]}>
+                <Board />
+              </ProtectedRoute>
+          },
+          {
+            path: "backlog",
+            element:
+              <ProtectedRoute allowedRoles={["admin", "user"]}>
+                <Backlog />
+              </ProtectedRoute>
+          },
           // Monitor Section
           {
             path: "overview",

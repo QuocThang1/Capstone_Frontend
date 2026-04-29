@@ -316,9 +316,10 @@ const RecentProjectsSection = () => {
   useEffect(() => {
     const fetchRecentProjects = async () => {
       try {
-        const res = await getProjectByIdApi();
+        const res = await getAllProjectsApi();
         if (res && res.EC === 0) {
-          setRecentProjects((res.data || []).slice(0, 6));
+          const data = Array.isArray(res.data) ? res.data : [];
+          setRecentProjects(data.slice(0, 6));
         }
       } catch (error) {
         console.error("Error fetching recent projects:", error);

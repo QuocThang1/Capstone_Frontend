@@ -48,7 +48,7 @@ const TeamHealth  = () =>{
           { icon: AlertCircle, label: "Blocked", value: blocked, color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-900/20" },
           { icon: Users, label: "Active Members", value: TEAM.length, color: "text-slate-700 dark:text-slate-300", bg: "bg-slate-50 dark:bg-slate-800" },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+          <div key={kpi.label} className="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-4">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${kpi.bg}`}>
               <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
             </div>
@@ -61,7 +61,7 @@ const TeamHealth  = () =>{
       </div>
 
       {/* Team table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+      <div className="glass-card rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <h2 className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
             <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> Team Members
@@ -121,7 +121,7 @@ const TeamHealth  = () =>{
       </div>
 
       {/* Workload distribution */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+      <div className="glass-card rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 p-6">
         <h2 className="font-semibold text-slate-800 dark:text-slate-200 mb-5">Workload Distribution</h2>
         <div className="space-y-3">
           {TEAM.map((member) => (
