@@ -113,12 +113,12 @@ const ProfilePage = () => {
     };
 
     return (
-        <div className="min-h-screen py-12 px-4 bg-[#F6F8F7]">
+        <div className="min-h-screen py-12 px-4 bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
             <div className="max-w-4xl mx-auto">
                 {/* Back Button */}
                 <button
                     onClick={() => navigate("/")}
-                    className="flex items-center gap-2 text-gray-600 hover:text-[#4ADE80] transition-colors duration-300 mb-6 group cursor-pointer"
+                    className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-300 mb-6 group cursor-pointer"
                 >
                     <svg
                         className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform duration-300"
@@ -131,16 +131,16 @@ const ProfilePage = () => {
                     <span className="font-medium">Back to Home</span>
                 </button>
                 {/* Header */}
-                <div className="bg-white rounded-xl shadow-xl p-8 mb-6">
+                <div className="glass-card rounded-2xl p-8 mb-6 shadow-lg transition-all duration-300 hover:shadow-xl">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             {/* Avatar */}
-                            <div className="w-20 h-20 bg-gradient-to-br from-[#4ADE80] to-[#22D3EE] rounded-full flex items-center justify-center text-3xl font-bold text-[#101A17]">
+                            <div className="w-20 h-20 bg-gradient-to-br from-indigo-600 to-indigo-500 dark:from-indigo-500 dark:to-indigo-400 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-indigo-500/20">
                                 {user?.fullName?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || "U"}
                             </div>
                             <div>
-                                <h1 className="text-3xl font-bold text-[#101A17]">{user?.fullName || "User Profile"}</h1>
-                                <p className="text-gray-600 mt-1">
+                                <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">{user?.fullName || "User Profile"}</h1>
+                                <p className="text-slate-600 dark:text-slate-400 mt-1">
                                     {user?.role === "admin" ? "Administrator" : "User"}
                                 </p>
                             </div>
@@ -150,7 +150,7 @@ const ProfilePage = () => {
                         {!isEditing && (
                             <button
                                 onClick={() => setIsEditing(true)}
-                                className="flex items-center gap-2 bg-[#4ADE80] text-[#101A17] px-6 py-3 rounded-lg font-semibold hover:bg-[#22D3EE] hover:scale-105 transition-all duration-300 shadow-lg cursor-pointer"
+                                className="flex items-center gap-2 bg-indigo-600 dark:bg-indigo-500/40 text-white dark:text-indigo-100 px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-500/60 hover:shadow-lg hover:shadow-indigo-500/20 hover:scale-105 transition-all duration-300 shadow-lg cursor-pointer"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -162,9 +162,9 @@ const ProfilePage = () => {
                 </div>
 
                 {/* Profile Form */}
-                <div className="bg-white rounded-xl shadow-xl p-8">
-                    <h2 className="text-2xl font-bold text-[#101A17] mb-6 flex items-center gap-2">
-                        <svg className="w-6 h-6 text-[#4ADE80]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="glass-card rounded-2xl p-8 shadow-lg transition-all duration-300 hover:shadow-xl">
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-6 flex items-center gap-2">
+                        <svg className="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         Personal Information
@@ -173,8 +173,8 @@ const ProfilePage = () => {
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         {/* Username */}
                         <div>
-                            <label htmlFor="username" className="block text-sm font-semibold text-[#101A17] mb-2">
-                                Username <span className="text-red-500">*</span>
+                            <label htmlFor="username" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                                Username <span className="text-rose-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -191,22 +191,22 @@ const ProfilePage = () => {
                                     }
                                 })}
                                 disabled={!isEditing}
-                                className={`w-full px-4 py-3 rounded-lg border ${errors.username
-                                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                    : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
-                                    } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200 ${!isEditing ? "bg-gray-50 cursor-not-allowed" : ""
+                                className={`w-full px-4 py-3 rounded-lg border transition-all duration-200 bg-white dark:bg-slate-900 ${errors.username
+                                    ? "border-rose-500 dark:border-rose-400 focus:border-rose-500 dark:focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900/50"
+                                    : "border-slate-300 dark:border-slate-600 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-indigo-200 dark:focus:ring-indigo-900/50"
+                                    } focus:outline-none focus:ring-2 focus:ring-opacity-20 ${!isEditing ? "bg-slate-100 dark:bg-slate-800 cursor-not-allowed" : ""
                                     }`}
                                 placeholder="Enter your username"
                             />
                             {errors.username && (
-                                <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>
+                                <p className="text-rose-500 dark:text-rose-400 text-sm mt-1">{errors.username.message}</p>
                             )}
                         </div>
 
                         {/* Full Name */}
                         <div>
-                            <label htmlFor="fullName" className="block text-sm font-semibold text-[#101A17] mb-2">
-                                Full Name <span className="text-red-500">*</span>
+                            <label htmlFor="fullName" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                                Full Name <span className="text-rose-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -219,23 +219,23 @@ const ProfilePage = () => {
                                     }
                                 })}
                                 disabled={!isEditing}
-                                className={`w-full px-4 py-3 rounded-lg border ${errors.fullName
-                                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                    : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
-                                    } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200 ${!isEditing ? "bg-gray-50 cursor-not-allowed" : ""
+                                className={`w-full px-4 py-3 rounded-lg border transition-all duration-200 bg-white dark:bg-slate-900 ${errors.fullName
+                                    ? "border-rose-500 dark:border-rose-400 focus:border-rose-500 dark:focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900/50"
+                                    : "border-slate-300 dark:border-slate-600 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-indigo-200 dark:focus:ring-indigo-900/50"
+                                    } focus:outline-none focus:ring-2 focus:ring-opacity-20 ${!isEditing ? "bg-slate-100 dark:bg-slate-800 cursor-not-allowed" : ""
                                     }`}
                                 placeholder="Enter your full name"
                             />
                             {errors.fullName && (
-                                <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>
+                                <p className="text-rose-500 dark:text-rose-400 text-sm mt-1">{errors.fullName.message}</p>
                             )}
                         </div>
 
                         {/* Email and Phone */}
                         <div className="grid md:grid-cols-2 gap-6">
                             <div>
-                                <label htmlFor="email" className="block text-sm font-semibold text-[#101A17] mb-2">
-                                    Email <span className="text-red-500">*</span>
+                                <label htmlFor="email" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                                    Email <span className="text-rose-500">*</span>
                                 </label>
                                 <input
                                     type="email"
@@ -248,21 +248,21 @@ const ProfilePage = () => {
                                         }
                                     })}
                                     disabled={!isEditing}
-                                    className={`w-full px-4 py-3 rounded-lg border ${errors.email
-                                        ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                        : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
-                                        } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200 ${!isEditing ? "bg-gray-50 cursor-not-allowed" : ""
+                                    className={`w-full px-4 py-3 rounded-lg border transition-all duration-200 bg-white dark:bg-slate-900 ${errors.email
+                                        ? "border-rose-500 dark:border-rose-400 focus:border-rose-500 dark:focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900/50"
+                                        : "border-slate-300 dark:border-slate-600 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-indigo-200 dark:focus:ring-indigo-900/50"
+                                        } focus:outline-none focus:ring-2 focus:ring-opacity-20 ${!isEditing ? "bg-slate-100 dark:bg-slate-800 cursor-not-allowed" : ""
                                         }`}
                                     placeholder="your@email.com"
                                 />
                                 {errors.email && (
-                                    <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                                    <p className="text-rose-500 dark:text-rose-400 text-sm mt-1">{errors.email.message}</p>
                                 )}
                             </div>
 
                             <div>
-                                <label htmlFor="phone" className="block text-sm font-semibold text-[#101A17] mb-2">
-                                    Phone <span className="text-red-500">*</span>
+                                <label htmlFor="phone" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                                    Phone <span className="text-rose-500">*</span>
                                 </label>
                                 <input
                                     type="tel"
@@ -272,15 +272,15 @@ const ProfilePage = () => {
                                     })}
                                     disabled={!isEditing}
                                     maxLength={13}
-                                    className={`w-full px-4 py-3 rounded-lg border ${errors.phone
-                                        ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                        : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
-                                        } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200 ${!isEditing ? "bg-gray-50 cursor-not-allowed" : ""
+                                    className={`w-full px-4 py-3 rounded-lg border transition-all duration-200 bg-white dark:bg-slate-900 ${errors.phone
+                                        ? "border-rose-500 dark:border-rose-400 focus:border-rose-500 dark:focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900/50"
+                                        : "border-slate-300 dark:border-slate-600 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-indigo-200 dark:focus:ring-indigo-900/50"
+                                        } focus:outline-none focus:ring-2 focus:ring-opacity-20 ${!isEditing ? "bg-slate-100 dark:bg-slate-800 cursor-not-allowed" : ""
                                         }`}
                                     placeholder="0987654321"
                                 />
                                 {errors.phone && (
-                                    <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+                                    <p className="text-rose-500 dark:text-rose-400 text-sm mt-1">{errors.phone.message}</p>
                                 )}
                             </div>
                         </div>
@@ -288,8 +288,8 @@ const ProfilePage = () => {
                         {/* Date of Birth and Gender */}
                         <div className="grid md:grid-cols-2 gap-6">
                             <div>
-                                <label htmlFor="dob" className="block text-sm font-semibold text-[#101A17] mb-2">
-                                    Date of Birth <span className="text-red-500">*</span>
+                                <label htmlFor="dob" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                                    Date of Birth <span className="text-rose-500">*</span>
                                 </label>
                                 <input
                                     type="date"
@@ -298,20 +298,20 @@ const ProfilePage = () => {
                                         required: "Date of birth is required"
                                     })}
                                     disabled={!isEditing}
-                                    className={`w-full px-4 py-3 rounded-lg border ${errors.dob
-                                        ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                        : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
-                                        } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200 ${!isEditing ? "bg-gray-50 cursor-not-allowed" : ""
+                                    className={`w-full px-4 py-3 rounded-lg border transition-all duration-200 bg-white dark:bg-slate-900 ${errors.dob
+                                        ? "border-rose-500 dark:border-rose-400 focus:border-rose-500 dark:focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900/50"
+                                        : "border-slate-300 dark:border-slate-600 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-indigo-200 dark:focus:ring-indigo-900/50"
+                                        } focus:outline-none focus:ring-2 focus:ring-opacity-20 ${!isEditing ? "bg-slate-100 dark:bg-slate-800 cursor-not-allowed" : ""
                                         }`}
                                 />
                                 {errors.dob && (
-                                    <p className="text-red-500 text-sm mt-1">{errors.dob.message}</p>
+                                    <p className="text-rose-500 dark:text-rose-400 text-sm mt-1">{errors.dob.message}</p>
                                 )}
                             </div>
 
                             <div>
-                                <label htmlFor="gender" className="block text-sm font-semibold text-[#101A17] mb-2">
-                                    Gender <span className="text-red-500">*</span>
+                                <label htmlFor="gender" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                                    Gender <span className="text-rose-500">*</span>
                                 </label>
                                 <select
                                     id="gender"
@@ -319,10 +319,10 @@ const ProfilePage = () => {
                                         required: "Please select your gender"
                                     })}
                                     disabled={!isEditing}
-                                    className={`w-full px-4 py-3 rounded-lg border ${errors.gender
-                                        ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                                        : "border-gray-300 focus:border-[#4ADE80] focus:ring-[#4ADE80]"
-                                        } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-200 ${!isEditing ? "bg-gray-50 cursor-not-allowed" : ""
+                                    className={`w-full px-4 py-3 rounded-lg border transition-all duration-200 bg-white dark:bg-slate-900 ${errors.gender
+                                        ? "border-rose-500 dark:border-rose-400 focus:border-rose-500 dark:focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900/50"
+                                        : "border-slate-300 dark:border-slate-600 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-indigo-200 dark:focus:ring-indigo-900/50"
+                                        } focus:outline-none focus:ring-2 focus:ring-opacity-20 ${!isEditing ? "bg-slate-100 dark:bg-slate-800 cursor-not-allowed" : ""
                                         }`}
                                 >
                                     <option value="">Select gender</option>
@@ -331,7 +331,7 @@ const ProfilePage = () => {
                                     <option value="other">Other</option>
                                 </select>
                                 {errors.gender && (
-                                    <p className="text-red-500 text-sm mt-1">{errors.gender.message}</p>
+                                    <p className="text-rose-500 dark:text-rose-400 text-sm mt-1">{errors.gender.message}</p>
                                 )}
                             </div>
                         </div>
@@ -342,7 +342,7 @@ const ProfilePage = () => {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="flex-1 bg-[#4ADE80] text-[#101A17] py-3 rounded-lg font-bold text-lg hover:bg-[#22D3EE] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 cursor-pointer"
+                                    className="flex-1 bg-indigo-600 dark:bg-indigo-500/40 text-white dark:text-indigo-100 py-3 rounded-lg font-bold text-lg hover:bg-indigo-700 dark:hover:bg-indigo-500/60 hover:shadow-lg hover:shadow-indigo-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg flex items-center justify-center gap-2 cursor-pointer"
                                 >
                                     {loading ? (
                                         <ButtonSpinner text="Saving..." />
@@ -360,7 +360,7 @@ const ProfilePage = () => {
                                     type="button"
                                     onClick={handleCancel}
                                     disabled={loading}
-                                    className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-bold text-lg hover:bg-gray-400 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:bg-gray-200 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 cursor-pointer"
+                                    className="flex-1 bg-slate-300 dark:bg-slate-700 text-slate-900 dark:text-slate-100 py-3 rounded-lg font-bold text-lg hover:bg-slate-400 dark:hover:bg-slate-600 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg flex items-center justify-center gap-2 cursor-pointer"
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
