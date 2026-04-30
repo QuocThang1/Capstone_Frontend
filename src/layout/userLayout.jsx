@@ -8,7 +8,7 @@ const UserLayout = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     return (
-        <div className="flex h-screen bg-white dark:bg-slate-950 overflow-hidden">
+        <div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden transition-colors duration-300">
             {/* Sidebar with flex-shrink-0 to prevent collapse */}
             <UserSidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
@@ -18,7 +18,7 @@ const UserLayout = () => {
                 <TopBar currentPageTitle="Workspaces" />
 
                 {/* Content Area - min-w-0 ensures cards shrink during sidebar transition */}
-                <main className="flex-1 min-w-0 overflow-auto p-6">
+                <main className="flex-1 min-w-0 overflow-auto p-6 bg-slate-50 dark:bg-slate-950">
                     <Outlet />
                 </main>
             </div>

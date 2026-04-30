@@ -46,29 +46,29 @@ const UserManagement = () => {
             title: "Total Users",
             value: statsData.total,
             icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z",
-            iconColor: "text-[#4ADE80]",
-            borderColor: "border-[#4ADE80]"
+            iconColor: "text-indigo-600 dark:text-indigo-400",
+            borderColor: "border-indigo-500"
         },
         {
             title: "Active Users",
             value: statsData.active,
             icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
-            iconColor: "text-[#22D3EE]",
-            borderColor: "border-[#22D3EE]"
+            iconColor: "text-emerald-600 dark:text-emerald-400",
+            borderColor: "border-emerald-500"
         },
         {
             title: "Inactive Users",
             value: statsData.inactive,
             icon: "M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636",
-            iconColor: "text-red-500",
-            borderColor: "border-red-500"
+            iconColor: "text-rose-600 dark:text-rose-400",
+            borderColor: "border-rose-500"
         },
         {
             title: "Administrators",
             value: statsData.admins,
             icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
-            iconColor: "text-yellow-500",
-            borderColor: "border-yellow-500"
+            iconColor: "text-amber-600 dark:text-amber-400",
+            borderColor: "border-amber-500"
         }
     ];
 const customSelectStyles = {
@@ -266,7 +266,7 @@ const customSelectStyles = {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
             {/* Header with Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {stats.map((stat, index) => (
@@ -282,7 +282,7 @@ const customSelectStyles = {
             </div>
 
             {/* Filters & Actions */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="glass-card rounded-2xl p-6 transition-all duration-200">
                 <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                     {/* Search */}
                     <div className="flex-1 w-full md:max-w-md">
@@ -400,57 +400,57 @@ const customSelectStyles = {
             </div>
 
             {/* Users Table */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="glass-card rounded-2xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-200">
+                        <thead className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
                             <tr>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">User</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Contact</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Created</th>
-                                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">User</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Contact</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Role</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Created</th>
+                                <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200">
+                        <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                             {users.length === 0 ? (
                                 <tr>
                                     <td colSpan="6" className="px-6 py-12 text-center">
                                         <div className="flex flex-col items-center gap-3">
-                                            <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-16 h-16 text-slate-300 dark:text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                             </svg>
-                                            <p className="text-gray-500 font-medium">No users found</p>
-                                            <p className="text-sm text-gray-400">Try adjusting your filters</p>
+                                            <p className="text-slate-600 dark:text-slate-400 font-medium">No users found</p>
+                                            <p className="text-sm text-slate-500 dark:text-slate-500">Try adjusting your filters</p>
                                         </div>
                                     </td>
                                 </tr>
                             ) : (
                                 users.map((user) => (
-                                    <tr key={user._id} className="hover:bg-gray-50 transition-colors duration-150">
+                                    <tr key={user._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all duration-200 border-b border-slate-100 dark:border-slate-800">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-gradient-to-br from-[#4ADE80] to-[#22D3EE] rounded-full flex items-center justify-center font-bold text-[#101A17]">
+                                                <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-indigo-500 dark:from-indigo-500 dark:to-indigo-400 rounded-lg flex items-center justify-center font-bold text-white text-sm">
                                                     {user.fullName?.charAt(0).toUpperCase() || "U"}
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-semibold text-gray-900">{user.fullName}</p>
-                                                    <p className="text-xs text-gray-500">@{user.username}</p>
+                                                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-50">{user.fullName}</p>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400">@{user.username}</p>
                                                 </div>
                                             </div>
                                         </td>
 
                                         <td className="px-6 py-4">
-                                            <p className="text-sm text-gray-900">{user.email}</p>
-                                            <p className="text-xs text-gray-500">{user.phone || "N/A"}</p>
+                                            <p className="text-sm text-slate-900 dark:text-slate-100">{user.email}</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{user.phone || "N/A"}</p>
                                         </td>
 
                                         <td className="px-6 py-4">
                                             <span
-                                                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${user.role === "admin"
-                                                    ? "bg-yellow-100 text-yellow-800"
-                                                    : "bg-blue-100 text-blue-800"
+                                                className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 ${user.role === "admin"
+                                                    ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300"
+                                                    : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
                                                     }`}
                                             >
                                                 {user.role === "admin" ? "👑 Admin" : "👤 User"}
@@ -460,25 +460,25 @@ const customSelectStyles = {
                                         <td className="px-6 py-4">
                                             <button
                                                 onClick={() => handleToggleStatus(user._id)}
-                                                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${user.active
-                                                    ? "bg-green-100 text-green-800 hover:bg-green-200"
-                                                    : "bg-red-100 text-red-800 hover:bg-red-200"
+                                                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${user.active
+                                                    ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/40"
+                                                    : "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 hover:bg-rose-200 dark:hover:bg-rose-900/40"
                                                     }`}
                                             >
-                                                <span className={`w-2 h-2 rounded-full ${user.active ? "bg-green-500" : "bg-red-500"}`}></span>
+                                                <span className={`w-2 h-2 rounded-full ${user.active ? "bg-emerald-500" : "bg-rose-500"}`}></span>
                                                 {user.active ? "Active" : "Inactive"}
                                             </button>
                                         </td>
 
                                         <td className="px-6 py-4">
-                                            <p className="text-sm text-gray-900">
+                                            <p className="text-sm font-medium text-slate-900 dark:text-slate-50">
                                                 {new Date(user.createdAt).toLocaleDateString("en-US", {
                                                     year: "numeric",
                                                     month: "short",
                                                     day: "numeric",
                                                 })}
                                             </p>
-                                            <p className="text-xs text-gray-500">
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">
                                                 {new Date(user.createdAt).toLocaleTimeString("en-US", {
                                                     hour: "2-digit",
                                                     minute: "2-digit",
@@ -490,7 +490,7 @@ const customSelectStyles = {
                                             <div className="flex items-center justify-center gap-2">
                                                 <button
                                                     onClick={() => handleViewUser(user)}
-                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200 cursor-pointer"
+                                                    className="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all duration-200 cursor-pointer"
                                                     title="View Details"
                                                 >
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -501,7 +501,7 @@ const customSelectStyles = {
 
                                                 <button
                                                     onClick={() => handleEditUser(user)}
-                                                    className="p-2 text-[#4ADE80] hover:bg-green-50 rounded-lg transition-colors duration-200 cursor-pointer"
+                                                    className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 cursor-pointer"
                                                     title="Edit User"
                                                 >
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -511,7 +511,7 @@ const customSelectStyles = {
 
                                                 <button
                                                     onClick={() => handleDeleteUser(user)}
-                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 cursor-pointer"
+                                                    className="p-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all duration-200 cursor-pointer"
                                                     title="Delete User"
                                                 >
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

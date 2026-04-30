@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation, useNavigate, Outlet } from 'react-router-dom';
-import { getProjectByIdApi } from '../../../utils/Api/projectApi';
-import { getStarredProjectsApi, toggleStarProjectApi } from '../../../utils/Api/accountApi';
-import Spinner from '../../../components/spinner';
+import { motion } from 'framer-motion';
+import { getProjectByIdApi } from '../../utils/Api/projectApi';
+import { getStarredProjectsApi, toggleStarProjectApi } from '../../utils/Api/accountApi';
+import Spinner from '../../components/spinner';
 import { toast } from 'react-toastify';
 import { Book, LayoutDashboard, ListChecks, Star, MoreHorizontal, UserPlus, Columns, Tag } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import AddMemberModal from './addMemberModal';
-import EditBoardColumnsModal from './editboardColumnModal';
-import EditIssueTypesModal from './editIssueTypesModal';
+import { cn } from '../../lib/utils';
+
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } };
 
 const ProjectPage = () => {
     const { projectId } = useParams();

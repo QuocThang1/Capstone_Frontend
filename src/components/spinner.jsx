@@ -17,7 +17,7 @@ const Spinner = ({
         <div className="flex flex-col items-center justify-center gap-4">
             {/* Spinner SVG */}
             <svg
-                className={`animate-spin text-indigo-600 ${spinnerSize}`}
+                className={`animate-spin text-indigo-600 dark:text-indigo-400 transition-colors ${spinnerSize}`}
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -39,7 +39,7 @@ const Spinner = ({
 
             {/* Loading Text */}
             {text && (
-                <p className="text-gray-600 font-medium text-center animate-pulse">
+                <p className="text-slate-600 dark:text-slate-400 font-medium text-center animate-pulse transition-colors">
                     {text}
                 </p>
             )}

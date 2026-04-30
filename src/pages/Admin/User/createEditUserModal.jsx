@@ -112,18 +112,18 @@ const CreateEditUserModal = ({ mode, user, onSubmit, onClose, loading }) => {
     ];
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-gray-500">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm">
+            <div className="glass-card rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-700 transition-all duration-300">
                 {/* Modal Header */}
-                <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-[#101A17]">
+                <div className="sticky top-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between transition-colors duration-300">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50">
                         {mode === "create" ? "Create New User" : "Edit User"}
                     </h3>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 cursor-pointer"
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all duration-200 cursor-pointer"
                     >
-                        <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -134,8 +134,8 @@ const CreateEditUserModal = ({ mode, user, onSubmit, onClose, loading }) => {
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         {/* Username */}
                         <div>
-                            <label htmlFor="username" className="block text-sm font-semibold text-[#101A17] mb-2">
-                                Username <span className="text-red-500">*</span>
+                            <label htmlFor="username" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                                Username <span className="text-rose-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -167,14 +167,14 @@ const CreateEditUserModal = ({ mode, user, onSubmit, onClose, loading }) => {
                                 placeholder="Enter username"
                                 
                             />
-                            {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>}
+                            {errors.username && <p className="text-rose-500 dark:text-rose-400 text-sm mt-1">{errors.username.message}</p>}
                         </div>
 
                         {/* Password */}
                         <div>
-                            <label htmlFor="password" className="block text-sm font-semibold text-[#101A17] mb-2">
-                                Password {mode === "create" && <span className="text-red-500">*</span>}
-                                {mode === "edit" && <span className="text-gray-500 text-xs">(Leave blank to keep current)</span>}
+                            <label htmlFor="password" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                                Password {mode === "create" && <span className="text-rose-500">*</span>}
+                                {mode === "edit" && <span className="text-slate-500 dark:text-slate-400 text-xs">(Leave blank to keep current)</span>}
                             </label>
                             <input
                                 type="password"
@@ -198,14 +198,14 @@ const CreateEditUserModal = ({ mode, user, onSubmit, onClose, loading }) => {
                                 //     } focus:border-[#8B5CF6] focus:outline-none border-[0.5px] focus:ring-2 focus:ring-[#8B5CF6] focus:ring-opacity-20`}
                                 placeholder="Enter password"
                             />
-                            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
+                            {errors.password && <p className="text-rose-500 dark:text-rose-400 text-sm mt-1">{errors.password.message}</p>}
                         </div>
 
                         {/* Full Name & Email */}
                         <div className="grid md:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="fullName" className="block text-sm font-semibold text-[#101A17] mb-2">
-                                    Full Name <span className="text-red-500">*</span>
+                                <label htmlFor="fullName" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                                    Full Name <span className="text-rose-500">*</span>
                                 </label>
                                 <input
                                     type="text"
@@ -229,12 +229,12 @@ const CreateEditUserModal = ({ mode, user, onSubmit, onClose, loading }) => {
                                     //     } focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:ring-opacity-20`}
                                     placeholder="Enter full name"
                                 />
-                                {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>}
+                                {errors.fullName && <p className="text-rose-500 dark:text-rose-400 text-sm mt-1">{errors.fullName.message}</p>}
                             </div>
 
                             <div>
-                                <label htmlFor="email" className="block text-sm font-semibold text-[#101A17] mb-2">
-                                    Email <span className="text-red-500">*</span>
+                                <label htmlFor="email" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                                    Email <span className="text-rose-500">*</span>
                                 </label>
                                 <input
                                     type="email"
@@ -261,15 +261,15 @@ const CreateEditUserModal = ({ mode, user, onSubmit, onClose, loading }) => {
                                     //     } focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:ring-opacity-20`}
                                     placeholder="your@email.com"
                                 />
-                                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+                                {errors.email && <p className="text-rose-500 dark:text-rose-400 text-sm mt-1">{errors.email.message}</p>}
                             </div>
                         </div>
 
                         {/* Phone & DOB */}
                         <div className="grid md:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="phone" className="block text-sm font-semibold text-[#101A17] mb-2">
-                                    Phone <span className="text-red-500">*</span>
+                                <label htmlFor="phone" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                                    Phone <span className="text-rose-500">*</span>
                                 </label>
                                 <input
                                     type="tel"
@@ -291,12 +291,12 @@ const CreateEditUserModal = ({ mode, user, onSubmit, onClose, loading }) => {
                                     //     } focus:border-[#8B5CF6] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:ring-opacity-20`}
                                     placeholder="0987654321"
                                 />
-                                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
+                                {errors.phone && <p className="text-rose-500 dark:text-rose-400 text-sm mt-1">{errors.phone.message}</p>}
                             </div>
 
                             <div>
-                                <label htmlFor="dob" className="block text-sm font-semibold text-[#101A17] mb-2">
-                                    Date of Birth <span className="text-red-500">*</span>
+                                <label htmlFor="dob" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                                    Date of Birth <span className="text-rose-500">*</span>
                                 </label>
                                 <Controller
                                     name="dob"
@@ -350,7 +350,7 @@ const CreateEditUserModal = ({ mode, user, onSubmit, onClose, loading }) => {
                                         </div>
                                     )}
                                 />
-                                {errors.dob && <p className="text-red-500 text-sm mt-1">{errors.dob.message}</p>}
+                                {errors.dob && <p className="text-rose-500 dark:text-rose-400 text-sm mt-1">{errors.dob.message}</p>}
                             </div>
                         </div>
 
@@ -449,7 +449,7 @@ const CreateEditUserModal = ({ mode, user, onSubmit, onClose, loading }) => {
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-400 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-lg cursor-pointer"
+                                className="flex-1 bg-slate-300 dark:bg-slate-700 text-slate-900 dark:text-slate-100 py-3 rounded-lg font-bold hover:bg-slate-400 dark:hover:bg-slate-600 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-lg cursor-pointer"
                             >
                                 Cancel
                             </button>

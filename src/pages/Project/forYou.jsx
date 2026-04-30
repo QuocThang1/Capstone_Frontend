@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
 import {
   FolderKanban, Zap, AlertCircle, Clock, Activity,
-  Sparkles, ArrowRight, BarChart3, Globe, TrendingUp
+  Sparkles, ArrowRight, BarChart3, Globe, TrendingUp, ChevronDown
 } from "lucide-react";
 import { Link } from "wouter";
 import { AuthContext } from "@/context/auth.context";
@@ -299,6 +299,149 @@ const ProjectAdminView = () => {
   );
 };
 
+const RecentProjectsSection = () => {
+  const [recentProjects, setRecentProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedProject, setExpandedProject] = useState(null);
+
+  const projectColors = [
+    "from-indigo-500 to-indigo-600",
+    "from-cyan-500 to-blue-600",
+    "from-emerald-500 to-teal-600",
+    "from-rose-500 to-pink-600",
+    "from-amber-500 to-orange-600",
+    "from-purple-500 to-violet-600",
+  ];
+
+  useEffect(() => {
+    const fetchRecentProjects = async () => {
+      try {
+        const res = await getAllProjectsApi();
+        if (res && res.EC === 0) {
+          const data = Array.isArray(res.data) ? res.data : [];
+          setRecentProjects(data.slice(0, 6));
+        }
+      } catch (error) {
+        console.error("Error fetching recent projects:", error);
+        setRecentProjects([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecentProjects();
+  }, []);
+
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
+      >
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-32 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse" />
+          ))}
+        </div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
+    >
+      <div className="flex items-center justify-between                                pb-6 border-b border-slate-200 dark:border-slate-800">
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Recent Projects</h2>
+        <Link href="/projects" className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
+          View all spaces
+        </Link>
+      </div>
+
+      {recentProjects.length === 0 ? (
+        <div className="p-8 text-center">
+          <p className="text-slate-500 dark:text-slate-400">No projects yet. Create your first project to get started!</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {recentProjects.map((project, index) => {
+            const colorClass = projectColors[index % projectColors.length];
+            const isExpanded = expandedProject === project.id;
+
+            return (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.08 }}
+              >
+                <div className={`bg-gradient-to-r ${colorClass} rounded-lg p-0.5`}>
+                  <div className="bg-slate-800 dark:bg-slate-900 rounded-md p-5">
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className={`bg-gradient-to-br ${colorClass} rounded-lg p-2 w-16 h-16 flex items-center justify-center flex-shrink-0 text-white`}>
+                        <FolderKanban className="w-8 h-8" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base font-bold text-white">{project.name}</h3>
+                        <p className="text-sm text-slate-400 mt-1">
+                          {project.description || "Team-managed software"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Quick Links */}
+                    <div className="border-t border-slate-700 pt-4 mt-4">
+                      <h4 className="text-sm font-semibold text-slate-300 mb-3">Quick links</h4>
+                      <div className="space-y-2 mb-4">
+                        <Link href={`/projects/${project.id}?view=backlog`} className="flex items-center justify-between text-sm text-slate-400 hover:text-indigo-400 transition-colors group">
+                          <span className="underline group-hover:no-underline">My open work items</span>
+                          <span className="text-xs font-medium bg-slate-700 px-2 py-1 rounded text-slate-300">0</span>
+                        </Link>
+                        <Link href={`/projects/${project.id}?view=done`} className="text-sm text-slate-400 hover:text-indigo-400 transition-colors underline hover:no-underline">
+                          Done work items
+                        </Link>
+                      </div>
+
+                      {/* Boards Dropdown */}
+                      <button
+                        onClick={() => setExpandedProject(isExpanded ? null : project.id)}
+                        className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-300 transition-colors group"
+                      >
+                        <span>1 board</span>
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform ${
+                            isExpanded ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="mt-3 pt-3 border-t border-slate-700 space-y-2"
+                        >
+                          <Link href={`/projects/${project.id}/board`} className="block text-sm text-slate-400 hover:text-indigo-400 transition-colors underline hover:no-underline pl-0">
+                            {project.name} Board
+                          </Link>
+                        </motion.div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
 const ForYou = () => {
   const { auth } = useContext(AuthContext);
   const user = auth?.user || {};
@@ -325,6 +468,9 @@ const ForYou = () => {
       </motion.div>
 
       {isSysAdmin ? <SystemAdminView /> : <ProjectAdminView />}
+
+      {/* Recent Projects Section */}
+      {!isSysAdmin && <RecentProjectsSection />}
 
       {/* Recent Activity Section */}
       <motion.div

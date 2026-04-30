@@ -10,10 +10,10 @@ const ComingSoonPage = ({ featureName, icon: Icon, description }) => {
     "Chúng tôi đang hoàn thiện tính năng này để mang lại trải nghiệm phân tích quy trình tốt nhất cho bạn. Hãy chờ đợi thông báo chính thức từ TASKA.";
 
   return (
-    <div className="w-full min-h-full bg-white dark:bg-slate-950 flex flex-col items-center justify-center px-4 relative overflow-hidden">
+    <div className="w-full min-h-full bg-white dark:bg-slate-950 transition-colors duration-300 flex flex-col items-center justify-center px-4 relative overflow-hidden">
       {/* Animated background shimmer effect */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -inset-96 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 animate-pulse" />
+        <div className="absolute -inset-96 bg-gradient-to-br from-indigo-500/5 via-transparent to-indigo-500/5 dark:from-indigo-400/10 dark:to-indigo-400/10 animate-pulse transition-colors duration-300" />
       </div>
 
       {/* Main Content Container */}
@@ -36,11 +36,11 @@ const ComingSoonPage = ({ featureName, icon: Icon, description }) => {
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-indigo-600/20 blur-xl"
+              className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-600/20 dark:from-indigo-400/30 via-indigo-600/10 dark:via-indigo-400/15 to-indigo-600/20 dark:to-indigo-400/30 blur-xl transition-colors duration-300"
             />
 
             {/* Main circle */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 dark:from-indigo-500/20 dark:to-indigo-400/10 border border-indigo-200 dark:border-indigo-500/30 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full glass-card border border-indigo-200 dark:border-indigo-500/30 flex items-center justify-center shadow-lg shadow-indigo-500/10">
               {/* Icon */}
               <motion.div
                 animate={{ y: [0, -8, 0] }}
@@ -59,7 +59,7 @@ const ComingSoonPage = ({ featureName, icon: Icon, description }) => {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="flex justify-center"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-100 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-indigo-200 dark:border-indigo-500/30 shadow-md shadow-indigo-500/10">
             <div className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-pulse" />
             <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
               Coming Soon
@@ -74,13 +74,13 @@ const ComingSoonPage = ({ featureName, icon: Icon, description }) => {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="space-y-4"
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white">
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-slate-50">
             {featureName}
             <span className="text-indigo-600 dark:text-indigo-400"> đang được hoàn thiện</span>
           </h1>
 
           {/* Description */}
-          <p className="text-slate-600 dark:text-slate-300 text-lg leading-relaxed max-w-md mx-auto">
+          <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed max-w-md mx-auto transition-colors duration-300">
             {description || defaultDescription}
           </p>
         </motion.div>
@@ -93,9 +93,9 @@ const ComingSoonPage = ({ featureName, icon: Icon, description }) => {
           className="flex flex-col sm:flex-row gap-4 justify-center pt-4"
         >
           {/* Primary Button - Notify Me */}
-          <button className="group relative px-8 py-3 bg-indigo-600 dark:bg-indigo-500 text-white font-semibold rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-indigo-600/30 dark:hover:shadow-indigo-500/30 overflow-hidden">
+          <button className="group relative px-8 py-3 bg-indigo-600 dark:bg-indigo-500/40 text-white dark:text-indigo-100 font-semibold rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-indigo-600/30 dark:hover:shadow-indigo-400/20 hover:bg-indigo-700 dark:hover:bg-indigo-500/60 overflow-hidden">
             {/* Shimmer effect on button */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse" />
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300 bg-gradient-to-r from-transparent via-white dark:via-slate-200 to-transparent animate-pulse" />
 
             <div className="relative flex items-center gap-2 justify-center">
               <Bell className="w-5 h-5" />
@@ -117,7 +117,7 @@ const ComingSoonPage = ({ featureName, icon: Icon, description }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="text-sm text-slate-500 dark:text-slate-400 pt-4"
+          className="text-sm text-slate-500 dark:text-slate-400 pt-4 transition-colors duration-300"
         >
           Cảm ơn vì sự kiên nhẫn. Chúng tôi sẽ sớm công bố những tính năng mới!
         </motion.p>
