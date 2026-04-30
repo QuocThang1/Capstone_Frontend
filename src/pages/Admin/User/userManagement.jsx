@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Select from "react-select";
 import { toast } from "react-toastify";
 import {
     getAllUsersApi,
@@ -70,7 +71,32 @@ const UserManagement = () => {
             borderColor: "border-amber-500"
         }
     ];
-
+const customSelectStyles = {
+    control: (base, state) => ({
+        ...base,
+        borderRadius: "12px",
+        padding: "2px",
+        borderColor: state.isFocused ? "#8B5CF6" : "#d1d5db",
+        boxShadow: state.isFocused
+            ? "0 0 0 2px rgba(139,92,246,0.3)"
+            : "0 2px 6px rgba(0,0,0,0.1)",
+        "&:hover": {
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+        },
+    }),
+    menu: (base) => ({
+        ...base,
+        borderRadius: "12px",
+        overflow: "hidden",
+        boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+    }),
+    option: (base, state) => ({
+        ...base,
+        backgroundColor: state.isFocused ? "#c0a8f9ff" : "white",
+        color: state.isFocused ? "white" : "black",
+        cursor: "pointer",
+    }),
+};
     useEffect(() => {
         fetchStatsData();
     }, []);
@@ -266,15 +292,33 @@ const UserManagement = () => {
                                 placeholder="Search by username, name, or email..."
                                 value={filters.search}
                                 onChange={(e) => handleFilterChange("search", e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:border-indigo-500 dark:focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 dark:focus:ring-indigo-400/10 transition-all duration-200"
+                                className="
+                                    w-full pl-10 pr-4 py-2
+                                    border border-gray-300
+                                    rounded-xl
+                                    bg-white
+                                    shadow-sm
+                                    transition-all duration-200
+                                    hover:shadow-md
+                                    focus:shadow-lg
+                                    focus:border-purple-500
+                                    focus:ring-2 focus:ring-purple-400/30
+                                    outline-none
+                                "
                             />
+
                             <svg
-                                className="absolute left-3 top-2.5 w-5 h-5 text-slate-400 dark:text-slate-500"
+                                className="absolute left-3 top-2.5 w-5 h-5 text-gray-400 transition-colors duration-200"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
                             >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
                             </svg>
                         </div>
                     </div>
@@ -282,43 +326,69 @@ const UserManagement = () => {
                     {/* Filters */}
                     <div className="flex gap-3 flex-wrap">
                         {/* Role Filter */}
-                        <select
-                            value={filters.role}
-                            onChange={(e) => handleFilterChange("role", e.target.value)}
-                            className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:border-indigo-500 dark:focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 dark:focus:ring-indigo-400/10 cursor-pointer transition-all duration-200"
-                        >
-                            <option value="">All Roles</option>
-                            <option value="admin">Admin</option>
-                            <option value="user">User</option>
-                        </select>
-
-                        {/* Gender Filter */}
-                        <select
-                            value={filters.gender}
-                            onChange={(e) => handleFilterChange("gender", e.target.value)}
-                            className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:border-indigo-500 dark:focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 dark:focus:ring-indigo-400/10 cursor-pointer transition-all duration-200"
-                        >
-                            <option value="">All Genders</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
-                        </select>
+                        <Select
+                            styles={customSelectStyles}
+                            placeholder="All Roles"
+                            value={
+                                filters.role
+                                    ? { value: filters.role, label: filters.role }
+                                    : null
+                            }
+                            onChange={(selected) =>
+                                handleFilterChange("role", selected?.value || "")
+                            }
+                            options={[
+                                { value: "", label: "All Roles" },
+                                { value: "admin", label: "Admin" },
+                                { value: "user", label: "User" },
+                            ]}
+                        />
 
                         {/* Status Filter */}
-                        <select
-                            value={filters.active}
-                            onChange={(e) => handleFilterChange("active", e.target.value)}
-                            className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:border-indigo-500 dark:focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 dark:focus:ring-indigo-400/10 cursor-pointer transition-all duration-200"
-                        >
-                            <option value="">All Status</option>
-                            <option value="true">Active</option>
-                            <option value="false">Inactive</option>
-                        </select>
+                        <Select
+                            styles={customSelectStyles}
+                            placeholder="All Genders"
+                            value={
+                                filters.gender
+                                    ? { value: filters.gender, label: filters.gender }
+                                    : null
+                            }
+                            onChange={(selected) =>
+                                handleFilterChange("gender", selected?.value || "")
+                            }
+                            options={[
+                                { value: "", label: "All Genders" },
+                                { value: "male", label: "Male" },
+                                { value: "female", label: "Female" },
+                                { value: "other", label: "Other" },
+                            ]}
+                        />
 
+                        {/* Status Filter */}
+                        <Select
+                            styles={customSelectStyles}
+                            placeholder="All Status"
+                            value={
+                                filters.active !== ""
+                                    ? {
+                                        value: filters.active,
+                                        label: filters.active === "true" ? "Active" : "Inactive",
+                                    }
+                                    : null
+                            }
+                            onChange={(selected) =>
+                                handleFilterChange("active", selected?.value || "")
+                            }
+                            options={[
+                                { value: "", label: "All Status" },
+                                { value: "true", label: "Active" },
+                                { value: "false", label: "Inactive" },
+                            ]}
+                        />
                         {/* Add User Button */}
                         <button
                             onClick={handleCreateUser}
-                            className="flex items-center gap-2 bg-indigo-600 dark:bg-indigo-500/40 text-white dark:text-indigo-100 px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/20 dark:hover:shadow-indigo-500/10 transition-all duration-200 cursor-pointer"
+                            className="flex items-center gap-2 bg-[#8B5CF6] text-[#F8FAFC] px-6 py-2 rounded-lg font-semibold hover:bg-[#22D3EE] hover:scale-105 transition-all duration-300 shadow-lg cursor-pointer"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
