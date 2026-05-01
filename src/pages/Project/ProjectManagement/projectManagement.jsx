@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useContext, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { ProjectContext } from '../../../context/project.context';
 import Spinner from '../../../components/spinner';
 import CreateProjectModal from './createProjectModal';
@@ -6,6 +7,7 @@ import EditProjectModal from './editProjectModal';
 import DeleteProjectModal from './deleteProjectModal';
 import { useNavigate } from 'react-router-dom';
 import { Search, MoreHorizontal, Edit, Trash2, Star } from 'lucide-react';
+
 import { getStarredProjectsApi, toggleStarProjectApi } from '../../../utils/Api/accountApi';
 import { toast } from 'react-toastify';
 import { cn } from '../../../lib/utils';
@@ -171,14 +173,14 @@ const ProjectManagement = () => {
 
 
     return (
-        <div className="p-4 sm:p-6 lg:p-8 bg-slate-50 dark:bg-slate-900 min-h-full text-slate-900 dark:text-slate-50">
+        <div className="p-4 sm:p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 min-h-full text-slate-900 dark:text-slate-50 transition-colors duration-300">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Projects</h1>
                     <button
                         onClick={() => setCreateModalOpen(true)}
-                        className="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer transition-colors"
+                        className="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 dark:bg-indigo-500/40 dark:text-indigo-100 rounded-xl shadow-sm dark:shadow-indigo-500/10 hover:bg-indigo-700 dark:hover:bg-indigo-500/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 cursor-pointer transition-all duration-200"
                     >
                         Create project
                     </button>
@@ -188,76 +190,76 @@ const ProjectManagement = () => {
                 <div className="mb-6">
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="w-5 h-5 text-slate-400" />
+                            <Search className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                         </div>
                         <input
                             type="text"
                             placeholder="Search projects..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full max-w-sm pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                            className="w-full max-w-sm pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
                         />
                     </div>
                 </div>
 
                 {/* Projects Table */}
-                <div className="bg-white dark:bg-slate-800 shadow-md rounded-lg">
+                <div className="glass-card rounded-2xl overflow-hidden">
                     {loading ? (
                         <div className="flex justify-center items-center h-64"><Spinner /></div>
                     ) : (
-                        <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                            <thead className="bg-slate-50 dark:bg-slate-700/50">
+                        <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                            <thead className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 w-12"><span className="sr-only">Star</span></th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Name</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Key</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Lead</th>
-                                    <th scope="col" className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
+                                    <th scope="col" className="px-6 py-4 w-12"><span className="sr-only">Star</span></th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Name</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Key</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Lead</th>
+                                    <th scope="col" className="relative px-6 py-4"><span className="sr-only">Actions</span></th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+                            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                                 {sortedProjects.length > 0 ? sortedProjects.map((project) => {
                                     const isStarred = starredProjects.includes(project._id);
                                     return (
-                                        <tr key={project._id} onClick={() => navigate(`/projects/${project._id}`)} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer">
+                                        <tr key={project._id} onClick={() => navigate(`/projects/${project._id}`)} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all duration-200 cursor-pointer">
                                             <td className="px-6 py-4">
                                                 <button
                                                     onClick={(e) => handleToggleStar(e, project._id)}
                                                     disabled={starLoading[project._id]}
-                                                    className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 disabled:cursor-wait cursor-pointer transition-colors"
+                                                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700/50 disabled:cursor-wait cursor-pointer transition-all duration-200"
                                                     aria-label={isStarred ? "Unstar project" : "Star project"}
                                                 >
-                                                    <Star className={cn("w-5 h-5 transition-colors", isStarred ? "text-yellow-400 fill-current" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200")} />
+                                                    <Star className={cn("w-5 h-5 transition-all duration-200", isStarred ? "text-amber-400 fill-current" : "text-slate-400 hover:text-amber-400 dark:hover:text-amber-400")} />
                                                 </button>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
-                                                    <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/50 rounded-md">
-                                                        <span className="text-indigo-800 dark:text-indigo-300 font-bold">{project.name.charAt(0).toUpperCase()}</span>
+                                                    <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 rounded-lg transition-all duration-200">
+                                                        <span className="text-indigo-700 dark:text-indigo-300 font-bold text-sm">{project.name.charAt(0).toUpperCase()}</span>
                                                     </div>
                                                     <div className="ml-4">
-                                                        <div className="text-sm font-medium text-slate-900 dark:text-white cursor-pointer hover:underline" onClick={(e) => { e.stopPropagation(); navigate(`/projects/${project._id}`) }}>
+                                                        <div className="text-sm font-medium text-slate-900 dark:text-slate-50 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200" onClick={(e) => { e.stopPropagation(); navigate(`/projects/${project._id}`) }}>
                                                             {project.name}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{project.key}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-white">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">{project.key}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">
                                                 {project.members.find(m => m.role === 'leader')?.accountId?.fullName || project.members[0]?.accountId?.fullName || 'N/A'}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative">
-                                                <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(activeDropdown === project._id ? null : project._id); }} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
+                                                <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(activeDropdown === project._id ? null : project._id); }} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-200">
                                                     <MoreHorizontal className="w-5 h-5" />
                                                 </button>
                                                 {activeDropdown === project._id && (
-                                                    <div ref={dropdownRef} className="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white dark:bg-slate-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                                                    <div ref={dropdownRef} className="origin-top-right absolute right-0 mt-2 w-40 rounded-lg shadow-lg glass-card ring-1 ring-black dark:ring-white ring-opacity-5 dark:ring-opacity-10 focus:outline-none z-10">
                                                         <div className="py-1">
-                                                            <button onClick={(e) => { e.stopPropagation(); handleOpenEditModal(project); }} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors">
+                                                            <button onClick={(e) => { e.stopPropagation(); handleOpenEditModal(project); }} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 cursor-pointer transition-all duration-200">
                                                                 <Edit className="w-4 h-4" />
                                                                 <span>Edit</span>
                                                             </button>
-                                                            <button onClick={(e) => { e.stopPropagation(); handleOpenDeleteModal(project); }} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer transition-colors">
+                                                            <button onClick={(e) => { e.stopPropagation(); handleOpenDeleteModal(project); }} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 cursor-pointer transition-all duration-200">
                                                                 <Trash2 className="w-4 h-4" />
                                                                 <span>Delete</span>
                                                             </button>

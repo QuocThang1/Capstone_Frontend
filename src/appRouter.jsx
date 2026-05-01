@@ -3,26 +3,25 @@ import ProtectedRoute from "./route/ProtectedRoute";
 import GeneralLayout from "./layout/generalLayout";
 import AdminLayout from "./layout/adminLayout";
 import UserLayout from "./layout/userLayout";
-import ProjectDetailsLayout from "./components/ProjectDetailsLayout";
 import HomePage from "./pages/home";
 import ProfilePage from "./pages/profile";
 import UserManagement from "./pages/Admin/User/userManagement";
 import ForYou from "./pages/Project/forYou";
 import ProjectManagement from "./pages/Project/ProjectManagement/projectManagement";
-import ProjectPage from "./pages/Project/projectPage";
-import Board from "./pages/Project/Monitor/board";
-import Backlog from "./pages/Project/Management/Backlog/backlog";
+import ProjectDetailsLayout from "./layout/projectDetailsLayout";
+import Board from "./pages/Project/ProjectDetail/Board/board";
+import Backlog from "./pages/Project/ProjectDetail/Backlog/backlog";
 
 // Coming Soon Pages
-import OverviewDashboard from "./pages/Monitor/OverviewDashboard";
-import RealTimeEventLog from "./pages/Monitor/RealTimeEventLog";
-import ProcessFlow from "./pages/Intelligence/ProcessFlow";
-import BottleneckDetector from "./pages/Intelligence/BottleneckDetector";
-import TeamHealth from "./pages/Management/TeamHealth";
-import RBACPermissions from "./pages/Management/RBACPermissions";
-import AuditLogs from "./pages/Management/AuditLogs";
-import ImportExportData from "./pages/Operations/ImportExportData";
-import AutomationRules from "./pages/Operations/AutomationRules";
+import OverviewDashboard from "./pages/Project/Monitor/OverviewDashboard";
+import RealTimeEventLog from "./pages/Project/Monitor/RealTimeEventLog";
+import ProcessFlow from "./pages/Project/Intelligence/ProcessFlow";
+import BottleneckDetector from "./pages/Project/Intelligence/BottleneckDetector";
+import TeamHealth from "./pages/Project/ProjectDetail/TeamHealth";
+import RBACPermissions from "./pages/Project/ProjectDetail/RBACPermissions";
+import AuditLogs from "./pages/Project/ProjectDetail/AuditLogs";
+import ImportExportData from "./pages/Project/Operations/ImportExportData";
+import AutomationRules from "./pages/Project/Operations/AutomationRules";
 
 
 const router = createBrowserRouter([
@@ -87,7 +86,10 @@ const router = createBrowserRouter([
             <ProjectDetailsLayout />
           </ProtectedRoute>,
         children: [
-          // Board and Backlog
+          {
+            index: true,
+            element: <Navigate to="overview" replace />
+          },
           {
             path: "board",
             element:
@@ -169,86 +171,7 @@ const router = createBrowserRouter([
                 <AutomationRules />
               </ProtectedRoute>
           },
-          // Default redirect to overview
-          {
-            index: true,
-            element: <Navigate to="overview" replace />
-          }
         ]
-      }
-    ],
-  },
-  // Legacy routes (keep for backward compatibility)
-  {
-    path: "/",
-    element: <UserLayout />,
-    children: [
-      // Monitor Section
-      {
-        path: "overview",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <OverviewDashboard />
-          </ProtectedRoute>
-      },
-      {
-        path: "events",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <RealTimeEventLog />
-          </ProtectedRoute>
-      },
-      // Intelligence Section
-      {
-        path: "process",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <ProcessFlow />
-          </ProtectedRoute>
-      },
-      {
-        path: "bottlenecks",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <BottleneckDetector />
-          </ProtectedRoute>
-      },
-      // Management Section
-      {
-        path: "team",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <TeamHealth />
-          </ProtectedRoute>
-      },
-      {
-        path: "rbac",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <RBACPermissions />
-          </ProtectedRoute>
-      },
-      {
-        path: "audit",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <AuditLogs />
-          </ProtectedRoute>
-      },
-      // Operations Section
-      {
-        path: "data",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <ImportExportData />
-          </ProtectedRoute>
-      },
-      {
-        path: "automation",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <AutomationRules />
-          </ProtectedRoute>
       }
     ],
   },

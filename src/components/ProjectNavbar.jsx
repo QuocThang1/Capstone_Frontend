@@ -1,27 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import useDarkMode from '../hooks/useDarkMode';
-import MoreNavDropdown from '../components/MoreNavModal';
 import {
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  MoreHorizontal,
-  Share2,
-  LayoutDashboard,
-  CircuitBoard,
-  Scroll,
-  GitBranch
+  ChevronLeft, ChevronRight, Plus, MoreHorizontal, Share2, LayoutDashboard,
+  CircuitBoard, Scroll, GitBranch, UserPlus, Columns, Tag, Star
 } from 'lucide-react';
+import { cn } from '../lib/utils';
+import MoreNavDropdown from './MoreNavModal';
 
-const ProjectNavbar = ({ projectName, projectId }) => {
-  const { isDark } = useDarkMode();
+const ProjectNavbar = ({
+  projectName,
+  projectId,
+  onAddMember,
+  onEditBoard,
+  onEditIssueTypes,
+  isStarred,
+  onToggleStar,
+  starLoading
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const scrollContainerRef = useRef(null);
+  const menuRef = useRef(null);
+
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMoreNavOpen, setIsMoreNavOpen] = useState(false);
+  const [isProjectMenuOpen, setProjectMenuOpen] = useState(false);
 
   const basePath = `/projects/${projectId}`;
 
@@ -31,6 +35,22 @@ const ProjectNavbar = ({ projectName, projectId }) => {
     { label: 'Backlog', icon: Scroll, path: `${basePath}/backlog` },
     { label: 'Process Flow', icon: GitBranch, path: `${basePath}/process-flow` },
   ];
+
+  const projectMenuItems = [
+    { label: 'Add members', icon: UserPlus, action: onAddMember },
+    { label: 'Edit board columns', icon: Columns, action: onEditBoard },
+    { label: 'Edit issue types', icon: Tag, action: onEditIssueTypes },
+  ];
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setProjectMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const checkScroll = () => {
     const container = scrollContainerRef.current;
@@ -58,93 +78,80 @@ const ProjectNavbar = ({ projectName, projectId }) => {
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/80 backdrop-blur-xl transition-all duration-300">
-      
-      {/* Top Section: Project Identity & Actions */}
       <div className="flex items-center justify-between px-4 py-3 lg:px-6 border-b border-slate-100 dark:border-slate-800/50">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 dark:bg-indigo-500/40 text-white dark:text-indigo-300 text-xs font-bold shadow-sm dark:shadow-indigo-500/10">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold">
             <span>TK</span>
           </div>
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-              {projectName}
-            </h2>
-            <button className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg transition-colors duration-200">
-              <MoreHorizontal className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">{projectName}</h1>
+            <button
+              onClick={onToggleStar}
+              disabled={starLoading}
+              className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 disabled:cursor-wait cursor-pointer transition-colors duration-200"
+              aria-label={isStarred ? "Unstar project" : "Star project"}
+            >
+              <Star className={cn("w-5 h-5 transition-colors", isStarred ? "text-yellow-400 fill-current" : "text-slate-400 hover:text-slate-600")} />
             </button>
           </div>
         </div>
-
         <div className="flex items-center gap-2">
-          <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg transition-colors duration-200">
+          <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer">
             <Share2 className="h-4 w-4 text-slate-600 dark:text-slate-400" />
           </button>
+          <div className="relative" ref={menuRef}>
+            <button onClick={() => setProjectMenuOpen(prev => !prev)} className="p-2 rounded-md hover:bg-slate-200 dark:hover:bg-slate-800 cursor-pointer">
+              <MoreHorizontal className="w-5 h-5" />
+            </button>
+            {isProjectMenuOpen && (
+              <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-slate-800 ring-1 ring-black ring-opacity-5 z-20">
+                <div className="py-1">
+                  {projectMenuItems.map((item) => (
+                    <button
+                      key={item.label}
+                      onClick={() => {
+                        item.action();
+                        setProjectMenuOpen(false);
+                      }}
+                      className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer "
+                    >
+                      <item.icon className="w-4 h-4" />
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Bottom Section: Tabs Navigation */}
       <div className="relative flex items-center px-2 lg:px-4 py-1">
         {showLeftArrow && (
-          <button 
-            onClick={() => scroll('left')} 
-            className="absolute left-0 z-10 bg-gradient-to-r from-white dark:from-slate-950 to-transparent p-1 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-          >
+          <button onClick={() => scroll('left')} className="absolute left-0 z-10 bg-gradient-to-r from-white dark:from-slate-950 to-transparent p-1 cursor-pointer">
             <ChevronLeft className="h-4 w-4" />
           </button>
         )}
-
-        <div 
-          ref={scrollContainerRef}
-          onScroll={checkScroll}
-          className="no-scrollbar flex flex-1 items-center gap-0.5 overflow-x-auto scroll-smooth"
-        >
-          {navItems.map((item) => {
-            const active = isActive(item.path);
-            return (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={`relative flex items-center gap-2 px-3 py-2.5 text-sm font-medium transition-all duration-200 whitespace-nowrap rounded-lg group
-                  ${active 
-                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20' 
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50'
-                  }`}
-              >
-                <item.icon className={`h-4 w-4 transition-colors ${active ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-500'}`} />
-                <span>{item.label}</span>
-                {item.tag && (
-                  <span className="ml-1 rounded-md bg-indigo-100 dark:bg-indigo-900/50 px-1.5 py-0.5 text-[8px] font-bold text-indigo-700 dark:text-indigo-300">
-                    {item.tag}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-          
-          <div className="relative">
+        <div ref={scrollContainerRef} onScroll={checkScroll} className="no-scrollbar flex flex-1 items-center gap-0.5 overflow-x-auto scroll-smooth">
+          {navItems.map((item) => (
             <button
-              onClick={() => setIsModalOpen(!isModalOpen)}
-              className={`p-2 rounded-lg transition-all duration-200 ml-1 ${
-                isModalOpen
-                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/30'
-                  : 'text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50'
-              }`}
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={`relative flex items-center gap-2 px-3 py-2.5 text-sm font-medium whitespace-nowrap rounded-lg ${isActive(item.path) ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 cursor-pointer' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 cursor-pointer'}`}
             >
+              <item.icon className={`h-4 w-4 ${isActive(item.path) ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500'}`} />
+              <span>{item.label}</span>
+            </button>
+          ))}
+          <div className="relative">
+            <button onClick={() => setIsMoreNavOpen(!isMoreNavOpen)} className={`p-2 rounded-lg ml-1 ${isMoreNavOpen ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'hover:bg-slate-100 dark:hover:bg-slate-800/50 cursor-pointer'}`}>
               <Plus className="h-4 w-4" />
             </button>
-            <MoreNavDropdown
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
-              projectId={projectId}
-            />
+            <MoreNavDropdown isOpen={isMoreNavOpen} onClose={() => setIsMoreNavOpen(false)} projectId={projectId} />
           </div>
         </div>
-
         {showRightArrow && (
-          <button 
-            onClick={() => scroll('right')} 
-            className="absolute right-0 z-10 bg-gradient-to-l from-white dark:from-slate-950 to-transparent p-1 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-          >
+          <button onClick={() => scroll('right')} className="absolute right-0 z-10 bg-gradient-to-l from-white dark:from-slate-950 to-transparent p-1 cursor-pointer">
             <ChevronRight className="h-4 w-4" />
           </button>
         )}

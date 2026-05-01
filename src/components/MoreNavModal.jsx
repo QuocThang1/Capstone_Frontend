@@ -62,7 +62,7 @@ const MoreNavDropdown = ({ isOpen, onClose, projectId }) => {
           <button
             key={item.path}
             onClick={() => handleNavigation(item.path)}
-            className={`flex items-start gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-left
+            className={`flex items-start gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-left cursor-pointer
               ${isDark
                 ? 'hover:bg-slate-800 text-slate-300'
                 : 'hover:bg-slate-100 text-slate-700'
