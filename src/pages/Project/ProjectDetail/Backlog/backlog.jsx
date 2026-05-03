@@ -71,7 +71,7 @@ const Backlog = () => {
 
     const handleDataUpdate = () => {
         fetchSprints();
-        if (fetchIssuesData) fetchIssuesData();
+        fetchIssuesData();
     };
 
     const findContainer = (id) => {
@@ -184,7 +184,7 @@ const Backlog = () => {
             if (selectedIssue?._id === issueToDelete._id) setSelectedIssue(null);
             if (isSubtask) setSubtaskTrigger(prev => prev + 1);
             setIssueToDelete(null);
-            if (fetchIssuesData) fetchIssuesData();
+            fetchIssuesData();
         } finally { setActionLoading(false); }
     };
 

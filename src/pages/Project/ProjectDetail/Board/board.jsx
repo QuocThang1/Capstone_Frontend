@@ -83,54 +83,95 @@ const Board = () => {
     const handleDragStart = (event) => setActiveElement(event.active.data.current);
 
     const handleDragEnd = async (event) => {
-        // ... (logic giữ nguyên)
         setActiveElement(null);
         const { active, over } = event;
-        if (!over || active.id === over.id) return;
+
+        if (!over) return;
+        if (active.id === over.id) return;
 
         const activeType = active.data.current?.type;
         const overType = over.data.current?.type;
 
+        // Kéo thả để sắp xếp lại CỘT
         if (activeType === 'Column' && overType === 'Column') {
             const oldIndex = orderedColumns.findIndex(col => col.name === active.id);
             const newIndex = orderedColumns.findIndex(col => col.name === over.id);
-            const newColumnsOrder = arrayMove(orderedColumns, oldIndex, newIndex);
 
-            const originalProject = project;
-            setProject({ ...project, boardColumns: newColumnsOrder.map((col, i) => ({ ...col, order: i + 1 })) });
-            try {
-                await updateBoardColumnsApi(project._id, {
-                    boardColumns: newColumnsOrder.map((col, i) => ({ _id: col._id, name: col.name, order: i + 1 }))
-                });
-            } catch {
-                setProject(originalProject);
-                toast.error("Failed to update board order.");
+            if (oldIndex !== newIndex) {
+                const newOrder = arrayMove(orderedColumns, oldIndex, newIndex);
+                const originalProject = { ...project };
+                setProject({ ...project, boardColumns: newOrder.map((col, i) => ({ ...col, order: i + 1 })) });
+
+                try {
+                    await updateBoardColumnsApi(project._id, {
+                        boardColumns: newOrder.map((col, i) => ({ _id: col._id, name: col.name, order: i + 1 }))
+                    });
+                } catch {
+                    setProject(originalProject);
+                    toast.error("Failed to update board order.");
+                }
             }
             return;
         }
 
-        if (activeType === 'Issue' && overType === 'Column') {
-            const issue = active.data.current.issue;
-            const newStatus = over.data.current.column.name;
+        // Kéo ISSUE (Vào Cột hoặc lên một Issue khác)
+        if (activeType === 'Issue') {
+            const issueToMove = active.data.current.issue;
+            let destinationColumnName = null;
 
-            if (issue.status !== newStatus) {
+            if (overType === 'Column') {
+                destinationColumnName = over.data.current.column.name;
+            } else if (overType === 'Issue') {
+                destinationColumnName = over.data.current.issue.status;
+            }
+
+            if (!destinationColumnName) return;
+
+            // NẾU KÉO SANG CỘT KHÁC
+            if (issueToMove.status !== destinationColumnName) {
                 const originalIssues = [...issues];
-                const updatedIssues = issues.map(i =>
-                    i._id === active.id ? { ...i, status: newStatus } : i
-                );
-                setIssues(updatedIssues);
+
+                setIssues(prevIssues => {
+                    const updatedList = prevIssues.map(issue =>
+                        issue._id === active.id ? { ...issue, status: destinationColumnName } : issue
+                    );
+
+                    if (overType === 'Issue') {
+                        const oldIndex = updatedList.findIndex(i => i._id === active.id);
+                        const newIndex = updatedList.findIndex(i => i._id === over.id);
+                        if (oldIndex !== -1 && newIndex !== -1) {
+                            return arrayMove(updatedList, oldIndex, newIndex);
+                        }
+                    }
+                    return updatedList;
+                });
 
                 try {
-                    const res = await updateIssueApi(active.id, { status: newStatus });
+                    const res = await updateIssueApi(active.id, { status: destinationColumnName });
                     if (res && res.EC === 0) {
-                        toast.success(`Issue moved to "${newStatus}"`);
+                        toast.success(`Issue moved to "${destinationColumnName}"`);
                     } else {
                         setIssues(originalIssues);
                         toast.error(res.EM || "Failed to update issue status.");
                     }
                 } catch (error) {
                     setIssues(originalIssues);
-                    toast.error(error.message || "Failed to update issue status.");
+                    const errorMessage = error.response?.data?.EM || error.message || "An unexpected error occurred.";
+                    toast.error(errorMessage);
+                }
+
+            }
+            // NẾU KÉO TRONG CÙNG 1 CỘT 
+            else {
+                if (active.id !== over.id) {
+                    setIssues(prevIssues => {
+                        const oldIndex = prevIssues.findIndex(i => i._id === active.id);
+                        const newIndex = prevIssues.findIndex(i => i._id === over.id);
+                        if (oldIndex !== -1 && newIndex !== -1) {
+                            return arrayMove(prevIssues, oldIndex, newIndex);
+                        }
+                        return prevIssues;
+                    });
                 }
             }
         }
