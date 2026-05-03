@@ -257,7 +257,7 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
                   <button
                     key={project._id}
                     onClick={() => navigate(`/projects/${project._id}/overview`)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200 cursor-pointer"
                   >
                     <div className="flex items-center justify-center w-6 h-6 rounded bg-slate-100 dark:bg-slate-900 text-[11px] font-bold text-slate-500 dark:text-slate-500 flex-shrink-0">
                       {project.key ? project.key.slice(0, 1).toUpperCase() : project.name.charAt(0).toUpperCase()}
@@ -265,15 +265,13 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
                     <span className="truncate">{project.name}</span>
                   </button>
                 ))}
-                {allProjects.length > 3 && (
-                  <button
-                    onClick={() => navigate("/projects/management")}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200 cursor-pointer rounded-lg"
-                  >
-                    <FolderOpen className="w-4 h-4" />
-                    <span>More projects</span>
-                  </button>
-                )}
+                <button
+                  onClick={() => navigate("/projects/management")}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200 cursor-pointer rounded-lg"
+                >
+                  <FolderOpen className="w-4 h-4" />
+                  <span>More projects</span>
+                </button>
               </div>
             </div>
           )}
