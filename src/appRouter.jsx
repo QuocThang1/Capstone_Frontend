@@ -11,11 +11,11 @@ import ProjectManagement from "./pages/Project/ProjectManagement/projectManageme
 import ProjectDetailsLayout from "./layout/projectDetailsLayout";
 import Board from "./pages/Project/ProjectDetail/Board/board";
 import Backlog from "./pages/Project/ProjectDetail/Backlog/backlog";
+import ProcessFlow from "./pages/Project/ProjectDetail/ProcessFlow/processFlow";
 
 // Coming Soon Pages
 import OverviewDashboard from "./pages/Project/Monitor/OverviewDashboard";
 import RealTimeEventLog from "./pages/Project/Monitor/RealTimeEventLog";
-import ProcessFlow from "./pages/Project/Intelligence/ProcessFlow";
 import BottleneckDetector from "./pages/Project/Intelligence/BottleneckDetector";
 import TeamHealth from "./pages/Project/ProjectDetail/TeamHealth";
 import RBACPermissions from "./pages/Project/ProjectDetail/RBACPermissions";

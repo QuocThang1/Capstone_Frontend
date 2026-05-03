@@ -4,6 +4,7 @@ import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, closestC
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { SortableContext, arrayMove, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { toast } from 'react-toastify';
+import { GitBranch } from 'lucide-react';
 
 import { getSprintsByProjectApi, completeSprintApi } from '../../../../utils/Api/sprintApi';
 import { updateIssueApi } from '../../../../utils/Api/issueApi';
@@ -120,11 +121,16 @@ const Board = () => {
                 setIssues(updatedIssues);
 
                 try {
-                    await updateIssueApi(active.id, { status: newStatus });
-                    toast.success(`Issue moved to "${newStatus}"`);
+                    const res = await updateIssueApi(active.id, { status: newStatus });
+                    if (res && res.EC === 0) {
+                        toast.success(`Issue moved to "${newStatus}"`);
+                    } else {
+                        setIssues(originalIssues);
+                        toast.error(res.EM || "Failed to update issue status.");
+                    }
                 } catch (error) {
                     setIssues(originalIssues);
-                    toast.error(error.response?.data?.EM || "Failed to update issue status.");
+                    toast.error(error.message || "Failed to update issue status.");
                 }
             }
         }
@@ -166,6 +172,16 @@ const Board = () => {
                                 : <>Go to the <button onClick={() => navigate(`/projects/${project._id}/backlog`)} className="text-indigo-500 hover:underline">Backlog</button> to start a sprint.</>
                             }
                         </p>
+                        {project?.activeWorkflowId?.name && (
+                            <>
+                                <span className="text-slate-300 dark:text-slate-600">|</span>
+                                <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 font-semibold">
+                                    <GitBranch className="w-6 h-6 text-indigo-500" />
+                                    Process flow:
+                                    <span className="font-bold text-slate-600 dark:text-slate-300">{project.activeWorkflowId.name}</span>
+                                </div>
+                            </>
+                        )}
                     </div>
                     <div className="flex items-center gap-4">
                         <AnimatePresence>
