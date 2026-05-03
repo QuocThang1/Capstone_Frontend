@@ -57,6 +57,7 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
             const res = await getSubtaskApi(issue._id);
             if (res && res.EC === 0) {
                 setSubtasks(res.data);
+                onDataUpdate();
             } else {
                 setSubtasks([]);
             }
