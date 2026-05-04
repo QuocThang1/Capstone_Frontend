@@ -1,17 +1,17 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Bell, Sun, Moon, Search, LogOut, ChevronDown } from "lucide-react";
+import { Sun, Moon, Search, LogOut, ChevronDown } from "lucide-react";
 import { AuthContext } from "../../context/auth.context";
 import useDarkMode from "../../hooks/useDarkMode";
 import { toast } from "react-toastify";
 import { Dropdown } from "antd";
+import NotificationDropdown from "./NotificationDropdown";
 
 const TopBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { auth, setAuth } = useContext(AuthContext);
   const { isDark, toggle } = useDarkMode();
-  const [notifOpen, setNotifOpen] = useState(false);
 
   const breadcrumbs = {
     "/projects": "Dashboard",
@@ -85,7 +85,7 @@ const TopBar = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+    <header className="sticky top-0 z-50 flex items-center justify-between h-16 px-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
       {/* Logo and Breadcrumb */}
       <div className="flex items-center gap-3 text-sm font-medium text-slate-400 dark:text-slate-500">
         TASKA
@@ -112,7 +112,7 @@ const TopBar = () => {
         {/* Dark mode toggle */}
         <button
           onClick={toggle}
-          className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           title={isDark ? "Switch to light mode" : "Switch to dark mode"}
         >
           {isDark ? (
@@ -122,14 +122,8 @@ const TopBar = () => {
           )}
         </button>
 
-        {/* Notification bell */}
-        <button
-          onClick={() => setNotifOpen(!notifOpen)}
-          className="relative p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-        >
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900" />
-        </button>
+        {/* Thông báo - Notification Dropdown mới tạo */}
+        <NotificationDropdown />
 
         <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-2" />
 
@@ -148,7 +142,7 @@ const TopBar = () => {
                 {auth.user.role ? auth.user.role.charAt(0).toUpperCase() + auth.user.role.slice(1) : "Role"}
               </span>
             </div>
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-sm flex-shrink-0">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-sm flex-shrink-0 shadow-sm">
               {getInitials(auth.user.fullName)}
             </div>
             <ChevronDown className="w-4 h-4 text-slate-400" />

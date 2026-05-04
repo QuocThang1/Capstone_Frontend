@@ -150,6 +150,7 @@ const Board = () => {
                     const res = await updateIssueApi(active.id, { status: destinationColumnName });
                     if (res && res.EC === 0) {
                         toast.success(`Issue moved to "${destinationColumnName}"`);
+                        fetchIssuesData();
                     } else {
                         setIssues(originalIssues);
                         toast.error(res.EM || "Failed to update issue status.");
