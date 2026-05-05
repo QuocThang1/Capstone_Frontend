@@ -84,11 +84,11 @@ const MemberIssuesModal = ({ selectedMember, selectedMemberIssues, onClose }) =>
                                             </div>
                                             <div className="flex items-center gap-1.5" title="Start Date">
                                                 <Calendar className="w-3.5 h-3.5 text-sky-500" />
-                                                <span>Start Date: {issue.startDate ? new Date(issue.startDate).toLocaleDateString('vi-VN') : 'No start date'}</span>
+                                                <span>Start Date: {issue.startDate ? new Date(issue.startDate).toLocaleString('vi-VN') : 'No start date'}</span>
                                             </div>
                                             <div className="flex items-center gap-1.5" title="Due Date">
                                                 <Calendar className="w-3.5 h-3.5 text-amber-500" />
-                                                <span>Due Date: {issue.dueDate ? new Date(issue.dueDate).toLocaleDateString('vi-VN') : 'No due date'}</span>
+                                                <span>Due Date: {issue.dueDate ? new Date(issue.dueDate).toLocaleString('vi-VN') : 'No due date'}</span>
                                             </div>
                                         </div>
                                         <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
