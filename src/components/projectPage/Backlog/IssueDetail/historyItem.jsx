@@ -13,10 +13,28 @@ const getInitials = (name) => {
 const HistoryItem = ({ entry }) => {
     const { authorId, field, oldValue, newValue, createdAt } = entry;
 
-    const renderValue = (value) => {
+    const renderValue = (value, fieldName) => {
         if (value === null || value === 'Unassigned' || value === '') {
             return <span className="text-slate-500 italic">Unassigned</span>;
         }
+
+        if (fieldName === 'Start Date' || fieldName === 'Due Date') {
+            try {
+                const dateObj = new Date(value);
+                if (!isNaN(dateObj.getTime())) {
+                    const formattedDate = dateObj.toLocaleString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    return <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 rounded-md text-xs font-medium">{formattedDate}</span>;
+                }
+            } catch (e) {
+            }
+        }
+
         return <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 rounded-md text-xs font-medium">{value}</span>;
     };
 
@@ -42,10 +60,10 @@ const HistoryItem = ({ entry }) => {
 
                 {/* Value Change */}
                 {(oldValue !== undefined || newValue !== undefined) && (
-                    <div className="mt-2 flex items-center gap-2 text-sm">
-                        {renderValue(oldValue)}
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                        {renderValue(oldValue, field)}
                         <ArrowRight className="w-4 h-4 text-slate-500" />
-                        {renderValue(newValue)}
+                        {renderValue(newValue, field)}
                     </div>
                 )}
             </div>
