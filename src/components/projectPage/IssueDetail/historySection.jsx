@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { getHistoryByIssueApi } from '../../../../utils/Api/historyApi';
-import Spinner from '../../../spinner';
+import { getHistoryByIssueApi } from '../../../utils/Api/historyApi';
+import Spinner from '../../spinner';
 import HistoryItem from './historyItem';
 
 const HistorySection = ({ issueId }) => {

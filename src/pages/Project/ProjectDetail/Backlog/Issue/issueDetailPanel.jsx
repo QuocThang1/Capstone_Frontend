@@ -6,11 +6,11 @@ import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizo
 import { updateIssueApi, createSubtaskApi, getSubtaskApi } from '../../../../../utils/Api/issueApi';
 import { getProjectMembersApi } from '../../../../../utils/Api/projectApi';
 import Spinner from '../../../../../components/spinner';
-import SubtaskRow from '../../../../../components/projectPage/Backlog/IssueDetail/subtaskRow';
+import SubtaskRow from '../../../../../components/projectPage/IssueDetail/subtaskRow';
 import { cn } from '../../../../../lib/utils';
 import SelectDropdown from '../../../../../components/selectDropdown';
-import CommentSection from '../../../../../components/projectPage/Backlog/IssueDetail/commentSection';
-import HistorySection from '../../../../../components/projectPage/Backlog/IssueDetail/historySection';
+import CommentSection from '../../../../../components/projectPage/IssueDetail/commentSection';
+import HistorySection from '../../../../../components/projectPage/IssueDetail/historySection';
 
 const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteRequest, subtaskTrigger }) => {
     const [projectMembers, setProjectMembers] = useState([]);
@@ -124,10 +124,10 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
 
     const handleAddSubtaskClick = () => {
         subtaskInputRef.current?.focus();
-    };
+    }
 
     const priorityOptions = ["Highest", "High", "Medium", "Low", "Lowest"];
-    const subtasksDone = subtasks.filter(s => project.boardColumns[project.boardColumns.length - 1].name === s.status).length;
+    const subtasksDone = subtasks.filter(s => s.status && s.status.toLowerCase() === 'done').length;
     const progress = subtasks.length > 0 ? (subtasksDone / subtasks.length) * 100 : 0;
 
     return (
@@ -208,14 +208,15 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
 
                         {isSubtasksVisible && (
                             <div className="border border-slate-200 dark:border-slate-700 rounded-md">
-                                <div className="grid grid-cols-[minmax(0,1fr)_130px_130px_40px] items-center gap-4 px-2 py-1 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+                                {/* SỬA grid-cols VÀ BỎ flex justify-center Ở HEADER */}
+                                <div className="grid grid-cols-[minmax(100px,1fr)_105px_105px_28px] items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 rounded-t-md">
                                     <span className="text-xs font-bold text-slate-500">Work</span>
-                                    <span className="text-xs font-bold text-slate-500 flex justify-center">Assignee</span>
-                                    <span className="text-xs font-bold text-slate-500 flex justify-center">Status</span>
+                                    <span className="text-xs font-bold text-slate-500">Assignee</span>
+                                    <span className="text-xs font-bold text-slate-500">Status</span>
                                     <span></span>
                                 </div>
                                 {loadingSubtasks ? <div className="flex justify-center py-4"><Spinner /></div> : (
-                                    <div>
+                                    <div className="divide-y divide-slate-200 dark:divide-slate-700">
                                         {subtasks.map(sub => (
                                             <SubtaskRow
                                                 key={sub._id}
@@ -224,6 +225,7 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                                                 boardColumns={project.boardColumns}
                                                 onUpdate={fetchSubtasks}
                                                 onDelete={() => onDeleteRequest(sub)}
+                                                gridClass="grid-cols-[minmax(100px,1fr)_105px_105px_28px]"
                                             />
                                         ))}
                                     </div>
