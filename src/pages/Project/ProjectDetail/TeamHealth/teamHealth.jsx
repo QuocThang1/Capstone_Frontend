@@ -1,10 +1,9 @@
-// src/pages/Project/ProjectDetail/TeamHealth/teamHealth.jsx
 import { useState, useMemo } from "react";
 import { useOutletContext } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Users, TrendingUp, CheckCircle2 } from "lucide-react";
 import Spinner from "../../../../components/spinner";
-import MemberIssuesModal from "./MemberIssuesModal"; // <--- Import component Modal
+import MemberIssuesModal from "./MemberIssuesModal";
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
@@ -35,7 +34,7 @@ const TeamHealth = () => {
   }
 
   const teamData = project.members.map(member => {
-    const assignedIssues = issues.filter(issue => issue.assigneeId?._id === member.accountId._id);
+    const assignedIssues = issues.filter(issue => issue.assigneeId?._id === member.accountId._id && !issue.parentId);
     const completedTasks = assignedIssues.filter(issue => issue.status === 'Done').length;
     const totalTasks = assignedIssues.length;
     const velocity = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -52,15 +51,16 @@ const TeamHealth = () => {
     };
   });
 
-  const totalProjectIssues = issues.length;
-  const completedProjectIssues = issues.filter(issue => issue.status === 'Done').length;
+  const parentIssues = issues.filter(issue => !issue.parentId);
+  const totalProjectIssues = parentIssues.length;
+  const completedProjectIssues = parentIssues.filter(issue => issue.status === 'Done').length;
   const avgVelocity = teamData.length > 0
     ? Math.round(teamData.reduce((acc, member) => acc + member.velocity, 0) / teamData.length)
     : 0;
 
   const selectedMemberIssues = useMemo(() => {
     if (!selectedMember || !issues) return [];
-    return issues.filter(issue => issue.assigneeId?._id === selectedMember.id);
+    return issues.filter(issue => issue.assigneeId?._id === selectedMember.id && !issue.parentId);
   }, [selectedMember, issues]);
 
   return (

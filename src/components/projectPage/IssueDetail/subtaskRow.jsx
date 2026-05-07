@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { Type, Trash2 } from 'lucide-react';
-import { updateIssueApi } from '../../../../utils/Api/issueApi';
-import SelectDropdown from '../../../../components/selectDropdown';
+import { updateIssueApi } from '../../../utils/Api/issueApi';
+import SelectDropdown from '../../selectDropdown';
+import { cn } from '../../../lib/utils';
 
-const SubtaskRow = ({ subtask, projectMembers, boardColumns, onUpdate, onDelete }) => {
+const SubtaskRow = ({ subtask, projectMembers, boardColumns, onUpdate, onDelete, gridClass }) => {
     const [status, setStatus] = useState(subtask.status);
 
     const handleUpdate = async (field, value) => {
@@ -54,7 +55,7 @@ const SubtaskRow = ({ subtask, projectMembers, boardColumns, onUpdate, onDelete 
     }));
 
     return (
-        <div className="group grid grid-cols-[minmax(0,1fr)_130px_130px_40px] items-center gap-4 px-3 py-2 border-b border-slate-200 dark:border-slate-700 last:border-b-0 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+        <div className={cn(`group grid items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50`, gridClass || "grid-cols-[minmax(200px,1fr)_130px_130px_40px]")}>
             {/* Work */}
             <div className="flex items-center gap-3 truncate">
                 <div className="w-6 h-6 rounded bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">

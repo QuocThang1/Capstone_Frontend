@@ -12,6 +12,8 @@ import { updateBoardColumnsApi } from '../../../../utils/Api/projectApi';
 
 import Spinner from '../../../../components/Spinner';
 import ButtonSpinner from '../../../../components/ButtonSpinner';
+import IssueDetailModal from './IssueDetailModal';
+import DeleteIssueModal from '../Backlog/Issue/deleteIssueModal';
 import BoardColumn from '../../../../components/projectPage/Board/BoardColumn';
 import IssueCard from '../../../../components/projectPage/Board/IssueCard';
 
@@ -34,6 +36,8 @@ const Board = () => {
     const [loading, setLoading] = useState(true);
     const [isCompleting, setIsCompleting] = useState(false);
     const [activeElement, setActiveElement] = useState(null);
+    const [selectedIssue, setSelectedIssue] = useState(null);
+    const [issueToDelete, setIssueToDelete] = useState(null);
 
     const orderedColumns = useMemo(() => {
         if (!project?.boardColumns) return [];
@@ -196,101 +200,125 @@ const Board = () => {
     if (loading) return <div className="flex h-full items-center justify-center"><Spinner /></div>;
 
     return (
-        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="h-full flex flex-col p-6 space-y-6 overflow-hidden"
-            >
-                <motion.header variants={itemVariants} className="flex justify-between items-end">
-                    <div>
-                        <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                            {activeSprint ? activeSprint.name : 'Board Overview'}
-                        </h1>
-                        <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">
-                            {activeSprint
-                                ? 'Track progress and coordinate tasks in real-time.'
-                                : <>Go to the <button onClick={() => navigate(`/projects/${project._id}/backlog`)} className="text-indigo-500 hover:underline">Backlog</button> to start a sprint.</>
-                            }
-                        </p>
-                        {project?.activeWorkflowId?.name && (
-                            <>
-                                <span className="text-slate-300 dark:text-slate-600">|</span>
-                                <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 font-semibold">
-                                    <GitBranch className="w-6 h-6 text-indigo-500" />
-                                    Process flow:
-                                    <span className="font-bold text-slate-600 dark:text-slate-300">{project.activeWorkflowId.name}</span>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <AnimatePresence>
-                            {activeSprint && (
-                                <motion.button
-                                    initial={{ scale: 0.8, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    exit={{ scale: 0.8, opacity: 0 }}
-                                    whileHover={{ scale: 1.05, y: -2 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleCompleteSprint}
-                                    disabled={isCompleting}
-                                    className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/30 flex items-center gap-2 disabled:bg-indigo-400 cursor-pointer disabled:cursor-not-allowed"
-                                >
-                                    {isCompleting ? <ButtonSpinner /> : (
-                                        <>
-                                            <span className="relative flex h-2 w-2">
-                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                                            </span>
-                                            Complete Sprint
-                                        </>
-                                    )}
-                                </motion.button>
+        <>
+            <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="h-full flex flex-col p-6 space-y-6 overflow-hidden"
+                >
+                    <motion.header variants={itemVariants} className="flex justify-between items-end">
+                        <div>
+                            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                                {activeSprint ? activeSprint.name : 'Board Overview'}
+                            </h1>
+                            <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">
+                                {activeSprint
+                                    ? 'Track progress and coordinate tasks in real-time.'
+                                    : <>Go to the <button onClick={() => navigate(`/projects/${project._id}/backlog`)} className="text-indigo-500 hover:underline">Backlog</button> to start a sprint.</>
+                                }
+                            </p>
+                            {project?.activeWorkflowId?.name && (
+                                <>
+                                    <span className="text-slate-300 dark:text-slate-600">|</span>
+                                    <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 font-semibold">
+                                        <GitBranch className="w-6 h-6 text-indigo-500" />
+                                        Process flow:
+                                        <span className="font-bold text-slate-600 dark:text-slate-300">{project.activeWorkflowId.name}</span>
+                                    </div>
+                                </>
                             )}
-                        </AnimatePresence>
-                    </div>
-                </motion.header>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <AnimatePresence>
+                                {activeSprint && (
+                                    <motion.button
+                                        initial={{ scale: 0.8, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        exit={{ scale: 0.8, opacity: 0 }}
+                                        whileHover={{ scale: 1.05, y: -2 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={handleCompleteSprint}
+                                        disabled={isCompleting}
+                                        className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/30 flex items-center gap-2 disabled:bg-indigo-400 cursor-pointer disabled:cursor-not-allowed"
+                                    >
+                                        {isCompleting ? <ButtonSpinner /> : (
+                                            <>
+                                                <span className="relative flex h-2 w-2">
+                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                                </span>
+                                                Complete Sprint
+                                            </>
+                                        )}
+                                    </motion.button>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </motion.header>
 
-                <motion.main variants={itemVariants} className="flex-grow overflow-x-auto custom-scrollbar pb-6">
-                    <div className="flex gap-6 h-full min-w-max">
-                        <SortableContext items={orderedColumns.map(c => c.name)} strategy={horizontalListSortingStrategy}>
-                            <LayoutGroup>
-                                {orderedColumns.map(column => (
-                                    <motion.div layout key={column.name} className="h-full">
-                                        <BoardColumn
-                                            column={column}
-                                            issues={issuesByColumn[column.name] || []}
-                                            onIssueClick={(issue) => console.log(issue)}
-                                        />
-                                    </motion.div>
-                                ))}
-                            </LayoutGroup>
-                        </SortableContext>
-                    </div>
-                </motion.main>
-            </motion.div>
+                    <motion.main variants={itemVariants} className="flex-grow overflow-x-auto custom-scrollbar pb-6">
+                        <div className="flex gap-6 h-full min-w-max">
+                            <SortableContext items={orderedColumns.map(c => c.name)} strategy={horizontalListSortingStrategy}>
+                                <LayoutGroup>
+                                    {orderedColumns.map(column => (
+                                        <motion.div layout key={column.name} className="h-full">
+                                            <BoardColumn
+                                                column={column}
+                                                issues={issuesByColumn[column.name] || []}
+                                                onIssueClick={(issue) => setSelectedIssue(issue)}
+                                            />
+                                        </motion.div>
+                                    ))}
+                                </LayoutGroup>
+                            </SortableContext>
+                        </div>
+                    </motion.main>
+                </motion.div>
 
-            <DragOverlay dropAnimation={{ duration: 300, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
-                {activeElement && (
-                    <motion.div
-                        initial={{ scale: 1 }}
-                        animate={{
-                            scale: 1.05,
-                            rotate: activeElement.type === 'Column' ? 2 : 1,
-                            boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
-                        }}
-                    >
-                        {activeElement.type === 'Column' ? (
-                            <BoardColumn column={activeElement.column} issues={issuesByColumn[activeElement.column.name] || []} />
-                        ) : (
-                            <IssueCard issue={activeElement.issue} />
-                        )}
-                    </motion.div>
-                )}
-            </DragOverlay>
-        </DndContext>
+                <DragOverlay dropAnimation={{ duration: 300, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
+                    {activeElement && (
+                        <motion.div
+                            initial={{ scale: 1 }}
+                            animate={{
+                                scale: 1.05,
+                                rotate: activeElement.type === 'Column' ? 2 : 1,
+                                boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
+                            }}
+                        >
+                            {activeElement.type === 'Column' ? (
+                                <BoardColumn column={activeElement.column} issues={issuesByColumn[activeElement.column.name] || []} />
+                            ) : (
+                                <IssueCard issue={activeElement.issue} />
+                            )}
+                        </motion.div>
+                    )}
+                </DragOverlay>
+            </DndContext>
+            {selectedIssue && (
+                <IssueDetailModal
+                    project={project}
+                    issue={selectedIssue}
+                    onClose={() => setSelectedIssue(null)}
+                    onDataUpdate={fetchIssuesData}
+                    onDeleteRequest={(issueObj) => {
+                        setSelectedIssue(null);
+                        setIssueToDelete(issueObj);
+                    }}
+                />
+            )}
+
+            <DeleteIssueModal
+                isOpen={!!issueToDelete}
+                onClose={() => setIssueToDelete(null)}
+                issue={issueToDelete}
+                onDeleteSuccess={() => {
+                    fetchIssuesData();
+                    setIssueToDelete(null);
+                }}
+            />
+        </>
     );
 };
 
