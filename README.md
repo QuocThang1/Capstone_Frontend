@@ -26,6 +26,7 @@ This repository contains the frontend source code for the Agile Task Management 
 
 Bash
 cd Task_Management_FrontEnd
+
 3. Install the required dependencies:
 
 Bash
