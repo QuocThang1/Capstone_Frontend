@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getAccountApi } from "../utils/Api/accountApi";
 import Spinner from "../components/spinner";
 import { AuthContext } from "./auth.context";
+import socket from "../utils/socket";
 
 export const AuthWrapper = (props) => {
     const [auth, setAuth] = useState({
@@ -84,6 +85,28 @@ export const AuthWrapper = (props) => {
 
         fetchAccount();
     }, []);
+
+    useEffect(() => {
+        // Nếu user đã đăng nhập -> Mở kết nối
+        if (auth.isAuthenticated) {
+            if (!socket.connected) {
+                socket.connect();
+            }
+        }
+        // Nếu user chưa đăng nhập hoặc vừa đăng xuất -> Ngắt kết nối
+        else {
+            if (socket.connected) {
+                socket.disconnect();
+            }
+        }
+
+        // Cleanup: Ngắt kết nối khi component sập (hoặc khi lưu code HMR)
+        return () => {
+            if (socket.connected) {
+                socket.disconnect();
+            }
+        };
+    }, [auth.isAuthenticated]);
 
     return (
         <>

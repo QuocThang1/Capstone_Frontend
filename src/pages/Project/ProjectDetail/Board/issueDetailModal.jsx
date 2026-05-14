@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizontal, Plus, Columns, Eye, Share2, Expand } from 'lucide-react';
+import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizontal, Plus, Columns, Eye, Share2, Expand, Clock } from 'lucide-react';
 import { updateIssueApi, createSubtaskApi, getSubtaskApi, deleteIssueApi } from '../../../../utils/Api/issueApi';
 import { getProjectMembersApi } from '../../../../utils/Api/projectApi';
 import Spinner from '../../../../components/spinner';
@@ -46,10 +46,12 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
             reset({
                 title: issue.title,
                 description: issue.description || '',
+                requiredSkills: issue.requiredSkills ? issue.requiredSkills.join(', ') : '',
                 assigneeId: issue.assigneeId?._id || 'null',
                 priority: issue.priority,
                 status: issue.status,
                 storyPoints: issue.storyPoints || 0,
+                timeExpect: issue.timeExpect || 0,
                 startDate: formatForDateTimeLocal(issue.startDate),
                 dueDate: formatForDateTimeLocal(issue.dueDate),
             });
@@ -94,8 +96,13 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
     // Handle Form update
     const onSubmit = async (data) => {
         try {
+            const parsedSkills = data.requiredSkills
+                ? data.requiredSkills.split(',').map(s => s.trim()).filter(Boolean)
+                : [];
+
             const updateData = {
                 ...data,
+                requiredSkills: parsedSkills,
                 assigneeId: data.assigneeId === "null" ? null : data.assigneeId,
                 storyPoints: Number(data.storyPoints) || 0,
                 startDate: data.startDate || null,
@@ -203,6 +210,15 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                                         rows="5"
                                         placeholder="Add a description..."
                                         className="w-full p-3 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:bg-white dark:focus:bg-slate-900 rounded-lg border border-transparent focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 placeholder-slate-500 transition-all duration-200 resize-y"
+                                    />
+                                </div>
+
+                                <div className="mt-4">
+                                    <h3 className="text-[15px] font-bold text-slate-800 dark:text-slate-200 mb-2">Required Skills</h3>
+                                    <input
+                                        {...register("requiredSkills")}
+                                        placeholder="e.g. React, Nodejs, Design (comma separated)"
+                                        className="w-full p-3 text-sm bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:bg-white dark:focus:bg-slate-900 rounded-lg border border-transparent focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 placeholder-slate-500 transition-all duration-200"
                                     />
                                 </div>
                             </form>
@@ -366,6 +382,21 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                                         onBlur={(e) => handleFieldChange("storyPoints", e.target.value)}
                                         className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 flex items-center gap-2 mb-1.5">
+                                        <Clock className="w-3.5 h-3.5 text-orange-500" /> Time Expect (hours)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        {...register("timeExpect")}
+                                        readOnly
+                                        className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-500 shadow-inner cursor-not-allowed"
+                                    />
+                                    <p className="text-[10px] text-slate-400 mt-1 italic">
+                                        Calculated by system: StoryPoints × Duration
+                                    </p>
                                 </div>
 
                                 <div>

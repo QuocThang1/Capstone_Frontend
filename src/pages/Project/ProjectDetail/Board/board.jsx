@@ -68,6 +68,16 @@ const Board = () => {
         findActiveSprint();
     }, [project?._id]);
 
+    useEffect(() => {
+        if (selectedIssue) {
+            const updatedIssue = issues.find(i => i._id === selectedIssue._id);
+            // Nếu có bản cập nhật mới nhất từ backend, thay thế dữ liệu đang hiển thị trên Modal
+            if (updatedIssue && JSON.stringify(updatedIssue) !== JSON.stringify(selectedIssue)) {
+                setSelectedIssue(updatedIssue);
+            }
+        }
+    }, [issues]);
+
     const sprintIssues = useMemo(() => {
         if (!activeSprint) return [];
         return issues.filter(issue => issue.sprintId === activeSprint._id);
