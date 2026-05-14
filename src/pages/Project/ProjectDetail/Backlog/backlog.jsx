@@ -69,6 +69,15 @@ const Backlog = () => {
         fetchSprints();
     }, [fetchSprints]);
 
+    useEffect(() => {
+        if (selectedIssue) {
+            const updatedIssue = issues.find(i => i._id === selectedIssue._id);
+            if (updatedIssue && JSON.stringify(updatedIssue) !== JSON.stringify(selectedIssue)) {
+                setSelectedIssue(updatedIssue);
+            }
+        }
+    }, [issues]);
+
     const handleDataUpdate = () => {
         fetchSprints();
         fetchIssuesData();

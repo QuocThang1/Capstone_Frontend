@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useContext } from "react";
 import { Bell, CalendarClock, Trash2, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
-import io from "socket.io-client";
+import socket from "../../utils/socket";
 import { AuthContext } from "../../context/auth.context";
 import { getNotificationsApi, deleteNotificationApi } from "../../utils/Api/notificationApi";
 
@@ -12,8 +12,6 @@ const NotificationDropdown = () => {
     const [loading, setLoading] = useState(false);
     const dropdownRef = useRef(null);
     const { auth } = useContext(AuthContext);
-
-    const SOCKET_SERVER_URL = import.meta.env.VITE_BACKEND_URL;
 
     const fetchNotifications = async () => {
         try {
@@ -39,12 +37,7 @@ const NotificationDropdown = () => {
     useEffect(() => {
         if (!auth.isAuthenticated || !auth.user?._id) return;
 
-        const socket = io(SOCKET_SERVER_URL);
-
-        socket.on("connect", () => {
-            console.log("Socket connected:", socket.id);
-            socket.emit("join_user_room", auth.user._id);
-        });
+        socket.emit("join_user_room", auth.user._id);
 
         socket.on("new_notification", (newNotif) => {
             setNotifications((prev) => [newNotif, ...prev]);
@@ -61,7 +54,6 @@ const NotificationDropdown = () => {
 
         return () => {
             socket.emit("leave_user_room", auth.user._id);
-            socket.disconnect();
             socket.off("new_notification");
         };
     }, [auth.isAuthenticated, auth.user?._id]);
