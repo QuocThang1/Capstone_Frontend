@@ -1,0 +1,435 @@
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizontal, Plus, Columns, Eye, Share2, Expand, Clock } from 'lucide-react';
+import { updateIssueApi, createSubtaskApi, getSubtaskApi, deleteIssueApi } from '../../../../utils/Api/issueApi';
+import { getProjectMembersApi } from '../../../../utils/Api/projectApi';
+import Spinner from '../../../../components/spinner';
+import SubtaskRow from '../../../../components/projectPage/IssueDetail/subtaskRow';
+import SelectDropdown from '../../../../components/selectDropdown';
+import CommentSection from '../../../../components/projectPage/IssueDetail/commentSection';
+import HistorySection from '../../../../components/projectPage/IssueDetail/historySection';
+import { cn } from '../../../../lib/utils';
+
+const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteRequest }) => {
+    const [projectMembers, setProjectMembers] = useState([]);
+    const [subtasks, setSubtasks] = useState([]);
+    const [loadingSubtasks, setLoadingSubtasks] = useState(false);
+    const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
+    const [isSubtasksVisible, setSubtasksVisible] = useState(true);
+    const [activeActivityTab, setActiveActivityTab] = useState('comments');
+    const subtaskInputRef = useRef(null);
+
+    const { register, handleSubmit, reset, watch, setValue } = useForm();
+    const assigneeValue = watch('assigneeId');
+    const priorityValue = watch('priority');
+    const statusValue = watch('status');
+
+    // Khởi tạo các options
+    const assigneeOptions = [
+        { value: 'null', label: 'Unassigned' },
+        ...projectMembers.map(member => ({ value: member.accountId._id, label: member.accountId.fullName }))
+    ];
+    const priorityOptionsList = ["Highest", "High", "Medium", "Low", "Lowest"];
+    const prioritySelectOptions = priorityOptionsList.map(p => ({ value: p, label: p }));
+    const statusOptions = project?.boardColumns ? project.boardColumns.map(col => ({ value: col.name, label: col.name.toUpperCase() })) : [];
+
+    useEffect(() => {
+        if (issue) {
+            const formatForDateTimeLocal = (dateString) => {
+                if (!dateString) return '';
+                const d = new Date(dateString);
+                return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            };
+
+            reset({
+                title: issue.title,
+                description: issue.description || '',
+                requiredSkills: issue.requiredSkills ? issue.requiredSkills.join(', ') : '',
+                assigneeId: issue.assigneeId?._id || 'null',
+                priority: issue.priority,
+                status: issue.status,
+                storyPoints: issue.storyPoints || 0,
+                timeExpect: issue.timeExpect || 0,
+                startDate: formatForDateTimeLocal(issue.startDate),
+                dueDate: formatForDateTimeLocal(issue.dueDate),
+            });
+        }
+    }, [issue, reset]);
+
+    useEffect(() => {
+        const fetchMembers = async () => {
+            try {
+                const res = await getProjectMembersApi(project._id);
+                if (res.EC === 0) setProjectMembers(res.data);
+            } catch (error) { console.error("Failed to fetch project members", error); }
+        };
+        fetchMembers();
+    }, [project._id]);
+
+    const fetchSubtasks = useCallback(async () => {
+        if (!issue || issue.parentId) {
+            setSubtasks([]);
+            return;
+        }
+        setLoadingSubtasks(true);
+        try {
+            const res = await getSubtaskApi(issue._id);
+            if (res && res.EC === 0) {
+                setSubtasks(res.data);
+            } else {
+                setSubtasks([]);
+            }
+        } catch (error) {
+            console.error("Failed to fetch subtasks", error);
+            setSubtasks([]);
+        } finally {
+            setLoadingSubtasks(false);
+        }
+    }, [issue]);
+
+    useEffect(() => {
+        fetchSubtasks();
+    }, [fetchSubtasks]);
+
+    // Handle Form update
+    const onSubmit = async (data) => {
+        try {
+            const parsedSkills = data.requiredSkills
+                ? data.requiredSkills.split(',').map(s => s.trim()).filter(Boolean)
+                : [];
+
+            const updateData = {
+                ...data,
+                requiredSkills: parsedSkills,
+                assigneeId: data.assigneeId === "null" ? null : data.assigneeId,
+                storyPoints: Number(data.storyPoints) || 0,
+                startDate: data.startDate || null,
+                dueDate: data.dueDate || null
+            };
+            const res = await updateIssueApi(issue._id, updateData);
+            if (res.EC === 0) {
+                toast.success(res.EM || "Issue updated!");
+                onDataUpdate();
+            } else {
+                toast.error(res.EM);
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.EM);
+        }
+    };
+
+    // Auto-save wrapper behavior (tránh phải bấm Save)
+    const handleFieldChange = (field, val) => {
+        setValue(field, val, { shouldValidate: true });
+        // Gọi Submit "tay" tại đây nếu muốn lưu tự động luôn. Tạm thời dùng onBlur ở thẻ Form
+        handleSubmit(onSubmit)();
+    };
+
+    const handleCreateSubtask = async () => {
+        if (!newSubtaskTitle.trim()) return;
+        try {
+            const subtaskData = { parentId: issue._id, title: newSubtaskTitle };
+            const res = await createSubtaskApi(subtaskData);
+            if (res.EC === 0) {
+                toast.success(res.EM || "Subtask created!");
+                setNewSubtaskTitle('');
+                fetchSubtasks();
+            } else {
+                toast.error(res.EM);
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.EM);
+        }
+    };
+
+    const handleDeleteSubtask = async (sub) => {
+        try {
+            const res = await deleteIssueApi(sub._id);
+            if (res.EC === 0) {
+                toast.success("Subtask deleted");
+                fetchSubtasks();
+            }
+        } catch (e) { toast.error("Error deleting"); }
+    };
+
+    const subtasksDone = subtasks.filter(s => s.status && s.status.toLowerCase() === 'done').length;
+    const progress = subtasks.length > 0 ? (subtasksDone / subtasks.length) * 100 : 0;
+
+    return (
+        <AnimatePresence>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 md:p-6"
+                onClick={onClose}
+            >
+                {/* Modal Container: Lớn để chứa thiết kế 2 cột */}
+                <motion.div
+                    initial={{ scale: 0.95, y: 10, opacity: 0 }}
+                    animate={{ scale: 1, y: 0, opacity: 1 }}
+                    exit={{ scale: 0.95, y: 10, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl flex flex-col w-full max-w-6xl max-h-[90vh] border border-slate-200 dark:border-slate-800"
+                >
+                    {/* Header: Key & Actions */}
+                    <div className="flex items-center justify-between px-6 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-t-xl">
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                                <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs dark:bg-blue-900 dark:text-blue-300">
+                                    Issue
+                                </span>
+                                {issue.issueKey}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => onDeleteRequest(issue)} className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors cursor-pointer"><Trash2 className="w-4 h-4" /></button>
+                            <div className="w-px h-6 bg-slate-300 dark:bg-slate-700 mx-1"></div>
+                            <button onClick={onClose} className="p-1.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-md transition-colors cursor-pointer"><X className="w-5 h-5" /></button>
+                        </div>
+                    </div>
+
+                    {/* Main Layout: 2 Cột */}
+                    <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+
+                        {/* LEFT COLUMN: Main Content */}
+                        <div className="flex-1 overflow-y-auto px-8 py-6 border-r border-slate-200 dark:border-slate-700 custom-scrollbar">
+                            <form onBlur={handleSubmit(onSubmit)}>
+                                <input
+                                    {...register("title")}
+                                    className="text-3xl font-extrabold bg-transparent w-full focus:outline-none focus:bg-indigo-50 dark:focus:bg-indigo-900/20 rounded-md py-1 px-2 -ml-2 text-slate-900 dark:text-slate-100 transition-all duration-200 mb-4"
+                                />
+
+                                <div className="mt-4">
+                                    <h3 className="text-[15px] font-bold text-slate-800 dark:text-slate-200 mb-2">Description</h3>
+                                    <textarea
+                                        {...register("description")}
+                                        rows="5"
+                                        placeholder="Add a description..."
+                                        className="w-full p-3 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:bg-white dark:focus:bg-slate-900 rounded-lg border border-transparent focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 placeholder-slate-500 transition-all duration-200 resize-y"
+                                    />
+                                </div>
+
+                                <div className="mt-4">
+                                    <h3 className="text-[15px] font-bold text-slate-800 dark:text-slate-200 mb-2">Required Skills</h3>
+                                    <input
+                                        {...register("requiredSkills")}
+                                        placeholder="e.g. React, Nodejs, Design (comma separated)"
+                                        className="w-full p-3 text-sm bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:bg-white dark:focus:bg-slate-900 rounded-lg border border-transparent focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 placeholder-slate-500 transition-all duration-200"
+                                    />
+                                </div>
+                            </form>
+
+                            {/* Subtasks */}
+                            {!issue.parentId && (
+                                <div className="mt-10">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h3 className="text-[15px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                                            Subtasks
+                                            <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-full text-xs">{subtasks.length}</span>
+                                        </h3>
+                                        <button onClick={() => subtaskInputRef.current?.focus()} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer">
+                                            <Plus className="w-4 h-4" /> Add Subtask
+                                        </button>
+                                    </div>
+
+                                    {/* Progress Bar */}
+                                    {subtasks.length > 0 && (
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                                <div className="bg-blue-500 h-1.5 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+                                            </div>
+                                            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">{Math.round(progress)}% Done</span>
+                                        </div>
+                                    )}
+
+                                    <div className="border border-slate-200 dark:border-slate-700 rounded-lg">
+                                        <div className="grid grid-cols-[minmax(200px,1fr)_160px_160px_40px] items-center gap-4 px-4 py-2 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 rounded-t-md">
+                                            <span className="text-[11px] uppercase tracking-wider font-bold text-slate-500">Work</span>
+                                            <span className="text-[11px] uppercase tracking-wider font-bold text-slate-500 flex justify-center">Assignee</span>
+                                            <span className="text-[11px] uppercase tracking-wider font-bold text-slate-500 flex justify-center">Status</span>
+                                            <span></span>
+                                        </div>
+                                        {loadingSubtasks ? (
+                                            <div className="flex justify-center py-6"><Spinner /></div>
+                                        ) : subtasks.length === 0 ? (
+                                            <div className="p-6 text-center text-slate-500 text-sm">No subtasks found</div>
+                                        ) : (
+                                            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                                                {subtasks.map(sub => (
+                                                    <SubtaskRow
+                                                        key={sub._id}
+                                                        subtask={sub}
+                                                        projectMembers={projectMembers}
+                                                        boardColumns={project.boardColumns}
+                                                        onUpdate={fetchSubtasks}
+                                                        onDelete={() => handleDeleteSubtask(sub)}
+                                                        gridClass="grid-cols-[minmax(200px,1fr)_160px_160px_40px] px-4 gap-4"
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
+                                        <div className="p-2 bg-slate-50 dark:bg-slate-800/30">
+                                            <input
+                                                ref={subtaskInputRef}
+                                                type="text"
+                                                value={newSubtaskTitle}
+                                                onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                                                onKeyDown={(e) => e.key === 'Enter' && handleCreateSubtask()}
+                                                placeholder="What needs to be done? (Press Enter to add)"
+                                                className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Activity Section */}
+                            <div className="mt-10">
+                                <h3 className="text-[15px] font-bold text-slate-800 dark:text-slate-200 mb-4">Activity</h3>
+                                <div className="flex items-center border-b border-slate-200 dark:border-slate-700">
+                                    <button
+                                        onClick={() => setActiveActivityTab('comments')}
+                                        className={cn(
+                                            "px-4 py-2.5 text-sm font-semibold cursor-pointer relative",
+                                            activeActivityTab === 'comments'
+                                                ? "text-indigo-600 dark:text-indigo-400"
+                                                : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                                        )}
+                                    >
+                                        Comments
+                                        {activeActivityTab === 'comments' && (
+                                            <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400" />
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveActivityTab('history')}
+                                        className={cn(
+                                            "px-4 py-2.5 text-sm font-semibold cursor-pointer relative",
+                                            activeActivityTab === 'history'
+                                                ? "text-indigo-600 dark:text-indigo-400"
+                                                : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                                        )}
+                                    >
+                                        History
+                                        {activeActivityTab === 'history' && (
+                                            <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400" />
+                                        )}
+                                    </button>
+                                </div>
+
+                                <div className="mt-6">
+                                    {activeActivityTab === 'comments' && <CommentSection issueId={issue?._id} />}
+                                    {activeActivityTab === 'history' && <HistorySection issueId={issue?._id} />}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* RIGHT COLUMN: Details */}
+                        <div className="w-full md:w-[320px] bg-slate-50/50 dark:bg-slate-900 overflow-y-auto custom-scrollbar px-6 py-6">
+
+                            {/* Status */}
+                            <div className="mb-6">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Status</label>
+                                <SelectDropdown
+                                    value={statusValue}
+                                    options={statusOptions}
+                                    onChange={(val) => handleFieldChange("status", val)}
+                                    placeholder="Select Status"
+                                />
+                            </div>
+
+                            <div className="border-t border-slate-200 dark:border-slate-700 mb-6"></div>
+
+                            {/* Details Accordion */}
+                            <div className="space-y-5">
+                                <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm">Details</h3>
+
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 flex items-center gap-2 mb-1.5">
+                                        <User className="w-3.5 h-3.5" /> Assignee
+                                    </label>
+                                    <SelectDropdown
+                                        value={assigneeValue || 'null'}
+                                        options={assigneeOptions}
+                                        onChange={(val) => handleFieldChange("assigneeId", val)}
+                                        placeholder="Select Assignee"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 flex items-center gap-2 mb-1.5">
+                                        <Star className="w-3.5 h-3.5" /> Priority
+                                    </label>
+                                    <SelectDropdown
+                                        value={priorityValue}
+                                        options={prioritySelectOptions}
+                                        onChange={(val) => handleFieldChange("priority", val)}
+                                        placeholder="Select Priority"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 flex items-center gap-2 mb-1.5">
+                                        <ChevronsRight className="w-3.5 h-3.5" /> Story Points
+                                    </label>
+                                    <input
+                                        type="number"
+                                        {...register("storyPoints")}
+                                        onBlur={(e) => handleFieldChange("storyPoints", e.target.value)}
+                                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 flex items-center gap-2 mb-1.5">
+                                        <Clock className="w-3.5 h-3.5 text-orange-500" /> Time Expect (hours)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        {...register("timeExpect")}
+                                        readOnly
+                                        className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-500 shadow-inner cursor-not-allowed"
+                                    />
+                                    <p className="text-[10px] text-slate-400 mt-1 italic">
+                                        Calculated by system: StoryPoints × Duration
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 flex items-center gap-2 mb-1.5">
+                                        <Calendar className="w-3.5 h-3.5" /> Start Date
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        {...register("startDate")}
+                                        onBlur={(e) => handleFieldChange("startDate", e.target.value)}
+                                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 [color-scheme:light] dark:[color-scheme:dark]"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 flex items-center gap-2 mb-1.5">
+                                        <Calendar className="w-3.5 h-3.5" /> Due Date
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        {...register("dueDate")}
+                                        onBlur={(e) => handleFieldChange("dueDate", e.target.value)}
+                                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold text-slate-800 dark:text-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 [color-scheme:light] dark:[color-scheme:dark]"
+                                    />
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </motion.div>
+            </motion.div>
+        </AnimatePresence>
+    );
+};
+
+export default IssueDetailModal;

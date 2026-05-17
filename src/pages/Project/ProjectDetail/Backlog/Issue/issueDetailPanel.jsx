@@ -2,14 +2,15 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
-import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizontal, Plus, Columns } from 'lucide-react';
+import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizontal, Plus, Columns, Clock } from 'lucide-react';
 import { updateIssueApi, createSubtaskApi, getSubtaskApi } from '../../../../../utils/Api/issueApi';
 import { getProjectMembersApi } from '../../../../../utils/Api/projectApi';
 import Spinner from '../../../../../components/spinner';
-import SubtaskRow from '../../../../../components/projectPage/Backlog/IssueDetail/subtaskRow';
+import SubtaskRow from '../../../../../components/projectPage/IssueDetail/subtaskRow';
 import { cn } from '../../../../../lib/utils';
-import CommentSection from '../../../../../components/projectPage/Backlog/IssueDetail/commentSection';
-import HistorySection from '../../../../../components/projectPage/Backlog/IssueDetail/historySection';
+import SelectDropdown from '../../../../../components/selectDropdown';
+import CommentSection from '../../../../../components/projectPage/IssueDetail/commentSection';
+import HistorySection from '../../../../../components/projectPage/IssueDetail/historySection';
 
 const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteRequest, subtaskTrigger }) => {
     const [projectMembers, setProjectMembers] = useState([]);
@@ -20,19 +21,36 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
     const [activeActivityTab, setActiveActivityTab] = useState('comments');
     const subtaskInputRef = useRef(null);
 
-    const { register, handleSubmit, reset, watch } = useForm();
+    const { register, handleSubmit, reset, watch, setValue } = useForm();
     const assigneeValue = watch('assigneeId');
+    const priorityValue = watch('priority');
+
+    const assigneeOptions = [
+        { value: 'null', label: 'Unassigned' },
+        ...projectMembers.map(member => ({ value: member.accountId._id, label: member.accountId.fullName }))
+    ];
+
+    const priorityOptionsList = ["Highest", "High", "Medium", "Low", "Lowest"];
+    const prioritySelectOptions = priorityOptionsList.map(p => ({ value: p, label: p }));
 
     useEffect(() => {
         if (issue) {
+            const formatForDateTimeLocal = (dateString) => {
+                if (!dateString) return '';
+                const d = new Date(dateString);
+                return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            };
+
             reset({
                 title: issue.title,
                 description: issue.description || '',
+                requiredSkills: issue.requiredSkills ? issue.requiredSkills.join(', ') : '',
                 assigneeId: issue.assigneeId?._id || 'null',
                 priority: issue.priority,
                 storyPoints: issue.storyPoints || 0,
-                startDate: issue.startDate ? new Date(issue.startDate).toISOString().split('T')[0] : '',
-                dueDate: issue.dueDate ? new Date(issue.dueDate).toISOString().split('T')[0] : '',
+                timeExpect: issue.timeExpect || 0,
+                startDate: formatForDateTimeLocal(issue.startDate),
+                dueDate: formatForDateTimeLocal(issue.dueDate),
             });
         }
     }, [issue, reset]);
@@ -57,6 +75,7 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
             const res = await getSubtaskApi(issue._id);
             if (res && res.EC === 0) {
                 setSubtasks(res.data);
+                onDataUpdate();
             } else {
                 setSubtasks([]);
             }
@@ -74,7 +93,11 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
 
     const onSubmit = async (data) => {
         try {
-            const updateData = { ...data, assigneeId: data.assigneeId === "null" ? null : data.assigneeId, storyPoints: Number(data.storyPoints) || 0, startDate: data.startDate || null, dueDate: data.dueDate || null };
+            const parsedSkills = data.requiredSkills
+                ? data.requiredSkills.split(',').map(s => s.trim()).filter(Boolean)
+                : [];
+
+            const updateData = { ...data, requiredSkills: parsedSkills, assigneeId: data.assigneeId === "null" ? null : data.assigneeId, storyPoints: Number(data.storyPoints) || 0, startDate: data.startDate || null, dueDate: data.dueDate || null };
             const res = await updateIssueApi(issue._id, updateData);
             if (res.EC === 0) {
                 toast.success(res.EM || "Issue updated!");
@@ -107,10 +130,15 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
 
     const handleAddSubtaskClick = () => {
         subtaskInputRef.current?.focus();
+    }
+
+    const handleFieldChange = (field, val) => {
+        setValue(field, val, { shouldValidate: true });
+        handleSubmit(onSubmit)();
     };
 
     const priorityOptions = ["Highest", "High", "Medium", "Low", "Lowest"];
-    const subtasksDone = subtasks.filter(s => project.boardColumns[project.boardColumns.length - 1].name === s.status).length;
+    const subtasksDone = subtasks.filter(s => s.status && s.status.toLowerCase() === 'done').length;
     const progress = subtasks.length > 0 ? (subtasksDone / subtasks.length) * 100 : 0;
 
     return (
@@ -129,41 +157,72 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                 </div>
             </header>
             <main className="flex-grow p-6 overflow-y-auto bg-white dark:bg-slate-900 transition-colors duration-300">
-                {/* All form and content remains the same */}
                 <form onBlur={handleSubmit(onSubmit)}>
                     <input {...register("title")} className="text-2xl font-bold bg-transparent w-full focus:outline-none focus:bg-indigo-50 dark:focus:bg-indigo-900/20 rounded-md p-2 text-slate-900 dark:text-slate-100 transition-all duration-200" />
                     <div className="mt-6 space-y-4">
                         <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 transition-colors duration-300">Description</h3>
                         <textarea {...register("description")} rows="4" placeholder="Add a description..." className="w-full p-2 bg-white dark:bg-slate-900 focus:outline-none focus:bg-indigo-50 dark:focus:bg-indigo-900/20 rounded-md border border-slate-300 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-400 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all duration-200" />
                     </div>
-                    <div className="mt-6 grid grid-cols-2 gap-6">
-                        <div>
-                            <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2 transition-colors duration-300"><User className="w-4 h-4" />Assignee</label>
-                            <select {...register("assigneeId")} value={assigneeValue || 'null'} className="mt-1 w-full p-2 bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-slate-900 dark:text-slate-100 transition-all duration-200">
-                                <option value="null">Unassigned</option>
-                                {projectMembers.map(member => (<option key={member.accountId._id} value={member.accountId._id}>{member.accountId.fullName}</option>))}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2 transition-colors duration-300"><Star className="w-4 h-4" />Priority</label>
-                            <select {...register("priority")} className="mt-1 w-full p-2 bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-slate-900 dark:text-slate-100 transition-all duration-200">
-                                {priorityOptions.map(p => <option key={p} value={p}>{p}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2 transition-colors duration-300"><ChevronsRight className="w-4 h-4" />Story Points</label>
-                            <input type="number" {...register("storyPoints")} className="mt-1 w-full p-2 bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-slate-900 dark:text-slate-100 transition-all duration-200" />
-                        </div>
-                        <div>
-                            <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2 transition-colors duration-300"><Calendar className="w-4 h-4" />Start Date</label>
-                            <input type="date" {...register("startDate")} className="mt-1 w-full p-2 bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-slate-900 dark:text-slate-100 transition-all duration-200" />
-                        </div>
-                        <div>
-                            <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2 transition-colors duration-300"><Calendar className="w-4 h-4" />Due Date</label>
-                            <input type="date" {...register("dueDate")} className="mt-1 w-full p-2 bg-white dark:bg-slate-900 rounded-md border border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-slate-900 dark:text-slate-100 transition-all duration-200" />
-                        </div>
+                    <div className="mt-4 space-y-2">
+                        <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400 transition-colors duration-300">Required Skills (comma separated)</h3>
+                        <input {...register("requiredSkills")} placeholder="e.g. React, Nodejs, Design" className="w-full p-2 bg-white dark:bg-slate-900 focus:outline-none focus:bg-indigo-50 dark:focus:bg-indigo-900/20 rounded-md border border-slate-300 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-400 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all duration-200" />
                     </div>
                 </form>
+
+                <div className="mt-6 grid grid-cols-2 gap-6">
+                    <div>
+                        <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2 transition-colors duration-300 mb-1"><User className="w-4 h-4" />Assignee</label>
+                        <SelectDropdown
+                            value={assigneeValue || 'null'}
+                            options={assigneeOptions}
+                            onChange={(val) => handleFieldChange("assigneeId", val)}
+                            placeholder="Select Assignee"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2 transition-colors duration-300 mb-1"><Star className="w-4 h-4" />Priority</label>
+                        <SelectDropdown
+                            value={priorityValue}
+                            options={prioritySelectOptions}
+                            onChange={(val) => handleFieldChange("priority", val)}
+                            placeholder="Select Priority"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2 transition-colors duration-300 mb-1"><ChevronsRight className="w-4 h-4" />Story Points</label>
+                        <input
+                            type="number"
+                            {...register("storyPoints")}
+                            onBlur={(e) => handleFieldChange("storyPoints", e.target.value)} // <-- Thêm onBlur
+                            className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2 transition-colors duration-300 mb-1">
+                            <Clock className="w-4 h-4 text-orange-500" />Time Expect (hrs)
+                        </label>
+                        <input type="text" {...register("timeExpect")} readOnly className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold text-slate-500 cursor-not-allowed shadow-inner" />
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 italic tracking-tight">Auto-calc: StoryPoints × (DueDate - StartDate)</p>
+                    </div>
+                    <div className="col-span-2">
+                        <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2 transition-colors duration-300 mb-1"><Calendar className="w-4 h-4" />Start Date</label>
+                        <input
+                            type="datetime-local"
+                            {...register("startDate")}
+                            onBlur={(e) => handleFieldChange("startDate", e.target.value)} // <-- Thêm onBlur
+                            className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 [color-scheme:light] dark:[color-scheme:dark]"
+                        />
+                    </div>
+                    <div className="col-span-2">
+                        <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2 transition-colors duration-300 mb-1"><Calendar className="w-4 h-4" />Due Date</label>
+                        <input
+                            type="datetime-local"
+                            {...register("dueDate")}
+                            onBlur={(e) => handleFieldChange("dueDate", e.target.value)} // <-- Thêm onBlur
+                            className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 [color-scheme:light] dark:[color-scheme:dark]"
+                        />
+                    </div>
+                </div>
                 {!issue?.parentId && (
                     <div className="mt-8">
                         <div className="flex items-center justify-between mb-2">
@@ -186,14 +245,15 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
 
                         {isSubtasksVisible && (
                             <div className="border border-slate-200 dark:border-slate-700 rounded-md">
-                                <div className="grid grid-cols-[minmax(0,1fr)_120px_100px_40px] items-center gap-4 px-2 py-1 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+                                {/* SỬA grid-cols VÀ BỎ flex justify-center Ở HEADER */}
+                                <div className="grid grid-cols-[minmax(100px,1fr)_105px_105px_28px] items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 rounded-t-md">
                                     <span className="text-xs font-bold text-slate-500">Work</span>
-                                    <span className="text-xs font-bold text-slate-500 text-center">Assignee</span>
-                                    <span className="text-xs font-bold text-slate-500 text-center">Status</span>
+                                    <span className="text-xs font-bold text-slate-500">Assignee</span>
+                                    <span className="text-xs font-bold text-slate-500">Status</span>
                                     <span></span>
                                 </div>
                                 {loadingSubtasks ? <div className="flex justify-center py-4"><Spinner /></div> : (
-                                    <div>
+                                    <div className="divide-y divide-slate-200 dark:divide-slate-700">
                                         {subtasks.map(sub => (
                                             <SubtaskRow
                                                 key={sub._id}
@@ -202,6 +262,7 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                                                 boardColumns={project.boardColumns}
                                                 onUpdate={fetchSubtasks}
                                                 onDelete={() => onDeleteRequest(sub)}
+                                                gridClass="grid-cols-[minmax(100px,1fr)_105px_105px_28px]"
                                             />
                                         ))}
                                     </div>

@@ -12,14 +12,15 @@ import ProjectDetailsLayout from "./layout/projectDetailsLayout";
 import Board from "./pages/Project/ProjectDetail/Board/board";
 import Backlog from "./pages/Project/ProjectDetail/Backlog/backlog";
 import ProcessFlow from "./pages/Project/ProjectDetail/ProcessFlow/processFlow";
+import TeamHealth from "./pages/Project/ProjectDetail/TeamHealth/teamHealth";
+import BottleneckDetector from "./pages/Project/ProjectDetail/Bottleneck/bottleneckDetector";
+import IssueList from "./pages/Project/ProjectDetail/List/issueList";
 import GitHubCallback from "./pages/auth/GitHubCallback";
 import GoogleCallback from "./pages/auth/GoogleCallback";
 
 // Coming Soon Pages
 import OverviewDashboard from "./pages/Project/Monitor/OverviewDashboard";
 import RealTimeEventLog from "./pages/Project/Monitor/RealTimeEventLog";
-import BottleneckDetector from "./pages/Project/Intelligence/BottleneckDetector";
-import TeamHealth from "./pages/Project/ProjectDetail/TeamHealth";
 import RBACPermissions from "./pages/Project/ProjectDetail/RBACPermissions";
 import AuditLogs from "./pages/Project/ProjectDetail/AuditLogs";
 import ImportExportData from "./pages/Project/Operations/ImportExportData";
@@ -120,6 +121,13 @@ const router = createBrowserRouter([
             element:
               <ProtectedRoute allowedRoles={["admin", "user"]}>
                 <OverviewDashboard />
+              </ProtectedRoute>
+          },
+          {
+            path: "list",
+            element:
+              <ProtectedRoute allowedRoles={["admin", "user"]}>
+                <IssueList />
               </ProtectedRoute>
           },
           {

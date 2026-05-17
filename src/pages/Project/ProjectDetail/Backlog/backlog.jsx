@@ -59,9 +59,18 @@ const Backlog = () => {
         fetchSprints();
     }, [fetchSprints]);
 
+    useEffect(() => {
+        if (selectedIssue) {
+            const updatedIssue = issues.find(i => i._id === selectedIssue._id);
+            if (updatedIssue && JSON.stringify(updatedIssue) !== JSON.stringify(selectedIssue)) {
+                setSelectedIssue(updatedIssue);
+            }
+        }
+    }, [issues]);
+
     const handleDataUpdate = () => {
         fetchSprints();
-        if (fetchIssuesData) fetchIssuesData();
+        fetchIssuesData();
     };
 
     const findContainer = (id) => {
@@ -152,9 +161,13 @@ const Backlog = () => {
     const handleCompleteSprint = async (sprintId) => {
         try {
             const res = await completeSprintApi(sprintId);
-            if (res?.EC === 0) toast.success(res.EM);
-            else toast.error(res.EM || "Failed to complete sprint.");
-            fetchSprints();
+            if (res && res.EC === 0) {
+                toast.success(res.EM || "Sprint completed successfully!");
+                fetchSprints();
+                fetchIssuesData();
+            } else {
+                toast.error(res.EM || "Failed to complete sprint.");
+            }
         } catch (error) {
             toast.error(error?.response?.data?.EM || "Failed to complete sprint.");
         }
@@ -174,7 +187,7 @@ const Backlog = () => {
             if (selectedIssue?._id === issueToDelete._id) setSelectedIssue(null);
             if (isSubtask) setSubtaskTrigger(prev => prev + 1);
             setIssueToDelete(null);
-            if (fetchIssuesData) fetchIssuesData();
+            fetchIssuesData();
         } finally { setActionLoading(false); }
     };
 

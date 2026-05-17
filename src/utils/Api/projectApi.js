@@ -63,6 +63,16 @@ const updateIssueTypesApi = (projectId, issueTypes) => {
     return axios.put(URL_API, issueTypes);
 };
 
+const deleteIssueTypeApi = (projectId, issueTypeName, targetTypeName = null) => {
+    const URL_API = `/v1/api/projects/${projectId}/issue-types/${encodeURIComponent(issueTypeName)}`;
+    const data = {};
+
+    if (targetTypeName) {
+        data.targetTypeName = targetTypeName;
+    }
+
+    return axios.delete(URL_API, { data });
+}
 export {
     createProjectApi,
     getAllProjectsApi,
@@ -73,5 +83,6 @@ export {
     getProjectMembersApi,
     updateBoardColumnsApi,
     updateIssueTypesApi,
+    deleteIssueTypeApi,
     deleteBoardColumnApi,
 };

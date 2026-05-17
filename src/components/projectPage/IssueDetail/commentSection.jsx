@@ -1,13 +1,11 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { ChevronDown } from 'lucide-react';
-import { AuthContext } from '../../../../context/auth.context';
-import { getCommentsByIssueApi, createCommentApi, updateCommentApi, deleteCommentApi } from '../../../../utils/Api/commentApi';
-import Spinner from '../../../spinner';
-import { io } from 'socket.io-client';
+import { AuthContext } from '../../../context/auth.context';
+import { getCommentsByIssueApi, createCommentApi, updateCommentApi, deleteCommentApi } from '../../../utils/Api/commentApi';
+import Spinner from '../../spinner';
+import socket from '../../../utils/socket';
 import CommentItem from './commentItem';
-
-const socket = io(import.meta.env.VITE_BACKEND_URL);
 
 const CommentSection = ({ issueId }) => {
     const { auth } = useContext(AuthContext);

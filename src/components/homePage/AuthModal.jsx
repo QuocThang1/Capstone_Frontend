@@ -643,7 +643,6 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
             role: account.role || "user",
           },
         });
-
         toast.success(res.EM || "Login successful!");
         setIsSuccess(true);
         setTimeout(() => {

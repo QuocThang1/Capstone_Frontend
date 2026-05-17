@@ -5,6 +5,7 @@ import { getIssuesByProjectApi } from '../utils/Api/issueApi';
 import { getStarredProjectsApi, toggleStarProjectApi } from '../utils/Api/accountApi';
 import Spinner from '../components/spinner';
 import { toast } from 'react-toastify';
+import socket from '../utils/socket';
 
 import ProjectNavbar from '../components/ProjectNavbar';
 import AddMemberModal from '../pages/Project/ProjectDetail/addMemberModal';
@@ -62,6 +63,16 @@ const ProjectDetailsLayout = () => {
             setLoading(false);
         };
         fetchInitialData();
+
+        if (socket) {
+            socket.emit('join_project_room', projectId);
+        }
+
+        return () => {
+            if (socket) {
+                socket.emit('leave_project_room', projectId);
+            }
+        };
     }, [projectId]);
 
     const handleToggleStar = async (e) => {

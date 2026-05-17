@@ -31,6 +31,12 @@ export const Header = () => {
         role: "",
       },
     });
+    Object.keys(localStorage).forEach((key) => {
+      // Quét tìm tất cả các key bắt đầu bằng "pinned_nav_" và xóa chúng
+      if (key.startsWith('pinned_nav_')) {
+        localStorage.removeItem(key);
+      }
+    });
     setDropdownOpen(false);
     navigate("/");
   };
