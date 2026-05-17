@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Zap, TrendingDown, Clock, AlertCircle, ChevronRight, RefreshCw, Brain } from "lucide-react";
 import { motion } from "framer-motion";
-
-const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } };
-const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 280, damping: 22 } } };
-const summaryItem = { hidden: { opacity: 0, scale: 0.95 }, show: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 260, damping: 20 } } };
-const summaryContainer = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } } };
-const filterItem = { hidden: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 300, damping: 25 } } };
-const filterContainer = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05, delayChildren: 0.3 } } };
+import {
+  bottleneckContainer,
+  bottleneckItem,
+  summaryItem,
+  summaryContainer,
+  filterItem,
+  filterContainer,
+  buttonVariants,
+} from "../../../utils/motionVariants";
 
 const BOTTLENECKS = [
   {
@@ -74,7 +76,7 @@ const trendIcon = {
 
 function BottleneckCard({ bn, expanded, onToggle }) {
   return (
-    <motion.div variants={item}>
+    <motion.div variants={bottleneckItem}>
       <motion.div
         layout
         initial={{ opacity: 0 }}
@@ -205,7 +207,7 @@ const BottleneckDetector = () => {
           <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="ml-auto text-xs text-slate-400 dark:text-slate-500">{filtered.length} detected</motion.span>
         </motion.div>
 
-        <motion.div variants={container} initial="hidden" animate="show" className="space-y-3">
+        <motion.div variants={bottleneckContainer} initial="hidden" animate="show" className="space-y-3">
           {filtered.map((bn) => (
             <BottleneckCard
               key={bn.id}

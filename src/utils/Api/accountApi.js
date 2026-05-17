@@ -53,4 +53,25 @@ const getStarredProjectsApi = () => {
     return axios.get(URL_API);
 };
 
-export { signUpApi, loginApi, getAccountApi, updateProfileApi, sendOtpApi, verifyOtpApi, toggleStarProjectApi, getStarredProjectsApi };
+const googleLoginApi = (authCode) => {
+    const URL_API = "/v1/api/auth/google";
+    return axios.post(URL_API, { code: authCode });
+};
+
+const githubLoginApi = (code) => {
+    const URL_API = "/v1/api/auth/github";
+    return axios.post(URL_API, { code });
+};
+
+export {
+    signUpApi,
+    loginApi,
+    getAccountApi,
+    updateProfileApi,
+    sendOtpApi,
+    verifyOtpApi,
+    toggleStarProjectApi,
+    getStarredProjectsApi,
+    googleLoginApi,
+    githubLoginApi,
+};

@@ -12,6 +12,8 @@ import ProjectDetailsLayout from "./layout/projectDetailsLayout";
 import Board from "./pages/Project/ProjectDetail/Board/board";
 import Backlog from "./pages/Project/ProjectDetail/Backlog/backlog";
 import ProcessFlow from "./pages/Project/ProjectDetail/ProcessFlow/processFlow";
+import GitHubCallback from "./pages/auth/GitHubCallback";
+import GoogleCallback from "./pages/auth/GoogleCallback";
 
 // Coming Soon Pages
 import OverviewDashboard from "./pages/Project/Monitor/OverviewDashboard";
@@ -25,6 +27,14 @@ import AutomationRules from "./pages/Project/Operations/AutomationRules";
 
 
 const router = createBrowserRouter([
+  {
+    path: "/auth/github/callback",
+    element: <GitHubCallback />
+  },
+  {
+    path: "/auth/google/callback",
+    element: <GoogleCallback />
+  },
   {
     path: "/",
     element: <GeneralLayout />,

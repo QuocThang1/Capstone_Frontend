@@ -1,8 +1,9 @@
 import { useState, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CloseOutlined, CheckCircleOutlined, GoogleOutlined, GithubOutlined } from "@ant-design/icons";
+import { useGoogleLogin } from "@react-oauth/google";
 import { AuthContext } from "../../context/auth.context";
-import { loginApi, signUpApi, sendOtpApi, verifyOtpApi } from "../../utils/Api/accountApi";
+import { loginApi, signUpApi, sendOtpApi, verifyOtpApi, googleLoginApi, githubLoginApi } from "../../utils/Api/accountApi";
 import { toast } from "react-toastify";
 
 // Success Step Component
@@ -35,7 +36,7 @@ const SuccessStep = ({ modalMode }) => (
 );
 
 // Signup Steps Component
-const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleContinue, handleBack, setModalMode, resetModal, handleSocialAuth, isSubmitting }) => (
+const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleContinue, handleBack, setModalMode, resetModal, handleSocialAuth, isSubmitting, handleGoogleLogin }) => (
   <AnimatePresence mode="wait">
     {currentStep === 1 && (
       <motion.div
@@ -101,22 +102,18 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
 
         <div className="grid grid-cols-2 gap-3">
           <button
-            onClick={() => handleSocialAuth("google")}
+            onClick={() => handleGoogleLogin()}
             className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50 transition-all hover:shadow-md"
           >
             <GoogleOutlined className="text-blue-500" />
-            <span className="text-sm font-medium">
-              Google
-            </span>
+            <span className="text-sm font-medium">Google</span>
           </button>
           <button
             onClick={() => handleSocialAuth("github")}
             className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50 transition-all hover:shadow-md"
           >
             <GithubOutlined className="text-gray-900 dark:text-gray-100" />
-            <span className="text-sm font-medium">
-              GitHub
-            </span>
+            <span className="text-sm font-medium">GitHub</span>
           </button>
         </div>
 
@@ -275,7 +272,7 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
 );
 
 // Login Step Component
-const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitting, setModalMode, resetModal, handleSocialAuth }) => (
+const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitting, setModalMode, resetModal, handleSocialAuth, handleGoogleLogin }) => (
   <motion.div
     key="login"
     initial={{ x: 20, opacity: 0 }}
@@ -374,22 +371,18 @@ const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitt
 
     <div className="grid grid-cols-2 gap-3">
       <button
-        onClick={() => handleSocialAuth("google")}
+        onClick={() => handleGoogleLogin()}
         className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50 transition-all hover:shadow-md"
       >
         <GoogleOutlined className="text-blue-500" />
-        <span className="text-sm font-medium">
-          Google
-        </span>
+        <span className="text-sm font-medium">Google</span>
       </button>
       <button
         onClick={() => handleSocialAuth("github")}
         className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50 transition-all hover:shadow-md"
       >
         <GithubOutlined className="text-gray-900 dark:text-gray-100" />
-        <span className="text-sm font-medium">
-          GitHub
-        </span>
+        <span className="text-sm font-medium">GitHub</span>
       </button>
     </div>
 
@@ -427,6 +420,61 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
   const validatePassword = (password) => password.length >= 8;
 
   const { setAuth } = useContext(AuthContext);
+
+  const googleLogin = useGoogleLogin({
+    flow: "auth-code",
+    onSuccess: async (codeResponse) => {
+      try {
+        setIsSubmitting(true);
+        // Send authorization code to backend
+        const res = await googleLoginApi(codeResponse.code);
+
+        if (res.EC === 0) {
+          const account = res.data || {};
+          if (res.access_token) {
+            localStorage.setItem("access_token", res.access_token);
+          }
+          setAuth({
+            isAuthenticated: true,
+            user: {
+              _id: account._id || "",
+              email: account.email || "",
+              fullName: account.fullName || "",
+              username: account.username || "",
+              dob: account.dob || "",
+              gender: account.gender || "",
+              phone: account.phone || "",
+              role: account.role || "user",
+              avatar: account.avatar || "",
+            },
+          });
+
+          toast.success("Login with Google successful!");
+          setIsSuccess(true);
+          setTimeout(() => {
+            setIsSuccess(false);
+            onClose();
+            resetModal();
+          }, 1200);
+        } else {
+          const errorMessage = res.EM || "Google login failed";
+          setErrors({ general: errorMessage });
+          toast.error(errorMessage);
+        }
+      } catch (error) {
+        console.error("Google login error:", error);
+        const errorMessage = error?.response?.data?.EM || "Google login failed";
+        setErrors({ general: errorMessage });
+        toast.error(errorMessage);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    onError: () => {
+      toast.error("Google login failed");
+      setIsSubmitting(false);
+    },
+  });
 
   const handleContinue = async () => {
     if (isSubmitting) return;
@@ -655,9 +703,25 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
     }
   };
 
-  const handleSocialAuth = (provider) => {
-    console.log(`Authenticating with ${provider}`);
-    // Handle social authentication here
+  const handleSocialAuth = async (provider) => {
+    if (provider === "google") {
+      // Google OAuth will be handled by useGoogleLogin hook
+      return;
+    }
+
+    if (provider === "github") {
+      try {
+        setIsSubmitting(true);
+        // Redirect to GitHub OAuth
+        const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
+        const redirectUri = encodeURIComponent(`${window.location.origin}/auth/github/callback`);
+        window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email`;
+      } catch (error) {
+        console.error("GitHub auth error:", error);
+        toast.error("Failed to initiate GitHub login");
+        setIsSubmitting(false);
+      }
+    }
   };
 
   return (
@@ -705,6 +769,7 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
                     resetModal={resetModal}
                     handleSocialAuth={handleSocialAuth}
                     isSubmitting={isSubmitting}
+                    handleGoogleLogin={googleLogin}
                   />
                 ) : (
                   <LoginStep
@@ -717,6 +782,7 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
                     setModalMode={setModalMode}
                     resetModal={resetModal}
                     handleSocialAuth={handleSocialAuth}
+                    handleGoogleLogin={googleLogin}
                   />
                 )}
               </AnimatePresence>

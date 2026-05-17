@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Activity, ShieldAlert, CheckCircle2, Info, AlertTriangle, Play, Pause } from "lucide-react";
 import { format } from "date-fns";
-
-const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
-const item = { hidden: { opacity: 0, x: -12 }, show: { opacity: 1, x: 0 } };
+import { eventLogContainer, eventLogItem } from "../../../utils/motionVariants";
 
 // Mock hook for events data
 const useListEvents = () => ({
@@ -135,9 +133,21 @@ const RealTimeEventLog = () => {
               <p className="text-sm font-medium">Waiting for data...</p>
             </div>
           ) : (
-            <div className="flex flex-col">
-              {events.map(ev => <EventRow key={ev.id} event={ev} />)}
-            </div>
+            <motion.div
+              className="flex flex-col"
+              initial="hidden"
+              animate="show"
+              variants={eventLogContainer}
+            >
+              {events.map((ev) => (
+                <motion.div
+                  key={ev.id}
+                  variants={eventLogItem}
+                >
+                  <EventRow event={ev} />
+                </motion.div>
+              ))}
+            </motion.div>
           )}
         </div>
       </div>

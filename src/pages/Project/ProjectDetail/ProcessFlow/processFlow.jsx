@@ -244,9 +244,8 @@ const ProcessFlow = () => {
       >
         <motion.div variants={itemVariants} className="flex items-center justify-between mb-6 shrink-0 flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tighter flex items-center gap-3">
-              <GitBranch className="w-8 h-8 text-indigo-600" />
-              Process flow Editor
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+              Flow Editor
             </h1>
             <p className="mt-1 text-slate-500 font-medium text-sm">Design and apply status transition rules for your project.</p>
           </div>

@@ -38,8 +38,13 @@ const Card = ({ children, className = "" }) => {
 const SystemAdminView = () => {
   const { data: events = [] } = useListEvents();
 
-  return (
-    <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+  return (      
+    <motion.div 
+      variants={container} 
+      initial="hidden" 
+      animate="show" 
+      className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 p-2"
+    >
       {/* Global Continuity Score */}
       <motion.div variants={item}>
         <Card className="p-6 relative overflow-hidden group">
@@ -451,7 +456,7 @@ const ForYou = () => {
   const tabs = ["Worked on", "Viewed", "Assigned to me", "Starred", "Boards"];
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="space-y-8 pb-10 p-6">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}

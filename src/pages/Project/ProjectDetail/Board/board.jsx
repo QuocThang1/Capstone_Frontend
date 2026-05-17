@@ -159,11 +159,11 @@ const Board = () => {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="h-full flex flex-col p-6 space-y-6 overflow-hidden"
+                className="h-full flex flex-col space-y-6 overflow-hidden p-2"
             >
                 <motion.header variants={itemVariants} className="flex justify-between items-end">
                     <div>
-                        <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
                             {activeSprint ? activeSprint.name : 'Board Overview'}
                         </h1>
                         <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">
