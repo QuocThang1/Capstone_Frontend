@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { CheckSquare, MoreHorizontal, Trash2, Edit, AlertTriangle } from 'lucide-react';
-import { format, isPast, isToday, startOfDay } from 'date-fns'; // Dùng thư viện date-fns để xử lý ngày tháng cho chuẩn
+import { MoreHorizontal, Trash2, Edit, AlertTriangle } from 'lucide-react';
+import { format, isPast } from 'date-fns';
+import { toast } from 'react-toastify';
+import SelectDropdown from '../../selectDropdown';
+import { updateIssueApi } from '../../../utils/Api/issueApi';
 
 const getStatusStyles = (status) => {
     if (status === 'Done') {
@@ -11,7 +14,7 @@ const getStatusStyles = (status) => {
     return 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-300';
 };
 
-const IssueRow = ({ issue, onSelect, onOpenDeleteModal }) => {
+const IssueRow = ({ issue, project, onSelect, onOpenDeleteModal, onDataUpdate }) => {
     const [isMenuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
@@ -58,16 +61,32 @@ const IssueRow = ({ issue, onSelect, onOpenDeleteModal }) => {
         }
     };
 
+    // Hàm gọi lấy dữ liệu và đổi Type khi đổi qua Dropdown
+    const handleTypeChange = async (newType) => {
+        if (newType === issue.type) return;
+        try {
+            const res = await updateIssueApi(issue._id, { type: newType });
+            if (res.EC === 0) {
+                if (onDataUpdate) onDataUpdate();
+            } else {
+                toast.error(res.EM || "Failed to update issue type.");
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.EM || "An error occurred.");
+        }
+    };
+
+    const issueTypeOptions = project?.issueTypes?.map(type => ({
+        value: type.name,
+        label: type.name
+    })) || [];
+
     const renderDueDate = () => {
         if (!issue.dueDate) return null;
 
-
         const dueDateObj = new Date(issue.dueDate);
-
         const isUrgent = isPast(dueDateObj);
-
         const formattedDate = format(dueDateObj, 'MMM dd');
-
         const displayUrgentStyle = isUrgent && issue.status !== 'Done';
 
         return (
@@ -95,20 +114,26 @@ const IssueRow = ({ issue, onSelect, onOpenDeleteModal }) => {
             className={`flex items-center justify-between p-2 rounded group touch-none cursor-pointer ${isDragging ? 'bg-blue-100 dark:bg-blue-900/50 shadow-lg' : 'hover:bg-slate-100 dark:hover:bg-slate-700/50'}`}
         >
             <div className="flex items-center gap-3 flex-grow-1 min-w-0">
-                <div>
-                    <CheckSquare className="w-4 h-4 text-green-500" />
+                {/* Khu vực Dropdown Issue Type được bọc bởi stopPropagation để ko gây kéo-thả nhầm */}
+                <div
+                    className="w-28 flex-shrink-0"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <SelectDropdown
+                        value={issue.type || (issueTypeOptions[0]?.value)}
+                        options={issueTypeOptions}
+                        onChange={handleTypeChange}
+                        size="sm"
+                    />
                 </div>
                 <span className="text-xs font-semibold text-slate-500">{issue.issueKey}</span>
                 <span className="text-sm text-slate-800 dark:text-slate-200 truncate">{issue.title}</span>
             </div>
 
-            {/* Phân cột hiển thị trạng thái và thông tin bổ sung */}
             <div className="flex items-center gap-2 flex-shrink-0 ml-4">
-
-                {/* Nơi nhúng badge ngày Due Date */}
                 {renderDueDate()}
 
-                {/* Các khối cũ không thay đổi */}
                 <div className="flex items-center justify-center w-28 flex-shrink-0 px-2">
                     {issue.status && (
                         <span className={`px-2.5 py-0.5 text-xs font-semibold capitalize rounded ${getStatusStyles(issue.status)}`}>

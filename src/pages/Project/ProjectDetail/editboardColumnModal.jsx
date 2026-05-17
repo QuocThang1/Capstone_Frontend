@@ -196,9 +196,10 @@ const EditBoardColumnsModal = ({ isOpen, onClose, project, onColumnsUpdate }) =>
             <MoveIssuesModal
                 isOpen={!!columnToDelete}
                 onClose={() => setColumnToDelete(null)}
-                columnToDelete={columnToDelete}
-                otherColumns={fields.filter(col => col.id !== columnToDelete?.id)}
+                itemToDelete={columnToDelete}
+                availableItems={fields.filter(col => col.id !== columnToDelete?.id)}
                 onConfirm={handleConfirmMoveAndDelete}
+                type="column"
             />
         </>
     );

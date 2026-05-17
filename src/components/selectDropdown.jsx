@@ -19,7 +19,7 @@ const SelectDropdown = ({ value, options, onChange, placeholder, size = "md", wi
     const selectedOption = options.find(o => o.value === value);
 
     // Kích thước của trigger button (để tái sử dụng cho loại to nhỏ khác nhau)
-    const paddingClass = size === "sm" ? "px-2 py-1 text-xs" : "px-3 py-2 text-sm";
+    const paddingClass = size === "sm" ? "px-2.5 py-1 text-xs text-slate-700 dark:text-slate-200" : "px-3 py-2 text-sm text-slate-700 dark:text-slate-200";
 
     return (
         <div className={`relative ${width}`} ref={ref}>
