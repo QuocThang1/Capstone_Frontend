@@ -119,6 +119,12 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
       isAuthenticated: false,
       user: null,
     });
+    Object.keys(localStorage).forEach((key) => {
+      // Quét tìm tất cả các key bắt đầu bằng "pinned_nav_" và xóa chúng
+      if (key.startsWith('pinned_nav_')) {
+        localStorage.removeItem(key);
+      }
+    });
     toast.success("Logged out successfully!");
     navigate("/");
   };

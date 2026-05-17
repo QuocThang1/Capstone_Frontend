@@ -171,9 +171,13 @@ const Backlog = () => {
     const handleCompleteSprint = async (sprintId) => {
         try {
             const res = await completeSprintApi(sprintId);
-            if (res?.EC === 0) toast.success(res.EM);
-            else toast.error(res.EM || "Failed to complete sprint.");
-            fetchSprints();
+            if (res && res.EC === 0) {
+                toast.success(res.EM || "Sprint completed successfully!");
+                fetchSprints();
+                fetchIssuesData();
+            } else {
+                toast.error(res.EM || "Failed to complete sprint.");
+            }
         } catch (error) {
             toast.error(error?.response?.data?.EM || "Failed to complete sprint.");
         }

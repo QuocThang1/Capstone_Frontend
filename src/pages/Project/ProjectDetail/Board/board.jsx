@@ -197,9 +197,13 @@ const Board = () => {
         setIsCompleting(true);
         try {
             const res = await completeSprintApi(activeSprint._id);
-            toast.success(res.EM || "Sprint completed successfully!");
-            setActiveSprint(null);
-            if (fetchIssuesData) fetchIssuesData();
+            if (res && res.EC === 0) {
+                toast.success(res.EM || "Sprint completed successfully!");
+                setActiveSprint(null);
+                if (fetchIssuesData) fetchIssuesData();
+            } else {
+                toast.error(res.EM || "Failed to complete sprint.");
+            }
         } catch (error) {
             toast.error(error.response?.data?.EM || "Failed to complete sprint.");
         } finally {

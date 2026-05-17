@@ -4,7 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, ShieldAlert } from 'lucide-react';
 import { toast } from 'react-toastify';
 
-import { getBottlenecksByProjectApi } from '../../../../utils/Api/bottleneckApi';
+import {
+  getBottlenecksByProjectApi,
+  requestResolveBottleneckApi,
+  approveResolveBottleneckApi
+} from '../../../../utils/Api/bottleneckApi';
 import BottleneckCard from '../../../../components/projectPage/Bottleneck/bottleneckCard';
 
 const containerVariants = {
@@ -45,7 +49,6 @@ const BottleneckDetector = () => {
     if (!socket) return;
 
     const handleNewBottleneck = (newBottleneck) => {
-      console.log("Realtime Bottleneck received!", newBottleneck);
       toast.warn(`New Bottleneck Detected: ${newBottleneck.name}`, { theme: "colored" });
       fetchBottlenecks();
     };
@@ -54,7 +57,36 @@ const BottleneckDetector = () => {
     return () => socket.off('bottleneck_alert', handleNewBottleneck);
   }, [socket, project?._id]);
 
-  const activeCount = bottlenecks.filter(b => !b.isResolved).length;
+  const handleRequestResolve = async (bottleneckId) => {
+    try {
+      const res = await requestResolveBottleneckApi(bottleneckId);
+      if (res && res.EC === 0) {
+        toast.success(res.EM || "Request sent successfully!");
+        fetchBottlenecks(); // Refresh list to update status
+      } else {
+        toast.error(res.EM || "Failed to make request.");
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.EM || "Error making resolve request.");
+    }
+  };
+
+  const handleApproveResolve = async (bottleneckId, isApproved) => {
+    try {
+      const res = await approveResolveBottleneckApi(bottleneckId, isApproved);
+      if (res && res.EC === 0) {
+        toast.success(res.EM || "Action processed successfully!");
+        fetchBottlenecks(); // Refresh list to update status
+      } else {
+        toast.error(res.EM || "Failed to process action.");
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.EM || "Error approving/rejecting request.");
+    }
+  };
+
+  // Đếm các mục chưa resolve (unresolved hoặc đang chờ pending)
+  const activeCount = bottlenecks.filter(b => b.status !== 'resolved').length;
 
   return (
     <motion.div
@@ -95,6 +127,8 @@ const BottleneckDetector = () => {
                 bn={bn}
                 expanded={expandedId}
                 onToggle={setExpandedId}
+                onRequestResolve={handleRequestResolve}
+                onApproveResolve={handleApproveResolve}
               />
             ))}
           </AnimatePresence>

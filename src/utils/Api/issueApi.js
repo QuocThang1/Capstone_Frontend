@@ -11,9 +11,10 @@ const getIssuesBySprintApi = (sprintId) => {
     return axios.get(URL_API);
 };
 
-const getIssuesByProjectApi = (projectId) => {
+const getIssuesByProjectApi = (projectId, filters = {}) => {
     const URL_API = `/v1/api/issues/project/${projectId}`;
-    return axios.get(URL_API);
+
+    return axios.get(URL_API, { params: filters });
 };
 
 const updateIssueApi = (issueId, updateData) => {

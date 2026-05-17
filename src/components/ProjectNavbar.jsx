@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, Plus, MoreHorizontal, Share2, LayoutDashboard,
-  CircuitBoard, Scroll, GitBranch, UserPlus, Columns, Tag, Star
+  CircuitBoard, Scroll, GitBranch, UserPlus, Columns, Tag, Star, LayoutList,
+  Activity, Zap, Users, Shield, FileText, Settings, X
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import MoreNavDropdown from './MoreNavModal';
@@ -29,12 +30,47 @@ const ProjectNavbar = ({
 
   const basePath = `/projects/${projectId}`;
 
-  const navItems = [
-    { label: 'Summary', icon: LayoutDashboard, path: `${basePath}/overview` },
-    { label: 'Board', icon: CircuitBoard, path: `${basePath}/board` },
-    { label: 'Backlog', icon: Scroll, path: `${basePath}/backlog` },
-    { label: 'Process Flow', icon: GitBranch, path: `${basePath}/process-flow` },
-  ];
+  // KHỞI TẠO CẤU HÌNH CHO TẤT CẢ CÁC NAV ITEMS GỒM MẶC ĐỊNH VÀ MỞ RỘNG
+  const allNavItems = useMemo(() => [
+    { id: 'overview', label: 'Summary', icon: LayoutDashboard, path: `${basePath}/overview`, fixed: true },
+    { id: 'board', label: 'Board', icon: CircuitBoard, path: `${basePath}/board`, fixed: true },
+    { id: 'backlog', label: 'Backlog', icon: Scroll, path: `${basePath}/backlog`, fixed: true },
+    { id: 'process-flow', label: 'Process Flow', icon: GitBranch, path: `${basePath}/process-flow`, fixed: true },
+    { id: 'list', label: 'List', icon: LayoutList, path: `${basePath}/list`, fixed: true },
+
+    // Các tùy chọn nâng cao có thể Pin / Unpin
+    { id: 'realtime-logs', label: 'Real-time Log', icon: Activity, path: `${basePath}/realtime-logs`, description: 'Monitor real-time events', fixed: false },
+    { id: 'bottleneck-detector', label: 'Bottleneck', icon: Zap, path: `${basePath}/bottleneck-detector`, description: 'AI-powered analysis', tag: 'AI', fixed: false },
+    { id: 'team-health', label: 'Team Health', icon: Users, path: `${basePath}/team-health`, description: 'Team metrics', fixed: false },
+    { id: 'rbac', label: 'RBAC', icon: Shield, path: `${basePath}/rbac`, description: 'Manage permissions', fixed: false },
+    { id: 'audit-logs', label: 'Audit Logs', icon: FileText, path: `${basePath}/audit-logs`, description: 'View audit trail', fixed: false },
+    { id: 'automation-rules', label: 'Automation', icon: Settings, path: `${basePath}/automation-rules`, description: 'Set automation rules', fixed: false },
+  ], [basePath]);
+
+  // Quản lý Pinned state qua LocalStorage (Mặc định pin những cái fixed)
+  const defaultPinnedIds = allNavItems.filter(item => item.fixed).map(item => item.id);
+
+  const [pinnedIds, setPinnedIds] = useState(() => {
+    const saved = localStorage.getItem(`pinned_nav_${projectId}`);
+    return saved ? JSON.parse(saved) : defaultPinnedIds;
+  });
+
+  const togglePin = (id) => {
+    setPinnedIds(prev => {
+      let next = [...prev];
+      if (next.includes(id)) {
+        next = next.filter(i => i !== id);
+      } else {
+        next.push(id);
+      }
+      localStorage.setItem(`pinned_nav_${projectId}`, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  // Phân loại list ra thanh nav và modal More
+  const pinnedItems = allNavItems.filter(item => item.fixed || pinnedIds.includes(item.id));
+  const unpinnedItems = allNavItems.filter(item => !item.fixed && !pinnedIds.includes(item.id));
 
   const projectMenuItems = [
     { label: 'Add members', icon: UserPlus, action: onAddMember },
@@ -64,7 +100,7 @@ const ProjectNavbar = ({
     checkScroll();
     window.addEventListener('resize', checkScroll);
     return () => window.removeEventListener('resize', checkScroll);
-  }, []);
+  }, [pinnedItems]); // Trigger lại check scroll khi pin state đổi
 
   const scroll = (direction) => {
     const container = scrollContainerRef.current;
@@ -129,30 +165,55 @@ const ProjectNavbar = ({
       <div className="relative flex items-center px-2 lg:px-4 py-1">
         {showLeftArrow && (
           <button onClick={() => scroll('left')} className="absolute left-0 z-10 bg-gradient-to-r from-white dark:from-slate-950 to-transparent p-1 cursor-pointer">
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4 text-slate-600 dark:text-slate-300" />
           </button>
         )}
-        <div ref={scrollContainerRef} onScroll={checkScroll} className="no-scrollbar flex flex-1 items-center gap-0.5 overflow-x-auto scroll-smooth">
-          {navItems.map((item) => (
-            <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className={`relative flex items-center gap-2 px-3 py-2.5 text-sm font-medium whitespace-nowrap rounded-lg ${isActive(item.path) ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 cursor-pointer' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 cursor-pointer'}`}
-            >
-              <item.icon className={`h-4 w-4 ${isActive(item.path) ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500'}`} />
-              <span>{item.label}</span>
-            </button>
+        <div ref={scrollContainerRef} onScroll={checkScroll} className="no-scrollbar flex flex-1 items-center gap-1 overflow-x-auto scroll-smooth">
+          {pinnedItems.map((item) => (
+            <div key={item.path} className="group relative flex items-center shrink-0">
+              <button
+                onClick={() => navigate(item.path)}
+                className={`relative flex items-center gap-2 px-3 py-2.5 text-sm font-medium whitespace-nowrap rounded-lg cursor-pointer ${isActive(item.path)
+                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50'
+                  } ${!item.fixed && 'pr-7'}`} // Tạo biên dư bên phải cho nút unpin
+              >
+                <item.icon className={`h-4 w-4 ${isActive(item.path) ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500'}`} />
+                <span>{item.label}</span>
+              </button>
+
+              {/* Nút Unpin */}
+              {!item.fixed && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); togglePin(item.id); }}
+                  className="absolute right-1 w-5 h-5 flex items-center justify-center rounded bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/50 dark:hover:text-rose-400 cursor-pointer"
+                  title="Remove from navigation"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           ))}
-          <div className="relative">
-            <button onClick={() => setIsMoreNavOpen(!isMoreNavOpen)} className={`p-2 rounded-lg ml-1 ${isMoreNavOpen ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'hover:bg-slate-100 dark:hover:bg-slate-800/50 cursor-pointer'}`}>
+
+          <div className="relative ml-1 shrink-0">
+            <button
+              onClick={() => setIsMoreNavOpen(!isMoreNavOpen)}
+              className={`p-2 rounded-lg cursor-pointer ${isMoreNavOpen ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600' : 'hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400'}`}
+              title="More Options"
+            >
               <Plus className="h-4 w-4" />
             </button>
-            <MoreNavDropdown isOpen={isMoreNavOpen} onClose={() => setIsMoreNavOpen(false)} projectId={projectId} />
+            <MoreNavDropdown
+              isOpen={isMoreNavOpen}
+              onClose={() => setIsMoreNavOpen(false)}
+              items={unpinnedItems}
+              onPin={togglePin}
+            />
           </div>
         </div>
         {showRightArrow && (
           <button onClick={() => scroll('right')} className="absolute right-0 z-10 bg-gradient-to-l from-white dark:from-slate-950 to-transparent p-1 cursor-pointer">
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 text-slate-600 dark:text-slate-300" />
           </button>
         )}
       </div>
