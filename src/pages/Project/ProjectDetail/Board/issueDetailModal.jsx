@@ -10,6 +10,9 @@ import SubtaskRow from '../../../../components/projectPage/IssueDetail/subtaskRo
 import SelectDropdown from '../../../../components/selectDropdown';
 import CommentSection from '../../../../components/projectPage/IssueDetail/commentSection';
 import HistorySection from '../../../../components/projectPage/IssueDetail/historySection';
+import { suggestAssigneesByAiApi } from '../../../../utils/Api/issueApi';
+import AiSuggestModal from '../../../../components/projectPage/IssueDetail/aiSuggestModal';
+import AiSuggestButton from '../../../../components/projectPage/IssueDetail/aiSuggestButton';
 import { cn } from '../../../../lib/utils';
 
 const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteRequest }) => {
@@ -19,6 +22,11 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
     const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
     const [isSubtasksVisible, setSubtasksVisible] = useState(true);
     const [activeActivityTab, setActiveActivityTab] = useState('comments');
+
+    const [isSuggesting, setIsSuggesting] = useState(false);
+    const [showAiModal, setShowAiModal] = useState(false);
+    const [aiSuggestions, setAiSuggestions] = useState([]);
+
     const subtaskInputRef = useRef(null);
 
     const { register, handleSubmit, reset, watch, setValue } = useForm();
@@ -152,6 +160,31 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                 fetchSubtasks();
             }
         } catch (e) { toast.error("Error deleting"); }
+    };
+
+    const handleSuggestAssignees = async () => {
+        if (!issue?._id) return;
+        setIsSuggesting(true);
+        try {
+            const res = await suggestAssigneesByAiApi(issue._id);
+            if (res.EC === 0 && res.data) {
+                setAiSuggestions(res.data);
+                setShowAiModal(true);
+            } else {
+                toast.error(res.EM || "Could not generate suggestions");
+            }
+        } catch (error) {
+            toast.error("Failed to connect to AI Service.");
+        } finally {
+            setIsSuggesting(false);
+        }
+    };
+
+    const handleApplySuggestion = (accountId) => {
+        setValue('assigneeId', accountId, { shouldValidate: true });
+        setShowAiModal(false);
+
+        handleSubmit(onSubmit)();
     };
 
     const subtasksDone = subtasks.filter(s => s.status && s.status.toLowerCase() === 'done').length;
@@ -358,6 +391,10 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                                         onChange={(val) => handleFieldChange("assigneeId", val)}
                                         placeholder="Select Assignee"
                                     />
+                                    <AiSuggestButton
+                                        onClick={handleSuggestAssignees}
+                                        isSuggesting={isSuggesting}
+                                    />
                                 </div>
 
                                 <div>
@@ -427,6 +464,12 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                         </div>
                     </div>
                 </motion.div>
+                <AiSuggestModal
+                    isOpen={showAiModal}
+                    onClose={() => setShowAiModal(false)}
+                    suggestions={aiSuggestions}
+                    onApply={handleApplySuggestion}
+                />
             </motion.div>
         </AnimatePresence>
     );
