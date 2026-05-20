@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
-import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizontal, Plus, Columns, Clock } from 'lucide-react';
+import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizontal, Plus, Columns, Clock, Sparkles, Check } from 'lucide-react';
+import { suggestAssigneesByAiApi } from "../../../../../utils/Api/issueApi";
 import { updateIssueApi, createSubtaskApi, getSubtaskApi } from '../../../../../utils/Api/issueApi';
 import { getProjectMembersApi } from '../../../../../utils/Api/projectApi';
 import Spinner from '../../../../../components/spinner';
@@ -11,6 +12,8 @@ import { cn } from '../../../../../lib/utils';
 import SelectDropdown from '../../../../../components/selectDropdown';
 import CommentSection from '../../../../../components/projectPage/IssueDetail/commentSection';
 import HistorySection from '../../../../../components/projectPage/IssueDetail/historySection';
+import AiSuggestModal from '../../../../../components/projectPage/IssueDetail/aiSuggestModal';
+import AiSuggestButton from '../../../../../components/projectPage/IssueDetail/aiSuggestButton';
 
 const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteRequest, subtaskTrigger }) => {
     const [projectMembers, setProjectMembers] = useState([]);
@@ -19,6 +22,11 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
     const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
     const [isSubtasksVisible, setSubtasksVisible] = useState(true);
     const [activeActivityTab, setActiveActivityTab] = useState('comments');
+
+    const [isSuggesting, setIsSuggesting] = useState(false);
+    const [showAiModal, setShowAiModal] = useState(false);
+    const [aiSuggestions, setAiSuggestions] = useState([]);
+
     const subtaskInputRef = useRef(null);
 
     const { register, handleSubmit, reset, watch, setValue } = useForm();
@@ -137,6 +145,31 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
         handleSubmit(onSubmit)();
     };
 
+    const handleSuggestAssignees = async () => {
+        if (!issue?._id) return;
+        setIsSuggesting(true);
+        try {
+            const res = await suggestAssigneesByAiApi(issue._id);
+            if (res.EC === 0 && res.data) {
+                setAiSuggestions(res.data);
+                setShowAiModal(true);
+            } else {
+                toast.error(res.EM || "Could not generate suggestions");
+            }
+        } catch (error) {
+            toast.error("Failed to connect to AI Service.");
+        } finally {
+            setIsSuggesting(false);
+        }
+    };
+
+    const handleApplySuggestion = (accountId) => {
+        setValue('assigneeId', accountId, { shouldDirty: true });
+        setShowAiModal(false);
+
+        handleSubmit(onSubmit)();
+    };
+
     const priorityOptions = ["Highest", "High", "Medium", "Low", "Lowest"];
     const subtasksDone = subtasks.filter(s => s.status && s.status.toLowerCase() === 'done').length;
     const progress = subtasks.length > 0 ? (subtasksDone / subtasks.length) * 100 : 0;
@@ -177,6 +210,10 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                             options={assigneeOptions}
                             onChange={(val) => handleFieldChange("assigneeId", val)}
                             placeholder="Select Assignee"
+                        />
+                        <AiSuggestButton
+                            onClick={handleSuggestAssignees}
+                            isSuggesting={isSuggesting}
                         />
                     </div>
                     <div>
@@ -309,7 +346,14 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                     </div>
                 </div>
             </main>
+            <AiSuggestModal
+                isOpen={showAiModal}
+                onClose={() => setShowAiModal(false)}
+                suggestions={aiSuggestions}
+                onApply={handleApplySuggestion}
+            />
         </motion.div>
+
     );
 };
 
