@@ -11,6 +11,7 @@ export const AuthContext = createContext({
         gender: "",
         phone: "",
         role: "",
+        skills: [],
     },
-    setAuth: () => {},
+    setAuth: () => { },
 });
