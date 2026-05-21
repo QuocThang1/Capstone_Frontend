@@ -16,13 +16,13 @@ import TeamHealth from "./pages/Project/ProjectDetail/TeamHealth/teamHealth";
 import BottleneckDetector from "./pages/Project/ProjectDetail/Bottleneck/bottleneckDetector";
 import IssueList from "./pages/Project/ProjectDetail/List/issueList";
 import RealTimeEventLog from "./pages/Project/ProjectDetail/EventLog/RealTimeEventLog";
+import AutomationRules from "./pages/Project/ProjectDetail/AutomationRules/automationRules";
 
 // Coming Soon Pages
 import OverviewDashboard from "./pages/Project/Monitor/OverviewDashboard";
 import RBACPermissions from "./pages/Project/ProjectDetail/RBACPermissions";
 import AuditLogs from "./pages/Project/ProjectDetail/AuditLogs";
 import ImportExportData from "./pages/Project/Operations/ImportExportData";
-import AutomationRules from "./pages/Project/Operations/AutomationRules";
 
 
 const router = createBrowserRouter([
