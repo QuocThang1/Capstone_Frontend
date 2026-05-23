@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizontal, Plus, Columns, Eye, Share2, Expand, Clock } from 'lucide-react';
+import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizontal, Plus, Columns, Eye, Share2, Expand, Clock, Paperclip, FileText, Loader2, Download } from 'lucide-react';
 import { updateIssueApi, createSubtaskApi, getSubtaskApi, deleteIssueApi } from '../../../../utils/Api/issueApi';
 import { getProjectMembersApi } from '../../../../utils/Api/projectApi';
 import Spinner from '../../../../components/spinner';
@@ -10,7 +10,7 @@ import SubtaskRow from '../../../../components/projectPage/IssueDetail/subtaskRo
 import SelectDropdown from '../../../../components/selectDropdown';
 import CommentSection from '../../../../components/projectPage/IssueDetail/commentSection';
 import HistorySection from '../../../../components/projectPage/IssueDetail/historySection';
-import { suggestAssigneesByAiApi } from '../../../../utils/Api/issueApi';
+import { suggestAssigneesByAiApi, uploadAttachmentApi, deleteAttachmentApi } from '../../../../utils/Api/issueApi';
 import AiSuggestModal from '../../../../components/projectPage/IssueDetail/aiSuggestModal';
 import AiSuggestButton from '../../../../components/projectPage/IssueDetail/aiSuggestButton';
 import { cn } from '../../../../lib/utils';
@@ -18,6 +18,8 @@ import { cn } from '../../../../lib/utils';
 const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteRequest }) => {
     const [projectMembers, setProjectMembers] = useState([]);
     const [subtasks, setSubtasks] = useState([]);
+    const [attachments, setAttachments] = useState(issue?.attachments || []);
+    const [isUploading, setIsUploading] = useState(false);
     const [loadingSubtasks, setLoadingSubtasks] = useState(false);
     const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
     const [isSubtasksVisible, setSubtasksVisible] = useState(true);
@@ -27,6 +29,7 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
     const [showAiModal, setShowAiModal] = useState(false);
     const [aiSuggestions, setAiSuggestions] = useState([]);
 
+    const fileInputRef = useRef(null);
     const subtaskInputRef = useRef(null);
 
     const { register, handleSubmit, reset, watch, setValue } = useForm();
@@ -43,6 +46,7 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
     const prioritySelectOptions = priorityOptionsList.map(p => ({ value: p, label: p }));
     const statusOptions = project?.boardColumns ? project.boardColumns.map(col => ({ value: col.name, label: col.name.toUpperCase() })) : [];
 
+
     useEffect(() => {
         if (issue) {
             const formatForDateTimeLocal = (dateString) => {
@@ -50,6 +54,8 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                 const d = new Date(dateString);
                 return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
             };
+
+            setAttachments(issue.attachments);
 
             reset({
                 title: issue.title,
@@ -187,6 +193,49 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
         handleSubmit(onSubmit)();
     };
 
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            setIsUploading(true);
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await uploadAttachmentApi(issue._id, formData);
+            if (res && res.EC === 0) {
+                setAttachments(res.data); // data nhận về là mảng attachments mới
+                toast.success(res.EM || "File uploaded successfully");
+                if (onDataUpdate) onDataUpdate();
+            } else {
+                toast.error(res?.EM || "Upload failed");
+            }
+        } catch (error) {
+            toast.error("An error occurred during upload");
+        } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
+
+    const handleDeleteAttachment = async (attachmentId) => {
+        try {
+            setIsUploading(true);
+            const res = await deleteAttachmentApi(issue._id, attachmentId);
+            if (res && res.EC === 0) {
+                setAttachments(res.data);
+                toast.success(res.EM || "File deleted successfully");
+                if (onDataUpdate) onDataUpdate();
+            } else {
+                toast.error(res?.EM || "Deletion failed");
+            }
+        } catch (error) {
+            toast.error("An error occurred during deletion");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     const subtasksDone = subtasks.filter(s => s.status && s.status.toLowerCase() === 'done').length;
     const progress = subtasks.length > 0 ? (subtasksDone / subtasks.length) * 100 : 0;
 
@@ -255,6 +304,82 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                                     />
                                 </div>
                             </form>
+
+                            <div className="mt-6 mb-6">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-[15px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                                        Attachments
+                                        <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-full text-xs">{attachments.length}</span>
+                                    </h3>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={handleFileUpload}
+                                        className="hidden"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={isUploading}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer disabled:opacity-50"
+                                    >
+                                        {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+                                        Add File
+                                    </button>
+                                </div>
+                                {attachments.length > 0 ? (
+                                    <div className="grid grid-cols-1 gap-3 mt-3">
+                                        {attachments.map(att => (
+                                            <div key={att._id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg group transition-colors">
+                                                <a href={att.url} target="_blank" rel="noreferrer" className="flex items-center gap-4 overflow-hidden flex-1 cursor-pointer">
+                                                    <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-md shrink-0">
+                                                        <FileText className="w-5 h-5" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{att.filename}</p>
+                                                        <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
+                                                            <span className="font-medium text-slate-600 dark:text-slate-400">
+                                                                {att.uploadedBy?.fullName || "User"}
+                                                            </span>
+                                                            <span>•</span>
+                                                            <span>{new Date(att.uploadedAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                                <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    {/* Nút download file (Cloudinary tự mở tab mới hoặc trình duyệt tải) */}
+                                                    <a
+                                                        href={att.url}
+                                                        download
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 rounded-md transition-colors"
+                                                        title="Download file"
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                    </a>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDeleteAttachment(att._id)}
+                                                        className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/40 rounded-md transition-colors cursor-pointer"
+                                                        title="Delete file"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500 rounded-lg p-6 text-center cursor-pointer transition-colors bg-slate-50/50 dark:bg-slate-800/30"
+                                    >
+                                        <Paperclip className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                                        <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">{isUploading ? 'Uploading...' : 'Click to upload a file'}</p>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Subtasks */}
                             {!issue.parentId && (
