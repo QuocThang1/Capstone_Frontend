@@ -42,6 +42,20 @@ const suggestAssigneesByAiApi = (issueId) => {
     return axios.get(URL_API);
 };
 
+const uploadAttachmentApi = (issueId, formData) => {
+    const URL_API = `/v1/api/issues/${issueId}/attachments`;
+    return axios.post(URL_API, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+};
+
+const deleteAttachmentApi = (issueId, attachmentId) => {
+    const URL_API = `/v1/api/issues/${issueId}/attachments/${attachmentId}`;
+    return axios.delete(URL_API);
+};
+
 export {
     createIssueApi,
     getIssuesBySprintApi,
@@ -50,5 +64,7 @@ export {
     deleteIssueApi,
     createSubtaskApi,
     getSubtaskApi,
-    suggestAssigneesByAiApi
+    suggestAssigneesByAiApi,
+    uploadAttachmentApi,
+    deleteAttachmentApi,
 };
