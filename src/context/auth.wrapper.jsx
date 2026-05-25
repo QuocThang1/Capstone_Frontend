@@ -16,6 +16,7 @@ export const AuthWrapper = (props) => {
             gender: "",
             phone: "",
             role: "",
+            skills: [],
         },
     });
 
@@ -44,6 +45,7 @@ export const AuthWrapper = (props) => {
                             gender: res.data.gender || "",
                             phone: res.data.phone || "",
                             role: res.data.role || "user",
+                            skills: res.data.skills || [],
                         },
                     });
                 } else {
@@ -59,6 +61,7 @@ export const AuthWrapper = (props) => {
                             gender: "",
                             phone: "",
                             role: "",
+                            skills: [],
                         },
                     });
                 }
@@ -76,6 +79,7 @@ export const AuthWrapper = (props) => {
                         gender: "",
                         phone: "",
                         role: "",
+                        skills: [],
                     },
                 });
             } finally {
@@ -135,6 +139,7 @@ export const AuthWrapper = (props) => {
                                         gender: res.data.gender || "",
                                         phone: res.data.phone || "",
                                         role: res.data.role || "user",
+                                        skills: res.data.skills || [],
                                     },
                                 });
                             }

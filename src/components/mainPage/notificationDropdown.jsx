@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useContext } from "react";
 import { Bell, CalendarClock, Trash2, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import socket from "../../utils/socket";
 import { AuthContext } from "../../context/auth.context";
@@ -12,6 +13,7 @@ const NotificationDropdown = () => {
     const [loading, setLoading] = useState(false);
     const dropdownRef = useRef(null);
     const { auth } = useContext(AuthContext);
+    const navigate = useNavigate();
 
     const fetchNotifications = async () => {
         try {
@@ -71,6 +73,15 @@ const NotificationDropdown = () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [isOpen]);
+
+    const handleNotificationClick = (notif) => {
+        const projectId = notif.issueId?.projectId?._id;
+
+        if (projectId) {
+            navigate(`/projects/${projectId}/backlog`);
+            setIsOpen(false);
+        }
+    };
 
     const handleDelete = async (id, e) => {
         e.stopPropagation();
@@ -148,7 +159,8 @@ const NotificationDropdown = () => {
                                     {notifications.map((notif) => (
                                         <div
                                             key={notif._id}
-                                            className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group relative flex gap-3"
+                                            onClick={() => handleNotificationClick(notif)}
+                                            className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group relative flex gap-3 cursor-pointer"
                                         >
                                             <div className="shrink-0 mt-0.5">
                                                 <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center">
@@ -156,6 +168,10 @@ const NotificationDropdown = () => {
                                                 </div>
                                             </div>
                                             <div className="flex-1 min-w-0 pr-8">
+                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 truncate">
+                                                    Project: {notif.issueId?.projectId?.name || "System"}
+                                                </div>
+
                                                 <p className="text-sm text-slate-800 dark:text-slate-200 leading-snug">
                                                     {notif.message}
                                                 </p>

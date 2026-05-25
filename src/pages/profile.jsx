@@ -26,6 +26,7 @@ const ProfilePage = () => {
             phone: "",
             dob: "",
             gender: "",
+            skills: "",
         },
     });
 
@@ -42,6 +43,7 @@ const ProfilePage = () => {
                 phone: user.phone || "",
                 dob: formattedDob,
                 gender: user.gender || "",
+                skills: user.skills ? user.skills.join(', ') : "",
             });
         }
     }, [user, reset]);
@@ -50,7 +52,14 @@ const ProfilePage = () => {
         setLoading(true);
 
         try {
-            const res = await updateProfileApi(data);
+            const formattedData = {
+                ...data,
+                skills: data.skills
+                    ? data.skills.split(',').map(s => s.trim()).filter(Boolean)
+                    : []
+            };
+
+            const res = await updateProfileApi(formattedData);
 
             if (res.EC === 0) {
                 toast.success(res.EM || "Profile updated successfully!");
@@ -66,6 +75,7 @@ const ProfilePage = () => {
                         phone: data.phone,
                         dob: data.dob,
                         gender: data.gender,
+                        skills: formattedData.skills,
                     },
                 });
 
@@ -92,6 +102,7 @@ const ProfilePage = () => {
             phone: user.phone || "",
             dob: formattedDob,
             gender: user.gender || "",
+            skills: user.skills ? user.skills.join(', ') : "",
         });
 
         setIsEditing(false);
@@ -333,6 +344,20 @@ const ProfilePage = () => {
                                 {errors.gender && (
                                     <p className="text-rose-500 dark:text-rose-400 text-sm mt-1">{errors.gender.message}</p>
                                 )}
+                            </div>
+                            {/* Skills */}
+                            <div className="w-full">
+                                <label htmlFor="skills" className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                                    Skills <span className="text-slate-500 font-normal">(Separate by comma)</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="skills"
+                                    {...register("skills")}
+                                    disabled={!isEditing}
+                                    className={`w-full px-4 py-3 rounded-lg border transition-all duration-200 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-indigo-200 dark:focus:ring-indigo-900/50 focus:outline-none focus:ring-2 focus:ring-opacity-20 ${!isEditing ? "bg-slate-100 dark:bg-slate-800 cursor-not-allowed" : ""}`}
+                                    placeholder="React, Node.js, Design..."
+                                />
                             </div>
                         </div>
 

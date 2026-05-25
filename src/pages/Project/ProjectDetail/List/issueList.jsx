@@ -29,6 +29,7 @@ const IssueList = () => {
     const [issues, setIssues] = useState([]);
     const [sprints, setSprints] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadingPage, setLoadingPage] = useState(true);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState({
@@ -39,6 +40,7 @@ const IssueList = () => {
     });
 
     useEffect(() => {
+        setLoadingPage(true);
         const fetchSprints = async () => {
             if (!project?._id) return;
             try {
@@ -46,6 +48,8 @@ const IssueList = () => {
                 if (res && res.EC === 0) setSprints(res.data);
             } catch (error) {
                 console.error("Lỗi lấy danh sách sprint:", error);
+            } finally {
+                setLoadingPage(false);
             }
         };
         fetchSprints();
@@ -133,6 +137,8 @@ const IssueList = () => {
         { label: "Lowest", value: "Lowest" }
     ];
     const statusOptions = [{ label: "All Statuses", value: "" }, ...project?.boardColumns?.map(col => ({ label: col.name, value: col._id })) || []];
+
+    if (loadingPage) return <div className="flex justify-center items-center h-full p-8"><Spinner /></div>;
 
     return (
         <motion.div
