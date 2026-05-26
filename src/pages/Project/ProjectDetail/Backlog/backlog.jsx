@@ -241,7 +241,7 @@ const Backlog = () => {
                                     <SprintContainer
                                         key={sprint._id}
                                         sprint={sprint}
-                                        issues={issues.filter(i => i.sprintId === sprint._id)}
+                                        issues={issues.filter(i => i.sprintId === sprint._id && !i.parentId)}
                                         project={project}
                                         onEdit={() => handleOpenEditModal(sprint)}
                                         onDelete={() => handleOpenDeleteModal(sprint)}
@@ -284,13 +284,13 @@ const Backlog = () => {
                                 <div className="flex items-center gap-2 mb-4">
                                     <h3 className="text-lg font-black text-slate-800 dark:text-slate-200">Project Backlog</h3>
                                     <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-800 rounded-md text-xs font-bold text-slate-500">
-                                        {issues.filter(i => i.sprintId === backlogSprint?._id).length} issues
+                                        {issues.filter(i => i.sprintId === backlogSprint?._id && !i.parentId).length} issues
                                     </span>
                                 </div>
                                 {backlogSprint && (
                                     <SprintContainer
                                         sprint={backlogSprint}
-                                        issues={issues.filter(i => i.sprintId === backlogSprint._id)}
+                                        issues={issues.filter(i => i.sprintId === backlogSprint._id && !i.parentId)}
                                         project={project}
                                         onIssueSelect={setSelectedIssue}
                                         onOpenDeleteIssueModal={setIssueToDelete}
