@@ -112,7 +112,7 @@ const ProjectDetailsLayout = () => {
     return (
         <>
             {project && (
-                <div className="h-screen overflow-y-auto bg-slate-50 dark:bg-slate-900">
+                <div className="h-screen flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-900">
                     <ProjectNavbar
                         projectName={project.name}
                         projectId={project._id}
@@ -123,7 +123,7 @@ const ProjectDetailsLayout = () => {
                         onToggleStar={handleToggleStar}
                         starLoading={starLoading}
                     />
-                    <main className="p-4 lg:p-6">
+                    <main className="flex-1 overflow-y-auto p-4 lg:p-6 relative">
                         <Outlet context={{ project, setProject, issues, setIssues, fetchProjectData, fetchIssuesData, socket }} />
                     </main>
                 </div>
