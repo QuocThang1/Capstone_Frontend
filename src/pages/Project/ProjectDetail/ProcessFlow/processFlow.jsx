@@ -240,7 +240,7 @@ const ProcessFlow = () => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="flex flex-col h-full font-sans antialiased p-4 md:p-6 bg-slate-50 dark:bg-slate-900"
+        className="flex flex-col h-full min-h-full flex-1 font-sans antialiased bg-slate-50 dark:bg-slate-900"
       >
         <motion.div variants={itemVariants} className="flex items-center justify-between mb-6 shrink-0 flex-wrap gap-4">
           <div>
@@ -281,7 +281,7 @@ const ProcessFlow = () => {
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="flex-1 flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950 shadow-sm">
+        <motion.div variants={itemVariants} className="flex-1 min-h-[500px] h-full flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950 shadow-sm">
           {activeWorkflow ? (
             <div className="flex flex-col h-full">
               <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
@@ -338,7 +338,7 @@ const ProcessFlow = () => {
               </div>
               {/* Visual Editor */}
               <div className="flex-1 w-full h-full overflow-auto custom-scrollbar border-t border-slate-200 dark:border-slate-800 relative">
-                <motion.div layout className="relative" style={{ width: '100%', height: 450 }}>
+                <motion.div layout className="relative " style={{ width: '100%', height: 450 }}>
                   <svg width="100%" height="100%" className="absolute inset-0 z-0 overflow-visible">
                     <defs>
                       <marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
