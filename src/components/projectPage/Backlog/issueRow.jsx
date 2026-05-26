@@ -111,7 +111,7 @@ const IssueRow = ({ issue, project, onSelect, onOpenDeleteModal, onDataUpdate })
             {...attributes}
             {...listeners}
             onClick={handleRowClick}
-            className={`flex items-center justify-between p-2 rounded group touch-none cursor-pointer ${isDragging ? 'bg-blue-100 dark:bg-blue-900/50 shadow-lg' : 'hover:bg-slate-100 dark:hover:bg-slate-700/50'}`}
+            className={`flex items-center justify-between p-2 rounded group cursor-pointer ${isDragging ? 'bg-blue-100 dark:bg-blue-900/50 shadow-lg' : 'hover:bg-slate-100 dark:hover:bg-slate-700/50'}`}
         >
             <div className="flex items-center gap-3 flex-grow-1 min-w-0">
                 {/* Khu vực Dropdown Issue Type được bọc bởi stopPropagation để ko gây kéo-thả nhầm */}
