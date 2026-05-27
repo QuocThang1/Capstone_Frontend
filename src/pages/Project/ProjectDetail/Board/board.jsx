@@ -220,7 +220,7 @@ const Board = () => {
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    className="h-full flex flex-col p-6 space-y-6 overflow-hidden"
+                    className="h-full min-h-[700px] flex flex-col p-6 space-y-6 overflow-hidden"
                 >
                     <motion.header variants={itemVariants} className="flex justify-between items-end">
                         <div>

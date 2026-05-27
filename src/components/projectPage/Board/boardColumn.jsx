@@ -47,7 +47,7 @@ const BoardColumn = ({ column, issues, onIssueClick }) => {
         <div
             ref={setSortableNodeRef}
             style={style}
-            className="w-72 flex-shrink-0 flex flex-col"
+            className="w-72 h-fullflex-shrink-0 flex flex-col"
         >
             <div
                 ref={setNodeRef}
