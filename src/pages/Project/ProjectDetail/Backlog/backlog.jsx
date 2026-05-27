@@ -331,6 +331,7 @@ const Backlog = () => {
                     {selectedIssue && (
                         <IssueDetailPanel
                             project={project}
+                            sprints={sprints}
                             issue={selectedIssue}
                             onClose={() => setSelectedIssue(null)}
                             onDataUpdate={handleDataUpdate}

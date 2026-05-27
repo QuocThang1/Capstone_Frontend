@@ -15,9 +15,10 @@ import AiSuggestModal from '../../../../components/projectPage/IssueDetail/aiSug
 import AiSuggestButton from '../../../../components/projectPage/IssueDetail/aiSuggestButton';
 import { cn } from '../../../../lib/utils';
 
-const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteRequest }) => {
+const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteRequest, isSubtaskMode = false }) => {
     const [projectMembers, setProjectMembers] = useState([]);
     const [subtasks, setSubtasks] = useState([]);
+    const [selectedSubtask, setSelectedSubtask] = useState(null);
     const [attachments, setAttachments] = useState(issue?.attachments || []);
     const [isUploading, setIsUploading] = useState(false);
     const [loadingSubtasks, setLoadingSubtasks] = useState(false);
@@ -46,30 +47,30 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
     const prioritySelectOptions = priorityOptionsList.map(p => ({ value: p, label: p }));
     const statusOptions = project?.boardColumns ? project.boardColumns.map(col => ({ value: col.name, label: col.name.toUpperCase() })) : [];
 
+    const resetFormToOriginal = () => {
+        if (!issue) return;
+        setAttachments(issue.attachments || []);
+        const formatForDateTimeLocal = (dateString) => {
+            if (!dateString) return '';
+            const d = new Date(dateString);
+            return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        };
+        reset({
+            title: issue.title,
+            description: issue.description || '',
+            requiredSkills: issue.requiredSkills ? issue.requiredSkills.join(', ') : '',
+            assigneeId: issue.assigneeId?._id || 'null',
+            priority: issue.priority,
+            status: issue.status,
+            storyPoints: issue.storyPoints || 0,
+            timeExpect: issue.timeExpect || 0,
+            startDate: formatForDateTimeLocal(issue.startDate),
+            dueDate: formatForDateTimeLocal(issue.dueDate),
+        });
+    };
 
     useEffect(() => {
-        if (issue) {
-            const formatForDateTimeLocal = (dateString) => {
-                if (!dateString) return '';
-                const d = new Date(dateString);
-                return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-            };
-
-            setAttachments(issue.attachments);
-
-            reset({
-                title: issue.title,
-                description: issue.description || '',
-                requiredSkills: issue.requiredSkills ? issue.requiredSkills.join(', ') : '',
-                assigneeId: issue.assigneeId?._id || 'null',
-                priority: issue.priority,
-                status: issue.status,
-                storyPoints: issue.storyPoints || 0,
-                timeExpect: issue.timeExpect || 0,
-                startDate: formatForDateTimeLocal(issue.startDate),
-                dueDate: formatForDateTimeLocal(issue.dueDate),
-            });
-        }
+        resetFormToOriginal();
     }, [issue, reset]);
 
     useEffect(() => {
@@ -128,6 +129,7 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                 onDataUpdate();
             } else {
                 toast.error(res.EM);
+                resetFormToOriginal();
             }
         } catch (error) {
             toast.error(error?.response?.data?.EM);
@@ -421,6 +423,7 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                                                     <SubtaskRow
                                                         key={sub._id}
                                                         subtask={sub}
+                                                        onClick={() => setSelectedSubtask(sub)}
                                                         projectMembers={projectMembers}
                                                         boardColumns={project.boardColumns}
                                                         onUpdate={fetchSubtasks}
@@ -589,6 +592,19 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                         </div>
                     </div>
                 </motion.div>
+                {selectedSubtask && (
+                    <IssueDetailModal
+                        project={project}
+                        issue={selectedSubtask}
+                        isSubtaskMode={true}
+                        onClose={() => setSelectedSubtask(null)}
+                        onDataUpdate={onDataUpdate || fetchIssuesData}
+                        onDeleteRequest={selected => {
+                            onDeleteRequest(selected);
+                            setSelectedSubtask(null);
+                        }}
+                    />
+                )}
                 <AiSuggestModal
                     isOpen={showAiModal}
                     onClose={() => setShowAiModal(false)}
