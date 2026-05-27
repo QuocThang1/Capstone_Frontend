@@ -139,14 +139,14 @@ const IssueList = () => {
         { label: "Low", value: "Low" },
         { label: "Lowest", value: "Lowest" }
     ];
-    const statusOptions = [{ label: "All Statuses", value: "" }, ...project?.boardColumns?.map(col => ({ label: col.name, value: col._id })) || []];
+    const statusOptions = [{ label: "All Statuses", value: "" }, ...project?.boardColumns?.map(col => ({ label: col.name, value: col.name })) || []];
 
     if (loadingPage) return <div className="flex justify-center items-center h-full p-8"><Spinner /></div>;
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col h-[calc(100vh-140px)] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden"
+            className="flex flex-col h-[calc(100vh-50px)] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden"
         >
             {/* Top Header & Filters */}
             <div className="flex flex-col gap-4 p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 shrink-0">
