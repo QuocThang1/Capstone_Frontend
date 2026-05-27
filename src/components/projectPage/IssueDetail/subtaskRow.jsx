@@ -5,7 +5,7 @@ import { updateIssueApi } from '../../../utils/Api/issueApi';
 import SelectDropdown from '../../selectDropdown';
 import { cn } from '../../../lib/utils';
 
-const SubtaskRow = ({ subtask, projectMembers, boardColumns, onUpdate, onDelete, gridClass }) => {
+const SubtaskRow = ({ subtask, projectMembers, boardColumns, onUpdate, onDelete, gridClass, onClick }) => {
     const [status, setStatus] = useState(subtask.status);
 
     const handleUpdate = async (field, value) => {
@@ -17,6 +17,7 @@ const SubtaskRow = ({ subtask, projectMembers, boardColumns, onUpdate, onDelete,
                 onUpdate();
             } else {
                 toast.error(res.EM);
+                if (field === 'status') setStatus(subtask.status);
             }
         } catch (error) {
             toast.error(error?.response?.data?.EM || `Failed to update ${field}`);
@@ -55,7 +56,9 @@ const SubtaskRow = ({ subtask, projectMembers, boardColumns, onUpdate, onDelete,
     }));
 
     return (
-        <div className={cn(`group grid items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50`, gridClass || "grid-cols-[minmax(200px,1fr)_130px_130px_40px]")}>
+        <div
+            className={cn(`group grid cursor-pointer items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50`, gridClass || "grid-cols-[minmax(200px,1fr)_130px_130px_40px]")}
+            onClick={onClick}>
             {/* Work */}
             <div className="flex items-center gap-3 truncate">
                 <div className="w-6 h-6 rounded bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
@@ -66,7 +69,10 @@ const SubtaskRow = ({ subtask, projectMembers, boardColumns, onUpdate, onDelete,
             </div>
 
             {/* Assignee */}
-            <div className="w-full flex items-center min-w-0">
+            <div
+                className="w-full flex items-center min-w-0"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <SelectDropdown
                     value={subtask.assigneeId?._id || 'null'}
                     options={assigneeOptions}
@@ -77,7 +83,10 @@ const SubtaskRow = ({ subtask, projectMembers, boardColumns, onUpdate, onDelete,
             </div>
 
             {/* Status */}
-            <div className="w-full flex items-center min-w-0">
+            <div
+                className="w-full flex items-center min-w-0"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <SelectDropdown
                     value={status}
                     options={statusOptions}
@@ -88,7 +97,10 @@ const SubtaskRow = ({ subtask, projectMembers, boardColumns, onUpdate, onDelete,
             </div>
 
             {/* Delete Button */}
-            <div className="flex justify-center">
+            <div
+                className="flex justify-center"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <button
                     onClick={handleDeleteClick}
                     className="p-1.5 rounded-md text-slate-400 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/40 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
