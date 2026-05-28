@@ -80,7 +80,7 @@ const Board = () => {
 
     const sprintIssues = useMemo(() => {
         if (!activeSprint) return [];
-        return issues.filter(issue => issue.sprintId === activeSprint._id);
+        return issues.filter(issue => issue.sprintId === activeSprint._id && !issue.parentId);
     }, [issues, activeSprint]);
 
     const issuesByColumn = useMemo(() => {

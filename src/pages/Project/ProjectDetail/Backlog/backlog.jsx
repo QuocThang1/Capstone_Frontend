@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/sortable';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, KeyboardSensor, MeasuringStrategy } from '@dnd-kit/core';
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 
@@ -38,7 +38,12 @@ const Backlog = () => {
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
-            activationConstraint: { distance: 8 },
+            activationConstraint: {
+                distance: 5 // Khoảng cách nhỏ để tránh kéo nhầm khi click 
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
         })
     );
 
@@ -195,7 +200,11 @@ const Backlog = () => {
     const regularSprints = useMemo(() =>
         sprints
             .filter(s => s.name !== 'Backlog' && s.status !== 'completed')
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
+            .sort((a, b) => {
+                if (a.status === 'active' && b.status !== 'active') return -1;
+                if (b.status === 'active' && a.status !== 'active') return 1;
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            }),
         [sprints]
     );
 
@@ -204,12 +213,28 @@ const Backlog = () => {
     return (
         <>
             <div className="flex h-full bg-slate-50 dark:bg-slate-950 overflow-hidden">
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}
+                    measuring={{
+                        droppable: {
+                            strategy: MeasuringStrategy.Always,
+                        },
+                    }}
+                    autoScroll={{
+                        canScroll: (element) => {
+                            return element.id === 'backlog-scroll-container' || element === window;
+                        },
+                        layoutShiftCompensation: {
+                            x: false,
+                            y: true
+                        },
+                    }}>
                     <motion.div
-                        className="flex-1 overflow-y-auto custom-scrollbar p-6"
+                        id="backlog-scroll-container"
+                        className="flex-1 overflow-y-auto custom-scrollbar overflow-x-hidden "
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
+                        style={{ height: '100%', minHeight: 0 }}
                     >
                         <div className="mx-auto space-y-6">
                             <motion.header variants={itemVariants} className="flex justify-between items-end">
@@ -237,7 +262,7 @@ const Backlog = () => {
                                     <SprintContainer
                                         key={sprint._id}
                                         sprint={sprint}
-                                        issues={issues.filter(i => i.sprintId === sprint._id)}
+                                        issues={issues.filter(i => i.sprintId === sprint._id && !i.parentId)}
                                         project={project}
                                         onEdit={() => handleOpenEditModal(sprint)}
                                         onDelete={() => handleOpenDeleteModal(sprint)}
@@ -309,7 +334,7 @@ const Backlog = () => {
                                 {backlogSprint && (
                                     <SprintContainer
                                         sprint={backlogSprint}
-                                        issues={issues.filter(i => i.sprintId === backlogSprint._id)}
+                                        issues={issues.filter(i => i.sprintId === backlogSprint._id && !i.parentId)}
                                         project={project}
                                         onIssueSelect={setSelectedIssue}
                                         onOpenDeleteIssueModal={setIssueToDelete}
@@ -325,6 +350,7 @@ const Backlog = () => {
                     {selectedIssue && (
                         <IssueDetailPanel
                             project={project}
+                            sprints={sprints}
                             issue={selectedIssue}
                             onClose={() => setSelectedIssue(null)}
                             onDataUpdate={handleDataUpdate}

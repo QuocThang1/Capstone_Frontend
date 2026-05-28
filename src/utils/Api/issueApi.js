@@ -13,9 +13,18 @@ const getIssuesBySprintApi = (sprintId) => {
 
 const getIssuesByProjectApi = (projectId, filters = {}) => {
     const URL_API = `/v1/api/issues/project/${projectId}`;
-
     return axios.get(URL_API, { params: filters });
 };
+
+const getMyIssuesByProjectApi = (projectId, filters = {}) => {
+    const URL_API = `/v1/api/issues/my/project/${projectId}`;
+    return axios.get(URL_API, { params: filters });
+}
+
+const getMyIssuesApi = (filters = {}) => {
+    const URL_API = `/v1/api/issues/my/all`;
+    return axios.get(URL_API, { params: filters });
+}
 
 const updateIssueApi = (issueId, updateData) => {
     const URL_API = `/v1/api/issues/${issueId}`;
@@ -60,6 +69,8 @@ export {
     createIssueApi,
     getIssuesBySprintApi,
     getIssuesByProjectApi,
+    getMyIssuesByProjectApi,
+    getMyIssuesApi,
     updateIssueApi,
     deleteIssueApi,
     createSubtaskApi,

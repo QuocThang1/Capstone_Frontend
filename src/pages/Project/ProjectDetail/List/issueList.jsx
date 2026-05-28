@@ -1,8 +1,8 @@
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Search, Filter, CheckSquare, Bug, Bookmark,
+    Search, Filter, CheckSquare, Bug, Bookmark, CornerDownRight, // Thêm CornerDownRight
     ChevronsUp, ChevronUp, Equal, ChevronDown as ChevronDownIcon, ChevronsDown,
     X, ListTodo, Inbox
 } from 'lucide-react';
@@ -36,7 +36,8 @@ const IssueList = () => {
         sprint: '',
         priority: '',
         status: '',
-        assignee: ''
+        assignee: '',
+        type: '' // THÊM filter cho Type
     });
 
     useEffect(() => {
@@ -66,7 +67,8 @@ const IssueList = () => {
                     sprint: filters.sprint,
                     priority: filters.priority,
                     status: filters.status,
-                    assignee: filters.assignee
+                    assignee: filters.assignee,
+                    type: filters.type // THÊM gửi type param
                 };
 
                 Object.keys(apiFilters).forEach(key => {
@@ -91,18 +93,9 @@ const IssueList = () => {
         return () => clearTimeout(delayTimer);
     }, [searchTerm, filters, project]);
 
-    // Format ngày lịch (VD: May 15, 2026)
     const formatDate = (dateString, formatStr = 'MMM d, yyyy') => {
         if (!dateString) return <span className="text-slate-400 italic">None</span>;
         return format(new Date(dateString), formatStr);
-    };
-
-    const getTypeIcon = (type) => {
-        switch (type?.toLowerCase()) {
-            case 'bug': return <Bug className="w-[18px] h-[18px] text-rose-500" />;
-            case 'story': return <Bookmark className="w-[18px] h-[18px] text-emerald-500" />;
-            default: return <CheckSquare className="w-[18px] h-[18px] text-blue-500" />;
-        }
     };
 
     const getPriorityDisplay = (priority) => {
@@ -126,6 +119,16 @@ const IssueList = () => {
     const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
     // --- CẤU HÌNH OPTION CHO SELECT DROPDOWN ---
+    // Lấy issueTypes từ Project
+    const typeOptions = [
+        { label: "All Types", value: "" },
+        { label: "Subtask", value: "Sub-task" },
+        ...(project?.issueTypes?.map(t => ({
+            label: typeof t === 'string' ? t : t.name,
+            value: typeof t === 'string' ? t : t.name
+        })) || [])
+    ];
+
     const assigneeOptions = [{ label: "All Assignees", value: "" }, ...(project?.members?.map(m => ({ label: m.accountId.fullName || m.accountId.username, value: m.accountId._id })) || [])];
     const sprintOptions = [{ label: "All Sprints", value: "" }, ...sprints.map(s => ({ label: s.name, value: s._id }))];
     const priorityOptions = [
@@ -136,14 +139,14 @@ const IssueList = () => {
         { label: "Low", value: "Low" },
         { label: "Lowest", value: "Lowest" }
     ];
-    const statusOptions = [{ label: "All Statuses", value: "" }, ...project?.boardColumns?.map(col => ({ label: col.name, value: col._id })) || []];
+    const statusOptions = [{ label: "All Statuses", value: "" }, ...project?.boardColumns?.map(col => ({ label: col.name, value: col.name })) || []];
 
     if (loadingPage) return <div className="flex justify-center items-center h-full p-8"><Spinner /></div>;
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col h-[calc(100vh-140px)] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden"
+            className="flex flex-col h-[calc(100vh-50px)] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden"
         >
             {/* Top Header & Filters */}
             <div className="flex flex-col gap-4 p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 shrink-0">
@@ -160,7 +163,6 @@ const IssueList = () => {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 mt-1">
-                    {/* Search Input */}
                     <div className="relative flex-1 min-w-[240px] max-w-sm">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <input
@@ -172,7 +174,6 @@ const IssueList = () => {
                         />
                     </div>
 
-                    {/* Filter Group with Custom Components */}
                     <div className="flex flex-wrap items-center gap-2">
                         <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold border border-slate-200 dark:border-slate-700 shadow-sm">
                             <Filter className="w-4 h-4" />
@@ -184,6 +185,9 @@ const IssueList = () => {
                             )}
                         </div>
 
+                        {/* Thêm Cột Type Filter */}
+                        <SelectDropdown value={filters.type} options={typeOptions} onChange={(val) => setFilters(prev => ({ ...prev, type: val }))} placeholder="Type" width="w-32" />
+
                         <SelectDropdown value={filters.assignee} options={assigneeOptions} onChange={(val) => setFilters(prev => ({ ...prev, assignee: val }))} placeholder="Assignee" width="w-40" />
                         <SelectDropdown value={filters.sprint} options={sprintOptions} onChange={(val) => setFilters(prev => ({ ...prev, sprint: val }))} placeholder="Sprint" width="w-36" />
                         <SelectDropdown value={filters.priority} options={priorityOptions} onChange={(val) => setFilters(prev => ({ ...prev, priority: val }))} placeholder="Priority" width="w-36" />
@@ -192,7 +196,7 @@ const IssueList = () => {
                         {activeFilterCount > 0 && (
                             <button
                                 className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-rose-500 dark:text-slate-400 dark:hover:text-rose-400 px-3 py-2 cursor-pointer transition-colors border border-transparent hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg"
-                                onClick={() => setFilters({ sprint: '', priority: '', status: '', assignee: '' })}
+                                onClick={() => setFilters({ sprint: '', priority: '', status: '', assignee: '', type: '' })}
                             >
                                 <X className="w-4 h-4" /> Clear
                             </button>
@@ -201,17 +205,18 @@ const IssueList = () => {
                 </div>
             </div>
 
-            {/* Bảng dữ liệu có Scroll */}
             <div className="flex-1 w-full overflow-auto custom-scrollbar relative bg-white dark:bg-slate-950">
                 {loading && (
                     <div className="absolute inset-0 bg-white/60 dark:bg-slate-950/60 flex items-center justify-center z-20 backdrop-blur-[2px]">
-                        <div className="flex items-center justify-center h-[calc(100vh-8rem)]"><Spinner /></div>;
+                        <div className="flex items-center justify-center h-[calc(100vh-8rem)]"><Spinner /></div>
                     </div>
                 )}
 
-                <table className="w-full text-left border-collapse min-w-[1300px]">
+                <table className="w-full text-left border-collapse min-w-[1400px]">
                     <thead className="sticky top-0 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md z-10 shadow-sm">
                         <tr>
+                            <th className="px-4 py-4 w-12"></th>
+                            <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-32">Type</th>
                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-80">Work / Issue</th>
                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-36">Status</th>
                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-32">Resolution</th>
@@ -231,7 +236,7 @@ const IssueList = () => {
                     >
                         {issues.length === 0 ? (
                             <tr>
-                                <td colSpan="9" className="px-6 py-20">
+                                <td colSpan="11" className="px-6 py-20">
                                     <div className="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
                                         <Inbox className="w-12 h-12 mb-3 text-slate-300 dark:text-slate-600" />
                                         <p className="text-base font-semibold text-slate-700 dark:text-slate-300">No issues found</p>
@@ -245,10 +250,29 @@ const IssueList = () => {
                                     variants={rowVariants} key={issue._id}
                                     className="group hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
                                 >
-                                    {/* Cột Work */}
+                                    <td className="px-4 py-4 text-center border-r border-slate-100 dark:border-slate-800/60">
+                                        <div
+                                            className={`shrink-0 inline-flex items-center justify-center p-1.5 rounded-lg shadow-sm ${issue.parentId ? 'bg-slate-100 dark:bg-slate-800/50' : 'bg-indigo-50 dark:bg-indigo-900/30'}`}
+                                            title={issue.parentId ? "Subtask" : "Issue"}
+                                        >
+                                            {issue.parentId ? (
+                                                <CornerDownRight className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                                            ) : (
+                                                <CheckSquare className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                            )}
+                                        </div>
+                                    </td>
+
+                                    {/* Cột Type mới */}
+                                    <td className="px-6 py-4">
+                                        <span className="font-semibold text-sm text-slate-700 dark:text-slate-300">
+                                            {issue.type || 'N/A'}
+                                        </span>
+                                    </td>
+
+                                    {/* Cột Work / Issue */}
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="shrink-0 drop-shadow-sm">{getTypeIcon(issue.type)}</div>
                                             <div className="flex flex-col gap-0.5 min-w-0">
                                                 <span className={`font-bold text-[13px] tracking-wide ${issue.resolution === 'Done' ? 'text-slate-400 line-through' : 'text-slate-600 dark:text-slate-400'}`}>
                                                     {issue.issueKey}

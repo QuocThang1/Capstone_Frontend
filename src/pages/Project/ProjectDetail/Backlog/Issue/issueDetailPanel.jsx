@@ -2,22 +2,24 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
-import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizontal, Plus, Columns, Clock, Sparkles, Check, Paperclip, FileText, Loader2, Download } from 'lucide-react';
+import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizontal, Plus, Columns, Clock, Sparkles, Check, Paperclip, FileText, Loader2, Download, Target } from 'lucide-react';
 import { suggestAssigneesByAiApi } from "../../../../../utils/Api/issueApi";
 import { updateIssueApi, createSubtaskApi, getSubtaskApi, uploadAttachmentApi, deleteAttachmentApi } from '../../../../../utils/Api/issueApi';
 import { getProjectMembersApi } from '../../../../../utils/Api/projectApi';
 import Spinner from '../../../../../components/spinner';
 import SubtaskRow from '../../../../../components/projectPage/IssueDetail/subtaskRow';
 import { cn } from '../../../../../lib/utils';
+import IssueDetailModal from '../../Board/issueDetailModal';
 import SelectDropdown from '../../../../../components/selectDropdown';
 import CommentSection from '../../../../../components/projectPage/IssueDetail/commentSection';
 import HistorySection from '../../../../../components/projectPage/IssueDetail/historySection';
 import AiSuggestModal from '../../../../../components/projectPage/IssueDetail/aiSuggestModal';
 import AiSuggestButton from '../../../../../components/projectPage/IssueDetail/aiSuggestButton';
 
-const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteRequest, subtaskTrigger }) => {
+const IssueDetailPanel = ({ project, sprints, issue, onClose, onDataUpdate, onDeleteRequest, subtaskTrigger }) => {
     const [projectMembers, setProjectMembers] = useState([]);
     const [subtasks, setSubtasks] = useState([]);
+    const [selectedSubtask, setSelectedSubtask] = useState(null);
     const [attachments, setAttachments] = useState(issue?.attachments || []);
     const [isUploading, setIsUploading] = useState(false);
     const [loadingSubtasks, setLoadingSubtasks] = useState(false);
@@ -41,31 +43,37 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
         ...projectMembers.map(member => ({ value: member.accountId._id, label: member.accountId.fullName }))
     ];
 
+    const sprintOptions = [
+        ...(sprints || []).map(s => ({ value: s._id, label: s.name }))
+    ];
+
     const priorityOptionsList = ["Highest", "High", "Medium", "Low", "Lowest"];
     const prioritySelectOptions = priorityOptionsList.map(p => ({ value: p, label: p }));
 
+    const resetFormToOriginal = () => {
+        if (!issue) return;
+        setAttachments(issue.attachments || []);
+        const formatForDateTimeLocal = (dateString) => {
+            if (!dateString) return '';
+            const d = new Date(dateString);
+            return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        };
+        reset({
+            title: issue.title,
+            description: issue.description || '',
+            requiredSkills: issue.requiredSkills ? issue.requiredSkills.join(', ') : '',
+            assigneeId: issue.assigneeId?._id || 'null',
+            priority: issue.priority,
+            status: issue.status,
+            storyPoints: issue.storyPoints || 0,
+            timeExpect: issue.timeExpect || 0,
+            startDate: formatForDateTimeLocal(issue.startDate),
+            dueDate: formatForDateTimeLocal(issue.dueDate),
+        });
+    };
+
     useEffect(() => {
-        if (issue) {
-            const formatForDateTimeLocal = (dateString) => {
-                if (!dateString) return '';
-                const d = new Date(dateString);
-                return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-            };
-
-            setAttachments(issue.attachments);
-
-            reset({
-                title: issue.title,
-                description: issue.description || '',
-                requiredSkills: issue.requiredSkills ? issue.requiredSkills.join(', ') : '',
-                assigneeId: issue.assigneeId?._id || 'null',
-                priority: issue.priority,
-                storyPoints: issue.storyPoints || 0,
-                timeExpect: issue.timeExpect || 0,
-                startDate: formatForDateTimeLocal(issue.startDate),
-                dueDate: formatForDateTimeLocal(issue.dueDate),
-            });
-        }
+        resetFormToOriginal();
     }, [issue, reset]);
 
     useEffect(() => {
@@ -117,6 +125,7 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                 onDataUpdate();
             } else {
                 toast.error(res.EM);
+                resetFormToOriginal();
             }
         } catch (error) {
             toast.error(error?.response?.data?.EM);
@@ -347,6 +356,15 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                             placeholder="Select Priority"
                         />
                     </div>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2"><Target className="w-4 h-4" />Sprint</label>
+                        <SelectDropdown
+                            value={issue.sprintId || 'null'}
+                            options={sprintOptions}
+                            onChange={(val) => handleFieldChange('sprintId', val === 'null' ? null : val)}
+                            placeholder="Add to sprint"
+                        />
+                    </div>
                     <div>
                         <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2 transition-colors duration-300 mb-1"><ChevronsRight className="w-4 h-4" />Story Points</label>
                         <input
@@ -417,6 +435,7 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                                             <SubtaskRow
                                                 key={sub._id}
                                                 subtask={sub}
+                                                onClick={() => setSelectedSubtask(sub)}
                                                 projectMembers={projectMembers}
                                                 boardColumns={project.boardColumns}
                                                 onUpdate={fetchSubtasks}
@@ -474,6 +493,19 @@ const IssueDetailPanel = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                 suggestions={aiSuggestions}
                 onApply={handleApplySuggestion}
             />
+            {selectedSubtask && (
+                <IssueDetailModal
+                    project={project}
+                    issue={selectedSubtask}
+                    isSubtaskMode={true}
+                    onClose={() => setSelectedSubtask(null)}
+                    onDataUpdate={onDataUpdate || fetchIssuesData}
+                    onDeleteRequest={selected => {
+                        onDeleteRequest(selected);
+                        setSelectedSubtask(null);
+                    }}
+                />
+            )}
         </motion.div>
 
     );

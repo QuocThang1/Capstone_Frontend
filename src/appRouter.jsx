@@ -17,11 +17,11 @@ import BottleneckDetector from "./pages/Project/ProjectDetail/Bottleneck/bottlen
 import IssueList from "./pages/Project/ProjectDetail/List/issueList";
 import RealTimeEventLog from "./pages/Project/ProjectDetail/EventLog/RealTimeEventLog";
 import AutomationRules from "./pages/Project/ProjectDetail/AutomationRules/automationRules";
+import OverviewDashboard from "./pages/Project/ProjectDetail/Summary/OverviewDashboard";
 import GitHubCallback from "./pages/auth/GitHubCallback";
 import GoogleCallback from "./pages/auth/GoogleCallback";
 
 // Coming Soon Pages
-import OverviewDashboard from "./pages/Project/Monitor/OverviewDashboard";
 import RBACPermissions from "./pages/Project/ProjectDetail/RBACPermissions";
 import AuditLogs from "./pages/Project/ProjectDetail/AuditLogs";
 import ImportExportData from "./pages/Project/Operations/ImportExportData";
