@@ -59,6 +59,16 @@ const googleLoginApi = (authCode) => {
     return axios.post(URL_API, { code: authCode });
 };
 
+const forgotPasswordApi = (email, otp, newPassword) => {
+    const URL_API = "/v1/api/account/forgot-password";
+    return axios.post(URL_API, { email, otp, newPassword });
+};
+
+const changePasswordApi = (oldPassword, otp, newPassword) => {
+    const URL_API = "/v1/api/account/change-password";
+    return axios.post(URL_API, { oldPassword, otp, newPassword });
+};
+
 const githubLoginApi = (code) => {
     const URL_API = "/v1/api/auth/github";
     return axios.post(URL_API, { code });
@@ -73,6 +83,8 @@ export {
     verifyOtpApi,
     toggleStarProjectApi,
     getStarredProjectsApi,
-    googleLoginApi,
     githubLoginApi,
+    googleLoginApi,
+    forgotPasswordApi,
+    changePasswordApi
 };

@@ -44,6 +44,16 @@ const updateUserApi = (userId, userData) => {
         data.password = userData.password;
     }
 
+    // Thêm avatar nếu có
+    if (userData.avatar) {
+        data.avatar = userData.avatar;
+    }
+
+    // Thêm bio nếu có
+    if (userData.bio) {
+        data.bio = userData.bio;
+    }
+
     return axios.put(URL_API, data);
 };
 

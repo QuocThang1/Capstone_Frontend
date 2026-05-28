@@ -7,6 +7,12 @@ import { toast } from "react-toastify";
 import { Dropdown } from "antd";
 import NotificationDropdown from "./NotificationDropdown";
 
+// Helper function to validate URL
+function isValidUrl(str) {
+  if (!str) return false;
+  try { new URL(str); return true; } catch { return false; }
+}
+
 const TopBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,6 +30,7 @@ const TopBar = () => {
     "/team": "Team Health",
     "/rbac": "RBAC & Permissions",
     "/audit": "Audit Logs",
+    "/profile": "Profile Settings",
   };
 
   const currentPage = breadcrumbs[location.pathname] || "Dashboard";
@@ -50,6 +57,8 @@ const TopBar = () => {
         dob: "",
         gender: "",
         phone: "",
+        avatar: "",
+        bio: "",
         role: "",
       },
     });
@@ -69,6 +78,19 @@ const TopBar = () => {
         </div>
       ),
       disabled: true,
+    },
+    { type: "divider" },
+    {
+      key: "profile",
+      label: (
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span>Profile Settings</span>
+        </div>
+      ),
+      onClick: () => navigate("/profile"),
     },
     { type: "divider" },
     {
@@ -142,8 +164,12 @@ const TopBar = () => {
                 {auth.user.role ? auth.user.role.charAt(0).toUpperCase() + auth.user.role.slice(1) : "Role"}
               </span>
             </div>
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-sm flex-shrink-0 shadow-sm">
-              {getInitials(auth.user.fullName)}
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-sm flex-shrink-0 shadow-sm overflow-hidden">
+              {auth.user.avatar && isValidUrl(auth.user.avatar) ? (
+                <img src={auth.user.avatar} alt={auth.user.fullName || "User"} className="w-full h-full " />
+              ) : (
+                getInitials(auth.user.fullName)
+              )}
             </div>
             <ChevronDown className="w-4 h-4 text-slate-400" />
           </button>

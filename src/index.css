@@ -357,3 +357,85 @@ input[type="search"]::-webkit-search-cancel-button { display: none; }
 .react-datepicker__input-container input {
   width: 100%;
 }
+
+/* Roles & Permissions: keep Ant Design controls on the indigo admin palette */
+.roles-permissions-page .role-save-button,
+.roles-permissions-page .role-save-button:focus,
+.roles-permissions-page .role-save-button:focus-visible {
+  background: #4f46e5 !important;
+  border-color: #4f46e5 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.roles-permissions-page .role-save-button:hover {
+  background: #4338ca !important;
+  border-color: #4338ca !important;
+  color: #ffffff !important;
+}
+
+.roles-permissions-page .role-save-button:active {
+  background: #3730a3 !important;
+  border-color: #3730a3 !important;
+}
+
+.roles-permissions-page .role-card:hover {
+  background: #eef2ff !important;
+  border-color: #c7d2fe !important;
+}
+
+.roles-permissions-page .role-card-active,
+.roles-permissions-page .role-card-active:hover {
+  background: #eef2ff !important;
+  border-color: #c7d2fe !important;
+}
+
+.roles-permissions-page .role-checkbox .ant-checkbox-inner {
+  border-color: #818cf8 !important;
+}
+
+.roles-permissions-page .role-checkbox:hover .ant-checkbox-inner,
+.roles-permissions-page .role-checkbox .ant-checkbox:hover .ant-checkbox-inner,
+.roles-permissions-page .role-checkbox .ant-checkbox-input:focus + .ant-checkbox-inner {
+  border-color: #6366f1 !important;
+}
+
+.roles-permissions-page .ant-checkbox-wrapper.role-checkbox .ant-checkbox-checked .ant-checkbox-inner,
+.roles-permissions-page .role-checkbox .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #6366f1 !important;
+  border-color: #6366f1 !important;
+}
+
+.roles-permissions-page .ant-checkbox-wrapper.role-checkbox .ant-checkbox-checked .ant-checkbox-inner::after,
+.roles-permissions-page .role-checkbox .ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: #ffffff !important;
+  border-width: 2.5px !important;
+}
+
+.system-health-table-card > div:first-child {
+  padding: 1rem 1.25rem !important;
+}
+
+.system-health-table-card > div:first-child h3 {
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+}
+
+.system-health-table-card > div:last-child {
+  padding: 0 1.25rem 1.25rem !important;
+}
+
+.system-health-table-card table th {
+  font-size: 0.8125rem !important;
+  padding: 0.875rem 0.75rem !important;
+}
+
+.system-health-table-card table td {
+  font-size: 0.8125rem !important;
+  padding: 0.55rem 0.75rem !important;
+}
+
+.system-health-table-card .inline-flex {
+  font-size: 0.75rem !important;
+  padding: 0.125rem 0.625rem !important;
+}

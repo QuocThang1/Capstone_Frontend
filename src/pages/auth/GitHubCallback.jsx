@@ -47,8 +47,9 @@ export default function GitHubCallback() {
               dob: account.dob || "",
               gender: account.gender || "",
               phone: account.phone || "",
-              role: account.role || "user",
               avatar: account.avatar || "",
+              bio: account.bio || "",
+              role: account.role || "user",
             },
           });
 

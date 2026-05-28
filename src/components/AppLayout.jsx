@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { Outlet, NavLink, useMatch } from 'react-router-dom';
+import useDarkMode from '../hooks/useDarkMode';
 import {
   Home,
   Sparkles,
@@ -27,12 +27,12 @@ const sidebarItems = [
 ];
 
 const AppLayout = () => {
-  const [darkMode, setDarkMode] = useState(false);
+  const { isDark, toggle } = useDarkMode();
   const projectMatch = useMatch('/projects/:projectId/*');
   const projectName = projectMatch ? 'My Software Project' : '';
 
   return (
-    <div className={`${darkMode ? 'dark' : ''}`}>
+    <div className={`${isDark ? 'dark' : ''}`}>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
         <div className="flex min-h-screen">
           <aside className="hidden xl:flex w-72 flex-col border-r border-slate-800 dark:border-slate-700 bg-slate-900 dark:bg-slate-900/95 text-slate-100 transition-all duration-300">
@@ -71,11 +71,11 @@ const AppLayout = () => {
                 <span>Dark mode</span>
                 <button
                   type="button"
-                  onClick={() => setDarkMode((prev) => !prev)}
+                  onClick={toggle}
                   className="rounded-full border border-slate-700 dark:border-slate-700/50 bg-slate-900 dark:bg-slate-800/50 p-2 text-slate-100 dark:text-slate-300 hover:border-indigo-500 dark:hover:border-indigo-400 transition-all duration-200"
                   aria-label="Toggle dark mode"
                 >
-                  {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                 </button>
               </div>
             </div>

@@ -1,6 +1,19 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MenuFoldOutlined, MenuUnfoldOutlined, DashboardOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons';
+import {
+  AuditOutlined,
+  BellOutlined,
+  DashboardOutlined,
+  DatabaseOutlined,
+  HeartOutlined,
+  LockOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  SafetyCertificateOutlined,
+  SettingOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 
 const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
   const navigate = useNavigate();
@@ -18,6 +31,54 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
       icon: <UserOutlined />,
       label: 'User Management',
       path: '/admin/users'
+    },
+    {
+      key: 'platform-users',
+      icon: <TeamOutlined />,
+      label: 'Platform Users',
+      path: '/admin/platform-users'
+    },
+    {
+      key: 'organizations',
+      icon: <DatabaseOutlined />,
+      label: 'Organizations',
+      path: '/admin/organizations'
+    },
+    {
+      key: 'support',
+      icon: <HeartOutlined />,
+      label: 'Support Center',
+      path: '/admin/support'
+    },
+    {
+      key: 'health',
+      icon: <HeartOutlined />,
+      label: 'System Health',
+      path: '/admin/health'
+    },
+    {
+      key: 'notifications',
+      icon: <BellOutlined />,
+      label: 'Notifications',
+      path: '/admin/notifications'
+    },
+    {
+      key: 'security',
+      icon: <LockOutlined />,
+      label: 'Data Security',
+      path: '/admin/security'
+    },
+    {
+      key: 'audit-logs',
+      icon: <AuditOutlined />,
+      label: 'Audit Logs',
+      path: '/admin/audit-logs'
+    },
+    {
+      key: 'roles',
+      icon: <SafetyCertificateOutlined />,
+      label: 'Roles',
+      path: '/admin/roles'
     },
     {
       key: 'settings',

@@ -4,6 +4,8 @@ import { CloseOutlined, CheckCircleOutlined, GoogleOutlined, GithubOutlined } fr
 import { useGoogleLogin } from "@react-oauth/google";
 import { AuthContext } from "../../context/auth.context";
 import { loginApi, signUpApi, sendOtpApi, verifyOtpApi, googleLoginApi, githubLoginApi } from "../../utils/Api/accountApi";
+import { ForgotPasswordModal } from "./ForgotPasswordModal";
+import { ChangePasswordModal } from "./ChangePasswordModal";
 import { toast } from "react-toastify";
 
 // Success Step Component
@@ -36,7 +38,7 @@ const SuccessStep = ({ modalMode }) => (
 );
 
 // Signup Steps Component
-const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleContinue, handleBack, setModalMode, resetModal, handleSocialAuth, isSubmitting, handleGoogleLogin }) => (
+const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleContinue, handleBack, setModalMode, resetModal, handleSocialAuth, isSubmitting, handleGoogleLogin, otpExpiresAt, otpCountdown, onResendOtp }) => (
   <AnimatePresence mode="wait">
     {currentStep === 1 && (
       <motion.div
@@ -44,6 +46,7 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
         initial={{ x: 20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: -20, opacity: 0 }}
+        transition={{ duration: 0.8, ease: "easeInOut" }}
         className="space-y-6"
       >
         <div className="text-center">
@@ -138,6 +141,7 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
         initial={{ x: 20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: -20, opacity: 0 }}
+        transition={{ duration: 0.8, ease: "easeInOut" }}
         className="space-y-6"
       >
         <div className="text-center">
@@ -147,6 +151,14 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
           <p className="text-slate-500 dark:text-slate-400">
             We've sent a 6-digit code to {formData.email}
           </p>
+          {otpCountdown > 0 && (
+            <p className="text-lg font-semibold text-indigo-600 mt-2">
+              Code expires in: {Math.floor(otpCountdown / 60)}:{(otpCountdown % 60).toString().padStart(2, '0')}
+            </p>
+          )}
+          {otpCountdown === 0 && (
+            <p className="text-lg font-semibold text-red-500 mt-2">OTP has expired. Please resend.</p>
+          )}
         </div>
 
         <div>
@@ -160,6 +172,7 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
             className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50 text-center text-2xl font-mono tracking-widest transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
             placeholder="000000"
             maxLength={6}
+            disabled={otpCountdown === 0}
           />
           {errors.otp && (
             <p className="text-sm mt-1 text-red-500">
@@ -178,6 +191,7 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
           <button
             onClick={handleContinue}
             className="flex-1 py-3 rounded-lg font-semibold text-white transition-all bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow"
+            disabled={otpCountdown === 0}
           >
             Continue
           </button>
@@ -185,7 +199,11 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
 
         <p className="text-center text-sm text-slate-500 dark:text-slate-400">
           Didn't receive the code?{" "}
-          <button className="font-semibold transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
+          <button
+            className="font-semibold transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+            onClick={onResendOtp}
+            disabled={isSubmitting || otpCountdown > 0}
+          >
             Resend
           </button>
         </p>
@@ -198,6 +216,7 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
         initial={{ x: 20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: -20, opacity: 0 }}
+        transition={{ duration: 0.8, ease: "easeInOut" }}
         className="space-y-6"
       >
         <div className="text-center">
@@ -250,6 +269,24 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
               </p>
             )}
           </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Confirm your password"
+            />
+            {errors.confirmPassword && (
+              <p className="text-sm mt-1 text-red-500">
+                {errors.confirmPassword}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="flex gap-3">
@@ -272,12 +309,13 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
 );
 
 // Login Step Component
-const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitting, setModalMode, resetModal, handleSocialAuth, handleGoogleLogin }) => (
+const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitting, setModalMode, resetModal, handleSocialAuth, handleGoogleLogin, setIsForgotPasswordOpen }) => (
   <motion.div
     key="login"
     initial={{ x: 20, opacity: 0 }}
     animate={{ x: 0, opacity: 1 }}
     exit={{ x: -20, opacity: 0 }}
+    transition={{ duration: 0.8, ease: "easeInOut" }}
     className="space-y-6"
   >
     <div className="text-center">
@@ -343,7 +381,11 @@ const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitt
             Remember me
           </span>
         </label>
-        <button className="text-sm font-semibold transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
+        <button 
+          type="button"
+          onClick={() => setIsForgotPasswordOpen(true)}
+          className="text-sm font-semibold transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+        >
           Forgot password?
         </button>
       </div>
@@ -401,19 +443,60 @@ const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitt
   </motion.div>
 );
 
+import { useRef } from "react";
+
 export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "", initialStep = 1 }) => {
-  const [modalMode, setModalMode] = useState(mode); // "signup" or "login"
-  const [currentStep, setCurrentStep] = useState(initialStep); // 1: email, 2: otp, 3: profile
-  const [formData, setFormData] = useState({
-    email: initialEmail || "",
-    otp: "",
-    fullName: "",
-    password: "",
-    rememberMe: false,
-  });
-  const [errors, setErrors] = useState({});
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+    // Define all state hooks FIRST before using them in effects
+    const [modalMode, setModalMode] = useState(mode); // "signup" or "login"
+    const [currentStep, setCurrentStep] = useState(initialStep); // 1: email, 2: otp, 3: profile
+    const [formData, setFormData] = useState({
+      email: initialEmail || "",
+      otp: "",
+      fullName: "",
+      password: "",
+      confirmPassword: "",
+      rememberMe: false,
+    });
+    const [errors, setErrors] = useState({});
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+    const [otpExpiresAt, setOtpExpiresAt] = useState(null);
+    const [otpCountdown, setOtpCountdown] = useState(0);
+    const countdownInterval = useRef(null);
+
+    // Countdown effect - now currentStep is already defined
+    useEffect(() => {
+      if (otpExpiresAt && currentStep === 2) {
+        const updateCountdown = () => {
+          const now = Date.now();
+          const expires = new Date(otpExpiresAt).getTime();
+          const diff = Math.max(0, Math.floor((expires - now) / 1000));
+          setOtpCountdown(diff);
+          if (diff === 0 && countdownInterval.current) {
+            clearInterval(countdownInterval.current);
+            countdownInterval.current = null;
+          }
+        };
+        updateCountdown();
+        if (!countdownInterval.current) {
+          countdownInterval.current = setInterval(updateCountdown, 1000);
+        }
+      } else {
+        setOtpCountdown(0);
+        if (countdownInterval.current) {
+          clearInterval(countdownInterval.current);
+          countdownInterval.current = null;
+        }
+      }
+      return () => {
+        if (countdownInterval.current) {
+          clearInterval(countdownInterval.current);
+          countdownInterval.current = null;
+        }
+      };
+    }, [otpExpiresAt, currentStep]);
 
   // Helper functions
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -444,8 +527,9 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
               dob: account.dob || "",
               gender: account.gender || "",
               phone: account.phone || "",
-              role: account.role || "user",
               avatar: account.avatar || "",
+              bio: account.bio || "",
+              role: account.role || "user",
             },
           });
 
@@ -490,10 +574,14 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
 
       try {
         const res = await sendOtpApi(formData.email);
-
         if (res.EC === 0) {
           toast.success(res.EM || "OTP sent to your email.");
           setCurrentStep(2);
+          if (res.expiresAt) {
+            setOtpExpiresAt(res.expiresAt);
+          } else {
+            setOtpExpiresAt(null);
+          }
         } else {
           const message = res.EM || "Failed to send OTP";
           setErrors({ general: message });
@@ -505,7 +593,6 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
       } finally {
         setIsSubmitting(false);
       }
-
       return;
     }
 
@@ -514,13 +601,14 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
         setErrors({ otp: "Please enter a 6-digit code" });
         return;
       }
-
+      if (otpCountdown === 0) {
+        setErrors({ otp: "OTP has expired. Please resend." });
+        return;
+      }
       setErrors({});
       setIsSubmitting(true);
-
       try {
         const res = await verifyOtpApi(formData.email, formData.otp);
-
         if (res.EC === 0) {
           toast.success(res.EM || "OTP verified.");
           setCurrentStep(3);
@@ -535,15 +623,22 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
       } finally {
         setIsSubmitting(false);
       }
-
       return;
     }
 
     if (currentStep === 3) {
-      if (!formData.fullName || !validatePassword(formData.password)) {
+      if (!formData.fullName || !validatePassword(formData.password) || !formData.confirmPassword) {
         setErrors({
           fullName: !formData.fullName ? "Full name is required" : "",
           password: !validatePassword(formData.password) ? "Password must be at least 8 characters" : "",
+          confirmPassword: !formData.confirmPassword ? "Please confirm your password" : "",
+        });
+        return;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        setErrors({
+          confirmPassword: "Passwords do not match",
         });
         return;
       }
@@ -640,6 +735,8 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
             dob: account.dob || "",
             gender: account.gender || "",
             phone: account.phone || "",
+            avatar: account.avatar || "",
+            bio: account.bio || "",
             role: account.role || "user",
           },
         });
@@ -670,10 +767,39 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
       otp: "",
       fullName: "",
       password: "",
+      confirmPassword: "",
       rememberMe: false,
     });
     setErrors({});
     setIsSuccess(false);
+    setOtpExpiresAt(null);
+    setOtpCountdown(0);
+  };
+  // Resend OTP handler
+  const handleResendOtp = async () => {
+    if (isSubmitting || otpCountdown > 0) return;
+    setIsSubmitting(true);
+    try {
+      const res = await sendOtpApi(formData.email);
+      if (res.EC === 0) {
+        toast.success(res.EM || "OTP resent to your email.");
+        if (res.expiresAt) {
+          setOtpExpiresAt(res.expiresAt);
+        } else {
+          setOtpExpiresAt(null);
+        }
+        setFormData(prev => ({ ...prev, otp: "" }));
+      } else {
+        const message = res.EM || "Failed to resend OTP";
+        setErrors({ general: message });
+      }
+    } catch (error) {
+      console.error("resendOtp error:", error);
+      const msg = error?.response?.data?.EM || "Failed to resend OTP, please retry.";
+      setErrors({ general: msg });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Keep modal mode in sync with the parent mode prop and reset when opening.
@@ -724,71 +850,96 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
   };
 
   return (
-    <AnimatePresence mode="wait">
-      {isOpen && (
-        <motion.div
-          key="modal-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="modal-overlay fixed inset-0 z-50 flex items-center justify-center"
-          onClick={onClose}
-        >
+    <>
+      <AnimatePresence>
+        {isOpen && (
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            className="relative w-full max-w-md mx-4"
-            onClick={(e) => e.stopPropagation()}
+            key="modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30"
+            onClick={!isForgotPasswordOpen && !isChangePasswordOpen ? onClose : undefined}
           >
-            {/* Modal content */}
-            <div className="glass-card rounded-2xl p-8 shadow-2xl">
-              {/* Close button */}
-              <button
-                onClick={onClose}
-                className="absolute top-4 right-4 p-1 rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              className="relative w-full max-w-md mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal content - hidden when forgot/change password opens */}
+              {!isForgotPasswordOpen && !isChangePasswordOpen && (
+              <motion.div
+                initial={{ x: 0, opacity: 1 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -20, opacity: 0 }}
+                transition={{ duration: 0.8, ease: "easeInOut" }}
+                className="glass-card rounded-2xl p-8 shadow-2xl"
               >
-                <CloseOutlined />
-              </button>
+                {/* Close button */}
+                <button
+                  onClick={onClose}
+                  className="absolute top-4 right-4 p-1 rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  <CloseOutlined />
+                </button>
 
-              {/* Modal content based on mode and success state */}
-              <AnimatePresence mode="wait">
-                {isSuccess ? (
-                  <SuccessStep key="success" modalMode={modalMode} />
-                ) : modalMode === "signup" ? (
-                  <SignupSteps
-                    key="signup"
-                    currentStep={currentStep}
-                    formData={formData}
-                    handleInputChange={handleInputChange}
-                    errors={errors}
-                    handleContinue={handleContinue}
-                    handleBack={handleBack}
-                    setModalMode={setModalMode}
-                    resetModal={resetModal}
-                    handleSocialAuth={handleSocialAuth}
-                    isSubmitting={isSubmitting}
-                    handleGoogleLogin={googleLogin}
-                  />
-                ) : (
-                  <LoginStep
-                    key="login"
-                    formData={formData}
-                    handleInputChange={handleInputChange}
-                    errors={errors}
-                    handleLogin={handleLogin}
-                    isSubmitting={isSubmitting}
-                    setModalMode={setModalMode}
-                    resetModal={resetModal}
-                    handleSocialAuth={handleSocialAuth}
-                    handleGoogleLogin={googleLogin}
-                  />
-                )}
-              </AnimatePresence>
-            </div>
+                {/* Modal content based on mode and success state */}
+                <AnimatePresence mode="wait">
+                  {isSuccess ? (
+                    <SuccessStep key="success" modalMode={modalMode} />
+                  ) : modalMode === "signup" ? (
+                    <SignupSteps
+                      key="signup"
+                      currentStep={currentStep}
+                      formData={formData}
+                      handleInputChange={handleInputChange}
+                      errors={errors}
+                      handleContinue={handleContinue}
+                      handleBack={handleBack}
+                      setModalMode={setModalMode}
+                      resetModal={resetModal}
+                      handleSocialAuth={handleSocialAuth}
+                      isSubmitting={isSubmitting}
+                      handleGoogleLogin={googleLogin}
+                      otpExpiresAt={otpExpiresAt}
+                      otpCountdown={otpCountdown}
+                      onResendOtp={handleResendOtp}
+                    />
+                  ) : (
+                    <LoginStep
+                      key="login"
+                      formData={formData}
+                      handleInputChange={handleInputChange}
+                      errors={errors}
+                      handleLogin={handleLogin}
+                      isSubmitting={isSubmitting}
+                      setModalMode={setModalMode}
+                      resetModal={resetModal}
+                      handleSocialAuth={handleSocialAuth}
+                      handleGoogleLogin={googleLogin}
+                      setIsForgotPasswordOpen={setIsForgotPasswordOpen}
+                    />
+                  )}
+                </AnimatePresence>
+              </motion.div>
+              )}
+              
+              {/* Forgot Password Modal - rendered inside overlay */}
+              {isForgotPasswordOpen && (
+                <ForgotPasswordModal isOpen={true} onClose={() => setIsForgotPasswordOpen(false)} isInsideOverlay={true} />
+              )}
+              
+              {/* Change Password Modal - rendered inside overlay */}
+              {isChangePasswordOpen && (
+                <ChangePasswordModal isOpen={true} onClose={() => setIsChangePasswordOpen(false)} isInsideOverlay={true} />
+              )}
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </>
   );
 };

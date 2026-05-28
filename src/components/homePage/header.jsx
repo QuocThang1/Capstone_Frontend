@@ -43,6 +43,14 @@ export const Header = () => {
 
   const profileMenuItems = [
     {
+      key: "profile",
+      label: "Profile",
+      onClick: () => {
+        navigate("/profile");
+        setDropdownOpen(false);
+      },
+    },
+    {
       key: "admin",
       label: "Admin",
       onClick: () => {

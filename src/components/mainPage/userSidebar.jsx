@@ -12,6 +12,12 @@ import { toast } from "react-toastify";
 import CreateProjectModal from "../../pages/Project/ProjectManagement/createProjectModal";
 import useDarkMode from "../../hooks/useDarkMode";
 
+// Helper function to validate URL
+function isValidUrl(str) {
+  if (!str) return false;
+  try { new URL(str); return true; } catch { return false; }
+}
+
 const NavItem = ({ to, icon: Icon, label, badge, isActive, isCollapsed }) => {
   const navigate = useNavigate();
   const [tooltipPos, setTooltipPos] = useState(null);
@@ -289,36 +295,53 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
         )}>
           {/* User Profile Card - Expanded Only */}
           {!isCollapsed && (
-            <div className="px-3 py-3 mb-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 transition-all duration-300">
+            <button
+              onClick={() => navigate("/profile")}
+              className="w-full px-3 py-3 mb-3 rounded-lg border bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 transition-all duration-300 cursor-pointer text-left hover:shadow-md"
+            >
               <div className="flex items-center gap-2.5">
                 {/* Avatar */}
-                <div className="w-9 h-9 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
-                  {user?.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
-                </div>
+                <div className="flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 overflow-hidden bg-transparent">
+                  {auth.user.avatar && isValidUrl(auth.user.avatar) ? (
+                    <img
+                      src={auth.user.avatar}
+                      alt={auth.user.fullName || "User"}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
+                      {getInitials(auth.user.fullName)}
+                    </span>
+                  )}
+                </div>            
                 {/* User Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-medium text-slate-900 dark:text-white truncate">
+                  <p className="text-[13px] font-medium truncate text-slate-900 dark:text-white">
                     {user?.fullName || "User"}
                   </p>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                  <p className="text-[10px] truncate text-slate-500 dark:text-slate-400">
                     {user?.email || "email@example.com"}
                   </p>
                 </div>
                 {/* Role Badge - on the right */}
                 {user?.role && (
-                  <div className="px-2.5 py-1 rounded-full bg-purple-500/20 dark:bg-purple-500/30 text-[10px] font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wider flex-shrink-0">
+                  <div className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider flex-shrink-0 bg-purple-500/20 dark:bg-purple-500/30 text-purple-700 dark:text-purple-300">
                     {user.role}
                   </div>
                 )}
               </div>
-            </div>
+            </button>
           )}
 
           {/* User Avatar - Collapsed Only */}
           {isCollapsed && (
             <div className="mb-3 flex justify-center">
-              <div className="w-10 h-10 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white text-sm font-semibold cursor-pointer hover:shadow-lg transition-shadow duration-200 dark:shadow-indigo-500/30" title={user?.fullName || "User"}>
-                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
+              <div className="w-10 h-10 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white text-sm font-semibold cursor-pointer hover:shadow-lg transition-shadow duration-200 dark:shadow-indigo-500/30 overflow-hidden" title={user?.fullName || "User"}>
+                {user?.avatar && isValidUrl(user.avatar) ? (
+                  <img src={user.avatar} alt={user?.fullName || "User"} className="w-full h-full object-cover" />
+                ) : (
+                  user?.fullName ? user.fullName.charAt(0).toUpperCase() : "U"
+                )}
               </div>
             </div>
           )}

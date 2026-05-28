@@ -1,11 +1,21 @@
 import { RouterProvider, createBrowserRouter, Navigate } from "react-router-dom";
+import { ConfigProvider } from "antd";
 import ProtectedRoute from "./route/ProtectedRoute";
 import GeneralLayout from "./layout/generalLayout";
 import AdminLayout from "./layout/adminLayout";
 import UserLayout from "./layout/userLayout";
 import HomePage from "./pages/home";
 import ProfilePage from "./pages/profile";
-import UserManagement from "./pages/Admin/User/userManagement";
+import PlatformDashboard from "./pages/Admin/PlatformDashboard";
+import PlatformUsersPage from "./pages/Admin/PlatformUsersPage";
+import OrganizationsPage from "./pages/Admin/OrganizationsPage";
+import SupportCenterPage from "./pages/Admin/SupportCenterPage";
+import SystemHealthPage from "./pages/Admin/SystemHealthPage";
+import GlobalNotificationsPage from "./pages/Admin/GlobalNotificationsPage";
+import DataSecurityPage from "./pages/Admin/DataSecurityPage";
+import AuditLogsPage from "./pages/Admin/AuditLogsPage";
+import RolesPermissionsPage from "./pages/Admin/RolesPermissionsPage";
+import SystemSettingsPage from "./pages/Admin/SystemSettingsPage";
 import ForYou from "./pages/Project/forYou";
 import ProjectManagement from "./pages/Project/ProjectManagement/projectManagement";
 import ProjectDetailsLayout from "./layout/projectDetailsLayout";
@@ -45,11 +55,16 @@ const router = createBrowserRouter([
   },
   {
     path: "/profile",
-    element: (
-      <ProtectedRoute allowedRoles={["admin", "user"]}>
-        <ProfilePage />
-      </ProtectedRoute>
-    )
+    element: <UserLayout />,
+    children: [
+      {
+        index: true,
+        element:
+          <ProtectedRoute allowedRoles={["admin", "user"]}>
+            <ProfilePage />
+          </ProtectedRoute>
+      }
+    ]
   },
   {
     path: "/admin",
@@ -59,14 +74,77 @@ const router = createBrowserRouter([
         index: true,
         element:
           <ProtectedRoute allowedRoles={["admin"]}>
-            <ProfilePage />
+            <PlatformDashboard />
           </ProtectedRoute>
       },
       {
         path: "users",
         element:
           <ProtectedRoute allowedRoles={["admin"]}>
-            <UserManagement />
+            <PlatformUsersPage />
+          </ProtectedRoute>
+      },
+      {
+        path: "platform-users",
+        element:
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <PlatformUsersPage />
+          </ProtectedRoute>
+      },
+      {
+        path: "organizations",
+        element:
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <OrganizationsPage />
+          </ProtectedRoute>
+      },
+      {
+        path: "support",
+        element:
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <SupportCenterPage />
+          </ProtectedRoute>
+      },
+      {
+        path: "health",
+        element:
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <SystemHealthPage />
+          </ProtectedRoute>
+      },
+      {
+        path: "notifications",
+        element:
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <GlobalNotificationsPage />
+          </ProtectedRoute>
+      },
+      {
+        path: "security",
+        element:
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <DataSecurityPage />
+          </ProtectedRoute>
+      },
+      {
+        path: "audit-logs",
+        element:
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AuditLogsPage />
+          </ProtectedRoute>
+      },
+      {
+        path: "roles",
+        element:
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <RolesPermissionsPage />
+          </ProtectedRoute>
+      },
+      {
+        path: "settings",
+        element:
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <SystemSettingsPage />
           </ProtectedRoute>
       }
     ],
@@ -270,5 +348,19 @@ const router = createBrowserRouter([
 ]);
 
 export default function AppRouter() {
-  return <RouterProvider router={router} />;
+  return (
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: "#6366f1",
+          colorPrimaryHover: "#4f46e5",
+          colorPrimaryActive: "#4338ca",
+          colorInfo: "#6366f1",
+          borderRadius: 8,
+        },
+      }}
+    >
+      <RouterProvider router={router} />
+    </ConfigProvider>
+  );
 }
