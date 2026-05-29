@@ -37,6 +37,17 @@ const addMemberToProjectApi = (projectId, email, role = 'member') => {
     return axios.post(URL_API, { email, role });
 };
 
+const respondToInvitationApi = (token) => {
+    const URL_API = `/v1/api/projects/respond-invite`;
+    return axios.post(URL_API, { token });
+};
+
+const removeMemberApi = (projectId, accountId) => {
+    const URL_API = `/v1/api/projects/${projectId}/members/${accountId}`;
+    return axios.delete(URL_API);
+};
+
+
 const getProjectMembersApi = (projectId) => {
     const URL_API = `/v1/api/projects/${projectId}/members`;
     return axios.get(URL_API);
@@ -80,6 +91,8 @@ export {
     updateProjectApi,
     deleteProjectApi,
     addMemberToProjectApi,
+    respondToInvitationApi,
+    removeMemberApi,
     getProjectMembersApi,
     updateBoardColumnsApi,
     updateIssueTypesApi,
