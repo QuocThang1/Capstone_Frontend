@@ -13,7 +13,6 @@ import { updateBoardColumnsApi } from '../../../../utils/Api/projectApi';
 import Spinner from '../../../../components/Spinner';
 import ButtonSpinner from '../../../../components/ButtonSpinner';
 import IssueDetailModal from './IssueDetailModal';
-import DeleteIssueModal from '../Backlog/Issue/deleteIssueModal';
 import BoardColumn from '../../../../components/projectPage/Board/BoardColumn';
 import IssueCard from '../../../../components/projectPage/Board/IssueCard';
 
@@ -37,7 +36,6 @@ const Board = () => {
     const [isCompleting, setIsCompleting] = useState(false);
     const [activeElement, setActiveElement] = useState(null);
     const [selectedIssue, setSelectedIssue] = useState(null);
-    const [issueToDelete, setIssueToDelete] = useState(null);
 
     const orderedColumns = useMemo(() => {
         if (!project?.boardColumns) return [];
@@ -78,9 +76,11 @@ const Board = () => {
         }
     }, [issues]);
 
+    const getSprintId = (issue) => issue?.sprintId?._id || issue?.sprintId || null;
+
     const sprintIssues = useMemo(() => {
         if (!activeSprint) return [];
-        return issues.filter(issue => issue.sprintId === activeSprint._id && !issue.parentId);
+        return issues.filter(issue => getSprintId(issue) === activeSprint._id && !issue.parentId);
     }, [issues, activeSprint]);
 
     const issuesByColumn = useMemo(() => {
@@ -316,22 +316,8 @@ const Board = () => {
                     issue={selectedIssue}
                     onClose={() => setSelectedIssue(null)}
                     onDataUpdate={fetchIssuesData}
-                    onDeleteRequest={(issueObj) => {
-                        setSelectedIssue(null);
-                        setIssueToDelete(issueObj);
-                    }}
                 />
             )}
-
-            <DeleteIssueModal
-                isOpen={!!issueToDelete}
-                onClose={() => setIssueToDelete(null)}
-                issue={issueToDelete}
-                onDeleteSuccess={() => {
-                    fetchIssuesData();
-                    setIssueToDelete(null);
-                }}
-            />
         </>
     );
 };
