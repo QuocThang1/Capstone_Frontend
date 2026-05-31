@@ -18,6 +18,7 @@ import RolesPermissionsPage from "./pages/Admin/RolesPermissionsPage";
 import SystemSettingsPage from "./pages/Admin/SystemSettingsPage";
 import ForYou from "./pages/Project/forYou";
 import ProjectManagement from "./pages/Project/ProjectManagement/projectManagement";
+import AcceptInvite from "./pages/acceptInvite";
 import ProjectDetailsLayout from "./layout/projectDetailsLayout";
 import Board from "./pages/Project/ProjectDetail/Board/board";
 import Backlog from "./pages/Project/ProjectDetail/Backlog/backlog";
@@ -148,6 +149,14 @@ const router = createBrowserRouter([
           </ProtectedRoute>
       }
     ],
+  },
+  {
+    path: "/project/invite",
+    element: (
+      <ProtectedRoute allowedRoles={["admin", "user"]}>
+        <AcceptInvite />
+      </ProtectedRoute>
+    )
   },
   {
     path: "/projects",

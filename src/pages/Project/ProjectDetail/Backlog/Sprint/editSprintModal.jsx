@@ -1,11 +1,36 @@
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useEffect } from 'react';
 import ButtonSpinner from '../../../../../components/ButtonSpinner';
-import { X } from 'lucide-react';
+import { X, Calendar as CalendarIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
+import { getOccupiedSprintsRangeApi } from '../../../../../utils/Api/sprintApi';
 
-const EditSprintModal = ({ isOpen, onClose, onUpdate, loading, sprint }) => {
-    const { register, handleSubmit, formState: { errors }, reset } = useForm();
+const EditSprintModal = ({ isOpen, onClose, onUpdate, loading, sprint, projectId }) => {
+    const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm();
+    const [occupiedRanges, setOccupiedRanges] = useState([]);
+    const [openPicker, setOpenPicker] = useState(null);
+
+    const startDateValue = watch('startDate');
+    const endDateValue = watch('endDate');
+
+    useEffect(() => {
+        if (!isOpen || !projectId) return;
+
+        const fetchOccupiedRanges = async () => {
+            try {
+                const res = await getOccupiedSprintsRangeApi(projectId);
+                if (res?.EC === 0) {
+                    setOccupiedRanges(res.data || []);
+                }
+            } catch (error) {
+                console.error('Failed to fetch occupied sprint ranges', error);
+            }
+        };
+
+        fetchOccupiedRanges();
+    }, [isOpen, projectId]);
 
     useEffect(() => {
         if (sprint) {
@@ -16,7 +41,7 @@ const EditSprintModal = ({ isOpen, onClose, onUpdate, loading, sprint }) => {
                 goal: sprint.goal || '',
             });
         }
-    }, [sprint, reset, isOpen]); // Thêm isOpen để reset form mỗi khi modal mở
+    }, [sprint, reset, isOpen]);
 
     if (!isOpen) return null;
 
@@ -24,7 +49,82 @@ const EditSprintModal = ({ isOpen, onClose, onUpdate, loading, sprint }) => {
         onUpdate(sprint._id, data);
     };
 
-    const inputStyle = "w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white";
+    const isDateInRange = (date, range) => {
+        const current = new Date(date);
+        current.setHours(0, 0, 0, 0);
+
+        const start = new Date(range.startDate);
+        start.setHours(0, 0, 0, 0);
+
+        const end = new Date(range.endDate);
+        end.setHours(23, 59, 59, 999);
+
+        return current >= start && current <= end;
+    };
+
+    const isOccupiedDate = (date) => {
+        return occupiedRanges.some(range => isDateInRange(date, range));
+    };
+
+    const handleSelectDate = (field, date) => {
+        if (!date) return;
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        const formatted = `${year}-${month}-${day}`;
+
+        if (isOccupiedDate(date)) {
+            return;
+        }
+
+        setValue(field, formatted, { shouldValidate: true });
+        setOpenPicker(null);
+    };
+    const inputStyle = "w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white";
+
+    const DatePickerField = ({ label, value, field, alignRight }) => {
+        const isOccupied = value ? isOccupiedDate(new Date(value)) : false;
+
+        return (
+            <div className="relative">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    {label}
+                </label>
+
+                <button
+                    type="button"
+                    onClick={() => setOpenPicker(openPicker === field ? null : field)}
+                    className={`${inputStyle} flex items-center justify-between ${isOccupied ? 'border-rose-500 text-rose-600' : ''}`}
+                >
+                    <span>{value || 'Select date'}</span>
+                    <CalendarIcon className="w-4 h-4" />
+                </button>
+
+                {openPicker === field && (
+                    <div
+                        className={`absolute z-[100] mt-1 w-max rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl p-2 ${alignRight ? 'right-0' : 'left-0'
+                            }`}
+                    >
+                        <div className="[&_.rdp]:m-0 [&_.rdp-month]:space-y-1 [&_.rdp-cell]:w-7 [&_.rdp-cell]:h-7 [&_.rdp-button_reset]:w-7 [&_.rdp-button_reset]:h-7 [&_.rdp-day]:text-xs [&_.rdp-caption_label]:text-sm [&_.rdp-head_cell]:text-[10px] [&_.rdp-head_cell]:font-medium [&_.rdp-head_cell]:text-slate-500 [&_.rdp-nav_button]:w-6 [&_.rdp-nav_button]:h-6">
+                            <DayPicker
+                                mode="single"
+                                selected={value ? new Date(value) : undefined}
+                                onSelect={(date) => handleSelectDate(field, date)}
+                                modifiers={{
+                                    occupied: (day) => isOccupiedDate(day),
+                                }}
+                                modifiersClassNames={{
+                                    occupied: 'bg-rose-500 text-white rounded-full font-bold shadow-sm',
+                                }}
+                            />
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     return (
         <motion.div
@@ -39,66 +139,61 @@ const EditSprintModal = ({ isOpen, onClose, onUpdate, loading, sprint }) => {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 280, damping: 22 }}
-                className="glass-card rounded-xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-slate-700 transition-all duration-300"
+                className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-slate-700 transition-all duration-300"
             >
                 <form onSubmit={handleSubmit(onSubmit)} noValidate>
-                    {/* Modal Header */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-t-xl transition-colors duration-300">
-                        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-50 transition-colors duration-300">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-50">
                             Edit Sprint
                         </h2>
                         <button
                             type="button"
                             onClick={onClose}
-                            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 hover:shadow-md transition-all duration-200 cursor-pointer"
+                            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer"
                         >
-                            <X className="w-6 h-6 text-slate-600 dark:text-slate-400 transition-colors duration-200" />
+                            <X className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                         </button>
                     </div>
 
-                    {/* Modal Body */}
-                    <div className="p-6 max-h-[70vh] overflow-y-auto">
-                        <div className="space-y-4">
-                            <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors duration-300">Sprint name</label>
-                                <input
-                                    id="name"
-                                    type="text"
-                                    {...register("name", { required: "Sprint name is required" })}
-                                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-all duration-200"
-                                />
-                                {errors.name && <p className="text-rose-500 dark:text-rose-400 text-xs mt-1 transition-colors duration-300">{errors.name.message}</p>}
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label htmlFor="startDate" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors duration-300">Start date</label>
-                                    <input id="startDate" type="date" {...register("startDate")} className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-all duration-200" />
-                                </div>
-                                <div>
-                                    <label htmlFor="endDate" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors duration-300">End date</label>
-                                    <input id="endDate" type="date" {...register("endDate")} className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-all duration-200" />
-                                </div>
-                            </div>
-                            <div>
-                                <label htmlFor="goal" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors duration-300">Sprint goal (optional)</label>
-                                <textarea id="goal" rows="4" {...register("goal")} className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-all duration-200"></textarea>
-                            </div>
+                    <div className="p-6 max-h-[70vh] overflow-y-auto space-y-5 custom-scrollbar">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Sprint name</label>
+                            <input
+                                type="text"
+                                {...register("name", { required: "Sprint name is required" })}
+                                className={inputStyle}
+                            />
+                            {errors.name && <p className="text-rose-500 text-xs mt-1">{errors.name.message}</p>}
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <DatePickerField label="Start date" value={startDateValue} field="startDate" />
+                            {/* Truyền alignRight=true cho End Date */}
+                            <DatePickerField label="End date" value={endDateValue} field="endDate" alignRight={true} />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Sprint goal (optional)</label>
+                            <textarea
+                                rows="3"
+                                {...register("goal")}
+                                className={inputStyle}
+                            />
                         </div>
                     </div>
 
-                    {/* Modal Footer */}
-                    <div className="flex justify-end gap-4 px-6 py-4 bg-white dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700 rounded-b-xl transition-colors duration-300">
+                    <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-b-xl">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-50 dark:hover:bg-slate-600 hover:shadow-md transition-all duration-200 cursor-pointer"
+                            className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 dark:bg-indigo-500/40 rounded-md shadow-sm hover:bg-indigo-700 dark:hover:bg-indigo-500/60 hover:shadow-lg hover:shadow-indigo-500/20 disabled:bg-indigo-400 dark:disabled:bg-indigo-500/20 flex items-center justify-center cursor-pointer w-28 transition-all duration-200"
+                            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg disabled:bg-indigo-400 flex items-center justify-center cursor-pointer min-w-[100px] transition-all"
                         >
                             {loading ? <ButtonSpinner text="Updating..." /> : 'Update'}
                         </button>

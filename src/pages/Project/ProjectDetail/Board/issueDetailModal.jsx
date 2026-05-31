@@ -13,6 +13,7 @@ import HistorySection from '../../../../components/projectPage/IssueDetail/histo
 import { suggestAssigneesByAiApi, uploadAttachmentApi, deleteAttachmentApi } from '../../../../utils/Api/issueApi';
 import AiSuggestModal from '../../../../components/projectPage/IssueDetail/aiSuggestModal';
 import AiSuggestButton from '../../../../components/projectPage/IssueDetail/aiSuggestButton';
+import DeleteIssueModal from '../Backlog/Issue/deleteIssueModal';
 import { cn } from '../../../../lib/utils';
 
 const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteRequest, isSubtaskMode = false }) => {
@@ -20,6 +21,7 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
     const [subtasks, setSubtasks] = useState([]);
     const [selectedSubtask, setSelectedSubtask] = useState(null);
     const [attachments, setAttachments] = useState(issue?.attachments || []);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [loadingSubtasks, setLoadingSubtasks] = useState(false);
     const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
@@ -141,6 +143,22 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
         setValue(field, val, { shouldValidate: true });
         // Gọi Submit "tay" tại đây nếu muốn lưu tự động luôn. Tạm thời dùng onBlur ở thẻ Form
         handleSubmit(onSubmit)();
+    };
+
+    const handleConfirmDelete = async (issueId) => {
+        try {
+            const res = await deleteIssueApi(issueId);
+            if (res?.EC === 0) {
+                toast.success(res.EM || 'Issue deleted');
+                setShowDeleteModal(false);
+                onDataUpdate?.();
+                onClose?.();
+            } else {
+                toast.error(res?.EM || 'Delete failed');
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.EM || 'Delete failed');
+        }
     };
 
     const handleCreateSubtask = async () => {
@@ -270,7 +288,13 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <button onClick={() => onDeleteRequest(issue)} className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors cursor-pointer"><Trash2 className="w-4 h-4" /></button>
+                            <button
+                                type="button"
+                                onClick={() => setShowDeleteModal(true)}
+                                className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors cursor-pointer"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
                             <div className="w-px h-6 bg-slate-300 dark:bg-slate-700 mx-1"></div>
                             <button onClick={onClose} className="p-1.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-md transition-colors cursor-pointer"><X className="w-5 h-5" /></button>
                         </div>
@@ -598,13 +622,19 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                         issue={selectedSubtask}
                         isSubtaskMode={true}
                         onClose={() => setSelectedSubtask(null)}
-                        onDataUpdate={onDataUpdate || fetchIssuesData}
-                        onDeleteRequest={selected => {
-                            onDeleteRequest(selected);
-                            setSelectedSubtask(null);
+                        onDataUpdate={() => {
+                            onDataUpdate();
+                            fetchSubtasks();
                         }}
                     />
                 )}
+                <DeleteIssueModal
+                    isOpen={showDeleteModal}
+                    onClose={() => setShowDeleteModal(false)}
+                    onConfirm={handleConfirmDelete}
+                    loading={false}
+                    issue={issue}
+                />
                 <AiSuggestModal
                     isOpen={showAiModal}
                     onClose={() => setShowAiModal(false)}

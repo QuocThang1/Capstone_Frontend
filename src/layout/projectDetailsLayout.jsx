@@ -101,6 +101,11 @@ const ProjectDetailsLayout = () => {
         fetchIssuesData();
     };
 
+    const handleMemberUpdate = () => {
+        fetchProjectData();
+        fetchIssuesData();
+    }
+
     if (loading) {
         return <div className="flex items-center justify-center h-screen"><Spinner /></div>;
     }
@@ -132,7 +137,7 @@ const ProjectDetailsLayout = () => {
             )}
 
             {isAddMemberModalOpen && (
-                <AddMemberModal isOpen={isAddMemberModalOpen} onClose={() => setAddMemberModalOpen(false)} project={project} />
+                <AddMemberModal isOpen={isAddMemberModalOpen} onClose={() => setAddMemberModalOpen(false)} project={project} onMemberUpdate={handleMemberUpdate} />
             )}
             {isEditBoardModalOpen && (
                 <EditBoardColumnsModal isOpen={isEditBoardModalOpen} onClose={() => setEditBoardModalOpen(false)} project={project} onColumnsUpdate={handleColumnsUpdate} />

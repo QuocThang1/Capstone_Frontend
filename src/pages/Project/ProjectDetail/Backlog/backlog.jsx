@@ -47,6 +47,8 @@ const Backlog = () => {
         })
     );
 
+    const getSprintId = (issue) => issue?.sprintId?._id || issue?.sprintId || null;
+
     const fetchSprints = useCallback(async () => {
         if (!project?._id) return;
         try {
@@ -122,10 +124,12 @@ const Backlog = () => {
         try {
             const res = await createSprintApi(project._id, { name: newSprintName });
             if (res?.EC === 0) {
-                toast.success("Sprint created!");
+                toast.success(res.EM || "Sprint created!");
                 setNewSprintName("");
                 setIsCreating(false);
                 fetchSprints();
+            } else {
+                toast.error(res.EM || "Failed to create sprint.");
             }
         } finally {
             setActionLoading(false);
@@ -135,20 +139,28 @@ const Backlog = () => {
     const handleUpdateSprint = async (sprintId, data) => {
         setActionLoading(true);
         try {
-            await updateSprintApi(sprintId, data);
-            toast.success("Sprint updated!");
-            handleCloseSprintModals();
-            fetchSprints();
+            const res = await updateSprintApi(sprintId, data);
+            if (res?.EC === 0) {
+                toast.success(res.EM || "Sprint updated!");
+                handleCloseSprintModals();
+                fetchSprints();
+            } else {
+                toast.error(res.EM || "Failed to update sprint.");
+            }
         } finally { setActionLoading(false); }
     };
 
     const handleDeleteSprint = async (sprintId) => {
         setActionLoading(true);
         try {
-            await deleteSprintApi(sprintId);
-            toast.success("Sprint deleted!");
-            handleCloseSprintModals();
-            handleDataUpdate();
+            const res = await deleteSprintApi(sprintId);
+            if (res?.EC === 0) {
+                toast.success(res.EM || "Sprint deleted!");
+                handleCloseSprintModals();
+                handleDataUpdate();
+            } else {
+                toast.error(res.EM || "Failed to delete sprint.");
+            }
         } finally { setActionLoading(false); }
     };
 
@@ -262,7 +274,7 @@ const Backlog = () => {
                                     <SprintContainer
                                         key={sprint._id}
                                         sprint={sprint}
-                                        issues={issues.filter(i => i.sprintId === sprint._id && !i.parentId)}
+                                        issues={issues.filter(i => getSprintId(i) === sprint._id && !i.parentId)}
                                         project={project}
                                         onEdit={() => handleOpenEditModal(sprint)}
                                         onDelete={() => handleOpenDeleteModal(sprint)}
@@ -330,11 +342,17 @@ const Backlog = () => {
                                         </motion.span>
                                     </div>
                                     <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Issues ready for planning</p>
+                            <motion.div variants={itemVariants} className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <h3 className="text-lg font-black text-slate-800 dark:text-slate-200">Project Backlog</h3>
+                                    <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-800 rounded-md text-xs font-bold text-slate-500">
+                                        {issues.filter(i => getSprintId(i) === backlogSprint?._id && !i.parentId).length} issues
+                                    </span>
                                 </div>
                                 {backlogSprint && (
                                     <SprintContainer
                                         sprint={backlogSprint}
-                                        issues={issues.filter(i => i.sprintId === backlogSprint._id && !i.parentId)}
+                                        issues={issues.filter(i => getSprintId(i) === backlogSprint._id && !i.parentId)}
                                         project={project}
                                         onIssueSelect={setSelectedIssue}
                                         onOpenDeleteIssueModal={setIssueToDelete}
@@ -362,7 +380,7 @@ const Backlog = () => {
             </div>
 
             {/* Modals remain outside the flex layout */}
-            <EditSprintModal isOpen={isEditModalOpen} onClose={handleCloseSprintModals} onUpdate={handleUpdateSprint} sprint={selectedSprint} loading={actionLoading} />
+            <EditSprintModal isOpen={isEditModalOpen} onClose={handleCloseSprintModals} onUpdate={handleUpdateSprint} sprint={selectedSprint} loading={actionLoading} projectId={project?._id} />
             <DeleteSprintModal isOpen={isDeleteModalOpen} onClose={handleCloseSprintModals} onConfirm={handleDeleteSprint} sprint={selectedSprint} loading={actionLoading} />
             <DeleteIssueModal isOpen={!!issueToDelete} onClose={() => setIssueToDelete(null)} onConfirm={handleConfirmDeleteIssue} issue={issueToDelete} loading={actionLoading} />
         </>
