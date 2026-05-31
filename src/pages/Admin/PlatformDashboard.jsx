@@ -11,7 +11,7 @@ import {
   FolderKanban,
   Users,
 } from "lucide-react";
-import { Avatar, Button, Empty, Spin, message } from "antd";
+import { App, Avatar, Button, Empty, Spin } from "antd";
 import SectionCard from "@/components/adminPage/SectionCard";
 import StatCard from "@/components/adminPage/StatCard";
 import StatusBadge from "@/components/adminPage/StatusBadge";
@@ -53,6 +53,7 @@ const growthDescriptions = {
 };
 
 export default function PlatformDashboard() {
+  const { message } = App.useApp();
   const [dashboard, setDashboard] = useState(emptyDashboard);
   const [loading, setLoading] = useState(true);
   const [growthPeriod, setGrowthPeriod] = useState("month");
@@ -77,7 +78,7 @@ export default function PlatformDashboard() {
     };
 
     fetchDashboard();
-  }, [growthPeriod]);
+  }, [growthPeriod, message]);
 
   const { dashboardStats, recentActivities, systemServices, organizations, organizationGrowth } = dashboard;
   const hasIssues = systemServices.some((service) => service.status !== "Operational");

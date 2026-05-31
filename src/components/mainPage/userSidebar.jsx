@@ -19,6 +19,16 @@ function isValidUrl(str) {
   try { new URL(str); return true; } catch { return false; }
 }
 
+function getInitials(name) {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
+
 const NavItem = ({ to, icon: Icon, label, badge, isActive, isCollapsed }) => {
   const navigate = useNavigate();
   const [tooltipPos, setTooltipPos] = useState(null);

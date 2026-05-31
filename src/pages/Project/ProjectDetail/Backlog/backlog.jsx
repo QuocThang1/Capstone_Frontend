@@ -342,6 +342,7 @@ const Backlog = () => {
                                         </motion.span>
                                     </div>
                                     <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Issues ready for planning</p>
+                                </div>
                             <motion.div variants={itemVariants} className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800">
                                 <div className="flex items-center gap-2 mb-4">
                                     <h3 className="text-lg font-black text-slate-800 dark:text-slate-200">Project Backlog</h3>
@@ -359,6 +360,7 @@ const Backlog = () => {
                                         onDataUpdate={handleDataUpdate}
                                     />
                                 )}
+                            </motion.div>
                             </motion.section>
                         </div>
                     </motion.div>

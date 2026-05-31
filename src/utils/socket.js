@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const SOCKET_SERVER_URL = import.meta.env.VITE_BACKEND_URL;
+const SOCKET_SERVER_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
 const socket = io(SOCKET_SERVER_URL, {
     transports: ["websocket"],
