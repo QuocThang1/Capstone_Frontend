@@ -30,6 +30,21 @@ const approveResolveBottleneckApi = (bottleneckId, isApproved) => {
     return axios.put(URL_API, { isApproved });
 }
 
+const analyzeIntelligenceDetectApi = (payload) => {
+    const URL_API = "/v1/api/intelligence_detect/analyze";
+    return axios.post(URL_API, payload);
+}
+
+const detectIntelligenceDetectApi = (payload) => {
+    const URL_API = "/v1/api/intelligence_detect/detect";
+    return axios.post(URL_API, payload);
+}
+
+const generateIntelligenceDetectReportApi = (payload) => {
+    const URL_API = "/v1/api/intelligence_detect/report";
+    return axios.post(URL_API, payload);
+}
+
 export {
     getAllBottlenecksApi,
     getBottlenecksByProjectApi,
@@ -37,4 +52,7 @@ export {
     getBottleneckByIssueApi,
     requestResolveBottleneckApi,
     approveResolveBottleneckApi,
+    analyzeIntelligenceDetectApi,
+    detectIntelligenceDetectApi,
+    generateIntelligenceDetectReportApi,
 };

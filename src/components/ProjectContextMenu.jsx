@@ -4,7 +4,7 @@ import { MoreHorizontal, Star, UserPlus, FilePlus, Settings, Image, Archive, Tra
 const menuItems = [
   { label: 'Add to starred', icon: Star },
   { label: 'Add people', icon: UserPlus },
-  { label: 'Save as template', icon: FilePlus, tag: 'ENTERPRISE' },
+  { label: 'Save as template', icon: FilePlus },
   { label: 'Set space background', icon: Image },
   { label: 'Space settings', icon: Settings },
 ];
@@ -51,20 +51,13 @@ const ProjectContextMenu = () => {
               );
             })}
 
-            <div className="rounded-lg bg-indigo-50 dark:bg-indigo-900/20 p-3 transition-all duration-200">
-              <button
-                type="button"
-                className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-3 text-left text-sm text-slate-700 dark:text-slate-300 transition-all duration-200 hover:bg-indigo-100 dark:hover:bg-indigo-900/40"
-              >
-                <span className="inline-flex items-center gap-3">
-                  <FilePlus className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                  Save as template
-                </span>
-                <span className="rounded-full bg-indigo-600 dark:bg-indigo-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
-                  Enterprise
-                </span>
-              </button>
-            </div>
+            <button
+              type="button"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm text-slate-700 dark:text-slate-300 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800/50"
+            >
+              <FilePlus className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              Save as template
+            </button>
 
             {menuItems.slice(3).map((item) => {
               const Icon = item.icon;

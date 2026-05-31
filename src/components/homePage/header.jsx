@@ -43,6 +43,14 @@ export const Header = () => {
 
   const profileMenuItems = [
     {
+      key: "profile",
+      label: "Profile",
+      onClick: () => {
+        navigate("/profile");
+        setDropdownOpen(false);
+      },
+    },
+    {
       key: "admin",
       label: "Admin",
       onClick: () => {
@@ -189,7 +197,7 @@ export const Header = () => {
                     onClick={() => setModalState({ isOpen: true, mode: "signup" })}
                     className="btn-indigo text-sm px-5 py-2.5 rounded-lg"
                   >
-                    Start Free Trial
+                    Get Started
                   </button>
                 </motion.div>
               )}
@@ -264,7 +272,7 @@ export const Header = () => {
                 className="w-full btn-indigo py-3 rounded-xl text-sm"
                 onClick={() => { setModalState({ isOpen: true, mode: "signup" }); setDrawerOpen(false); }}
               >
-                Start Free Trial
+                Get Started
               </button>
             )}
           </div>

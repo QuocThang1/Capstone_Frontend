@@ -267,7 +267,7 @@ export const Hero = () => {
                           onClick={handleGetStarted}
                           className="btn-indigo px-7 py-4 rounded-xl text-sm whitespace-nowrap"
                         >
-                          Get Started Free
+                          Get Started
                         </button>
                       </form>
                     )}
@@ -281,7 +281,7 @@ export const Hero = () => {
               </AnimatePresence>
               {!isAuthenticated && (
                 <p className="text-xs mt-3" style={{ color: "var(--info-text)" }}>
-                  No credit card required · 14-day trial · Cancel anytime
+                  Create your workspace · Invite your team · Start collaborating
                 </p>
               )}
             </motion.div>

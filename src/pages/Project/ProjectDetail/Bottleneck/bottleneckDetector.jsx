@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, ShieldAlert } from 'lucide-react';
+import { Activity, Brain, RefreshCw, Send, ShieldAlert, Sparkles } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 import {
   getBottlenecksByProjectApi,
   requestResolveBottleneckApi,
-  approveResolveBottleneckApi
+  approveResolveBottleneckApi,
+  analyzeIntelligenceDetectApi,
+  detectIntelligenceDetectApi,
+  generateIntelligenceDetectReportApi
 } from '../../../../utils/Api/bottleneckApi';
 import BottleneckCard from '../../../../components/projectPage/Bottleneck/bottleneckCard';
 
@@ -21,11 +24,21 @@ const itemVariants = {
   visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 24 } }
 };
 
+const severityClass = {
+  CRITICAL: "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800",
+  HIGH: "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800",
+  MEDIUM: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800",
+  LOW: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800",
+};
+
 const BottleneckDetector = () => {
   const { project, socket } = useOutletContext();
   const [bottlenecks, setBottlenecks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
+  const [aiQuery, setAiQuery] = useState("Task nào đang bị kẹt trong project này?");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState(null);
 
   const fetchBottlenecks = async () => {
     setLoading(true);
@@ -86,6 +99,34 @@ const BottleneckDetector = () => {
   };
 
   // Đếm các mục chưa resolve (unresolved hoặc đang chờ pending)
+  const runIntelligenceDetect = async (mode = "analyze") => {
+    if (!project?._id) return;
+    setAiLoading(true);
+    try {
+      const payload = {
+        query: aiQuery,
+        projectId: project._id,
+      };
+      const res = mode === "report"
+        ? await generateIntelligenceDetectReportApi({ ...payload, reportType: "detailed" })
+        : mode === "detect"
+          ? await detectIntelligenceDetectApi(payload)
+          : await analyzeIntelligenceDetectApi(payload);
+
+      if (res && res.EC === 0) {
+        setAiResult(res.data);
+        toast.success(res.EM || "Intelligence Detect analysis completed");
+      } else {
+        setAiResult(res?.data || null);
+        toast.error(res?.EM || "Intelligence Detect analysis failed");
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.EM || "Error running Intelligence Detect analysis.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const activeCount = bottlenecks.filter(b => b.status !== 'resolved').length;
 
   return (
@@ -106,6 +147,90 @@ const BottleneckDetector = () => {
           </p>
         </div>
       </motion.header>
+
+      <motion.section variants={itemVariants} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm space-y-4">
+        <div className="flex items-center gap-2">
+          <Brain className="w-5 h-5 text-indigo-500" />
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">Intelligence Detect AI Analysis</h2>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-3">
+          <input
+            value={aiQuery}
+            onChange={(e) => setAiQuery(e.target.value)}
+            className="flex-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Vi du: Sprint nay co bottleneck khong?"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={() => runIntelligenceDetect("analyze")}
+              disabled={aiLoading}
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-60"
+            >
+              {aiLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Analyze
+            </button>
+            <button
+              onClick={() => runIntelligenceDetect("detect")}
+              disabled={aiLoading}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-60"
+            >
+              <Activity className="w-4 h-4" />
+              Detect
+            </button>
+            <button
+              onClick={() => runIntelligenceDetect("report")}
+              disabled={aiLoading}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-60"
+            >
+              <Sparkles className="w-4 h-4" />
+              Report
+            </button>
+          </div>
+        </div>
+
+        {aiResult && (
+          <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="space-y-3">
+              <div className="rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-4">
+                <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase">Summary</p>
+                <p className="mt-1 text-sm text-slate-800 dark:text-slate-200">{aiResult.summary}</p>
+              </div>
+
+              <div className="space-y-2">
+                {(aiResult.bottlenecks || []).slice(0, 6).map((item, index) => (
+                  <div key={`${item.type}-${item.affectedEntityId}-${index}`} className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-bold text-slate-900 dark:text-white">{item.type}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{item.reason}</p>
+                      </div>
+                      <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-black ${severityClass[item.severity] || severityClass.LOW}`}>
+                        {item.severity}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-lg bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900 p-4">
+              <p className="text-sm font-bold text-indigo-700 dark:text-indigo-300">Recommendations</p>
+              <div className="mt-3 space-y-3">
+                {(aiResult.recommendations || []).slice(0, 5).map((item, index) => (
+                  <div key={`${item.action}-${index}`} className="text-sm">
+                    <p className="font-semibold text-slate-900 dark:text-slate-100">{item.action}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{item.expectedImpact}</p>
+                  </div>
+                ))}
+                {(aiResult.recommendations || []).length === 0 && (
+                  <p className="text-sm text-slate-500 dark:text-slate-400">No action needed from the current rule results.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </motion.section>
 
       {loading ? (
         <motion.div variants={itemVariants} className="flex justify-center items-center py-20">

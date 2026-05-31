@@ -1,45 +1,39 @@
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import AdminSidebar from "../components/mainPage/AdminSidebar";
 import TopBar from "../components/mainPage/topBar";
 
-const AdminLayout = () => {
-    const location = useLocation();
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+export default function AdminLayout() {
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
-    // Menu items for title display
-    const menuItems = [
-        { title: "Dashboard", path: "/admin" },
-        { title: "User Management", path: "/admin/users" },
-        { title: "Settings", path: "/admin/settings" },
-    ];
+  return (
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans">
+      <AdminSidebar collapsed={collapsed} />
 
-    // Get current page title based on path
-    const getCurrentPageTitle = () => {
-        const currentItem = menuItems.find((item) => location.pathname === item.path);
-        return currentItem?.title || "Dashboard";
-    };
-
-    return (
-        <div className="flex h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
-            {/* Sidebar Component */}
-            <AdminSidebar
-                isCollapsed={isSidebarCollapsed}
-                setIsCollapsed={setIsSidebarCollapsed}
-            />
-
-            {/* Main Content */}
-            <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 transition-all duration-300">
-                {/* Top Bar Component */}
-                <TopBar currentPageTitle={getCurrentPageTitle()} />
-
-                {/* Content Area */}
-                <div className="p-8">
-                    <Outlet />
-                </div>
-            </main>
-        </div>
-    );
-};
-
-export default AdminLayout;
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <TopBar
+          onMobileMenuClick={() => setMobileMenuOpen(true)}
+          onSidebarToggle={() => setCollapsed(!collapsed)}
+        />
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15, ease: "easeInOut" }}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}

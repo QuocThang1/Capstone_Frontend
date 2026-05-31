@@ -54,4 +54,43 @@ const getStarredProjectsApi = () => {
     return axios.get(URL_API);
 };
 
-export { signUpApi, loginApi, getAccountApi, updateProfileApi, sendOtpApi, verifyOtpApi, toggleStarProjectApi, getStarredProjectsApi };
+const googleLoginApi = (authCode) => {
+    const URL_API = "/v1/api/auth/google";
+    return axios.post(URL_API, { code: authCode });
+};
+
+const forgotPasswordApi = (email, otp, newPassword) => {
+    const URL_API = "/v1/api/account/forgot-password";
+    return axios.post(URL_API, { email, otp, newPassword });
+};
+
+const changePasswordApi = (oldPassword, otp, newPassword) => {
+    const URL_API = "/v1/api/account/change-password";
+    return axios.post(URL_API, { oldPassword, otp, newPassword });
+};
+
+const githubLoginApi = (code) => {
+    const URL_API = "/v1/api/auth/github";
+    return axios.post(URL_API, { code });
+};
+
+const getPublicAuthSettingsApi = () => {
+    const URL_API = "/v1/api/system-settings/public-auth";
+    return axios.get(URL_API);
+};
+
+export {
+    signUpApi,
+    loginApi,
+    getAccountApi,
+    updateProfileApi,
+    sendOtpApi,
+    verifyOtpApi,
+    toggleStarProjectApi,
+    getStarredProjectsApi,
+    githubLoginApi,
+    googleLoginApi,
+    forgotPasswordApi,
+    changePasswordApi,
+    getPublicAuthSettingsApi
+};

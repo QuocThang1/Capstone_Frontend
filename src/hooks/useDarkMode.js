@@ -22,16 +22,24 @@ const useDarkMode = () => {
 
   const toggle = () => {
     const html = document.documentElement;
+    const newIsDark = !isDark;
 
-    if (isDark) {
-      html.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-      setIsDark(false);
-    } else {
+    // Update DOM ngay lập tức để tất cả component sync
+    if (newIsDark) {
       html.classList.add("dark");
       localStorage.setItem("theme", "dark");
-      setIsDark(true);
+    } else {
+      html.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
+
+    // Update state và dispatch event
+    setIsDark(newIsDark);
+    
+    // Dispatch event để các component khác lắng nghe
+    setTimeout(() => {
+      window.dispatchEvent(new Event("themechange"));
+    }, 0);
   };
 
   return { isDark, toggle };
