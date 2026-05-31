@@ -1,5 +1,5 @@
 import { RouterProvider, createBrowserRouter, Navigate } from "react-router-dom";
-import { ConfigProvider } from "antd";
+import { App as AntApp, ConfigProvider } from "antd";
 import ProtectedRoute from "./route/ProtectedRoute";
 import GeneralLayout from "./layout/generalLayout";
 import AdminLayout from "./layout/adminLayout";
@@ -360,7 +360,9 @@ export default function AppRouter() {
         },
       }}
     >
-      <RouterProvider router={router} />
+      <AntApp>
+        <RouterProvider router={router} />
+      </AntApp>
     </ConfigProvider>
   );
 }

@@ -52,7 +52,7 @@ export const CTA = () => {
               <div className="text-4xl mb-3">🎉</div>
               <h3 className="font-display font-bold text-xl mb-2 text-white">Check your inbox!</h3>
               <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                We'll send your trial link to {email} within 24 hours.
+                We'll send your access details to {email} within 24 hours.
               </p>
             </div>
           ) : (
@@ -93,13 +93,13 @@ export const CTA = () => {
                   e.currentTarget.style.boxShadow = "";
                 }}
               >
-                Start Free Trial →
+                Get Started →
               </button>
             </form>
           )}
 
           <div className="flex flex-wrap justify-center gap-6">
-            {["14-day free trial", "No credit card", "Setup in 5 min", "Cancel anytime"].map(item => (
+            {["Create your workspace", "Invite your team", "Setup in 5 min", "Start collaborating"].map(item => (
               <span key={item} className="flex items-center gap-1.5 text-sm font-medium"
                 style={{ color: "rgba(255,255,255,0.85)" }}>
                 <CheckCircleFilled style={{ color: "rgba(255,255,255,0.92)", fontSize: 14 }} />

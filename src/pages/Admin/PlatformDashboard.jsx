@@ -1,17 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Building2, Users, FolderKanban, CheckCircle2, Activity, Clock, AlertTriangle, ArrowRight } from "lucide-react";
-import StatCard from "@/components/adminPage/StatCard";
+import {
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  Clock,
+  FolderKanban,
+  Users,
+} from "lucide-react";
+import { Avatar, Button, Empty, Spin, message } from "antd";
 import SectionCard from "@/components/adminPage/SectionCard";
+import StatCard from "@/components/adminPage/StatCard";
 import StatusBadge from "@/components/adminPage/StatusBadge";
-
-const dashboardStats = [];
-const recentActivities = [];
-const systemServices = [];
-const organizations = [];
-import { Card, Button, Avatar, Row, Col, Space } from "antd";
+import { getPlatformDashboardApi } from "@/utils/Api/adminApi";
 import { cn } from "@/lib/utils";
-import { Link } from "wouter";
 
 const activityDotColor = {
   create: "bg-emerald-500",
@@ -20,13 +25,75 @@ const activityDotColor = {
   system: "bg-slate-400",
 };
 
+const emptyDashboard = {
+  dashboardStats: {},
+  recentActivities: [],
+  systemServices: [],
+  organizations: [],
+  organizationGrowth: [],
+};
+
+const formatChange = (value, suffix) => {
+  const numericValue = Number(value || 0);
+  return `${numericValue > 0 ? "+" : ""}${numericValue} ${suffix}`;
+};
+
+const growthPeriods = [
+  { value: "day", label: "Day" },
+  { value: "week", label: "Week" },
+  { value: "month", label: "Month" },
+  { value: "year", label: "Year" },
+];
+
+const growthDescriptions = {
+  day: "New organizations over the last 7 days",
+  week: "New organizations over the last 8 weeks",
+  month: "New organizations over the last 6 months",
+  year: "New organizations over the last 5 years",
+};
+
 export default function PlatformDashboard() {
-  const hasIssues = systemServices.some((s) => s.status !== "Operational");
+  const [dashboard, setDashboard] = useState(emptyDashboard);
+  const [loading, setLoading] = useState(true);
+  const [growthPeriod, setGrowthPeriod] = useState("month");
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      const res = await getPlatformDashboardApi({ growthPeriod });
+
+      if (res?.EC === 0) {
+        setDashboard({
+          dashboardStats: res.data?.dashboardStats || {},
+          recentActivities: res.data?.recentActivities || [],
+          systemServices: res.data?.systemServices || [],
+          organizations: res.data?.organizations || [],
+          organizationGrowth: res.data?.organizationGrowth || [],
+        });
+      } else {
+        message.error(res?.EM || "Failed to load platform dashboard");
+      }
+
+      setLoading(false);
+    };
+
+    fetchDashboard();
+  }, [growthPeriod]);
+
+  const { dashboardStats, recentActivities, systemServices, organizations, organizationGrowth } = dashboard;
+  const hasIssues = systemServices.some((service) => service.status !== "Operational");
   const topOrgs = [...organizations].sort((a, b) => b.users - a.users).slice(0, 5);
+  const maxGrowth = Math.max(...organizationGrowth.map((item) => item.val), 1);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[420px] items-center justify-center">
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Critical alert banner */}
       <AnimatePresence>
         {hasIssues && (
           <motion.div
@@ -50,7 +117,7 @@ export default function PlatformDashboard() {
                 </p>
               </div>
             </div>
-            <Link href="/admin/health">
+            <Link to="/admin/health">
               <Button
                 size="small"
                 className="bg-white/60 dark:bg-black/20 border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 hover:bg-white dark:hover:bg-black/40 gap-1.5"
@@ -62,29 +129,84 @@ export default function PlatformDashboard() {
         )}
       </AnimatePresence>
 
-      {/* Stat cards — staggered */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <StatCard title="Total Organizations" value={dashboardStats.totalOrganizations} change="+12% this month" icon={Building2} tone="indigo" delay={0} />
-        <StatCard title="Active Platform Users" value={dashboardStats.activeUsers} change="+5% this month" icon={Users} tone="emerald" delay={0.07} />
-        <StatCard title="Active Projects" value={dashboardStats.activeProjects} change="+8% this month" icon={FolderKanban} tone="indigo" delay={0.14} />
-        <StatCard title="Tasks Completed" value={dashboardStats.totalTasks} change="+15% this month" icon={CheckCircle2} tone="slate" delay={0.21} />
-        <StatCard title="Bottlenecks Detected" value={dashboardStats.bottlenecksDetected} change="-2 this week" icon={Activity} tone="amber" delay={0.28} />
-        <StatCard title="System Uptime" value={dashboardStats.systemUptime} icon={Clock} tone="emerald" delay={0.35} />
+        <StatCard
+          title="Total Organizations"
+          value={dashboardStats.totalOrganizations || 0}
+          change={formatChange(dashboardStats.organizationGrowthThisMonth, "this month")}
+          icon={Building2}
+          tone="indigo"
+          delay={0}
+        />
+        <StatCard
+          title="Active Platform Users"
+          value={dashboardStats.activeUsers || 0}
+          change={formatChange(dashboardStats.userGrowthThisMonth, "this month")}
+          icon={Users}
+          tone="emerald"
+          delay={0.07}
+        />
+        <StatCard
+          title="Active Projects"
+          value={dashboardStats.activeProjects || 0}
+          change={formatChange(dashboardStats.projectGrowthThisMonth, "this month")}
+          icon={FolderKanban}
+          tone="indigo"
+          delay={0.14}
+        />
+        <StatCard
+          title="Tasks Completed"
+          value={dashboardStats.totalTasks || 0}
+          change={formatChange(dashboardStats.completedTasksThisMonth, "this month")}
+          icon={CheckCircle2}
+          tone="slate"
+          delay={0.21}
+        />
+        <StatCard
+          title="Bottlenecks Detected"
+          value={dashboardStats.bottlenecksDetected || 0}
+          change={formatChange(dashboardStats.bottlenecksThisWeek, "this week")}
+          icon={Activity}
+          tone="amber"
+          delay={0.28}
+        />
+        <StatCard
+          title="System Uptime"
+          value={dashboardStats.systemUptime || "N/A"}
+          icon={Clock}
+          tone="emerald"
+          delay={0.35}
+        />
       </div>
 
-      {/* Growth chart + Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <SectionCard title="Organization Growth" description="New workspaces over the last 6 months" className="lg:col-span-2">
+        <SectionCard
+          title="Organization Growth"
+          description={growthDescriptions[growthPeriod]}
+          className="lg:col-span-2"
+          actions={
+            <div className="flex rounded-lg bg-slate-100 dark:bg-slate-800 p-1">
+              {growthPeriods.map((period) => (
+                <button
+                  key={period.value}
+                  type="button"
+                  onClick={() => setGrowthPeriod(period.value)}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-semibold rounded-md transition-all",
+                    growthPeriod === period.value
+                      ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                  )}
+                >
+                  {period.label}
+                </button>
+              ))}
+            </div>
+          }
+        >
           <div className="h-[220px] flex items-end justify-between gap-3 pt-4 pb-2 px-2">
-            {[
-              { month: "Jan", val: 45 },
-              { month: "Feb", val: 62 },
-              { month: "Mar", val: 85 },
-              { month: "Apr", val: 110 },
-              { month: "May", val: 168 },
-              { month: "Jun", val: 247 },
-            ].map(({ month, val }, i) => (
-              <div key={month} className="flex flex-col items-center gap-2 flex-1 group">
+            {organizationGrowth.map(({ month, val }, i) => (
+              <div key={`${month}-${i}`} className="flex flex-col items-center gap-2 flex-1 group">
                 <motion.span
                   initial={{ scale: 0.7 }}
                   animate={{ scale: 1 }}
@@ -99,7 +221,7 @@ export default function PlatformDashboard() {
                     animate={{ scaleY: 1 }}
                     transition={{ duration: 0.55, delay: 0.2 + i * 0.08, ease: [0.34, 1.56, 0.64, 1] }}
                     className="absolute bottom-0 w-full rounded-t-md bg-indigo-100 dark:bg-indigo-900/40 group-hover:bg-indigo-200 dark:group-hover:bg-indigo-800/50 transition-colors origin-bottom"
-                    style={{ height: `${(val / 247) * 100}%` }}
+                    style={{ height: `${(val / maxGrowth) * 100}%` }}
                   >
                     <motion.div
                       initial={{ scaleY: 0 }}
@@ -117,74 +239,81 @@ export default function PlatformDashboard() {
         </SectionCard>
 
         <SectionCard title="Recent Activity">
-          <div className="space-y-4">
-            {recentActivities.slice(0, 7).map((activity, i) => (
-              <motion.div
-                key={activity.id}
-                initial={{ x: 14 }}
-                animate={{ x: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 28, delay: i * 0.05 }}
-                className="relative flex gap-3"
-              >
-                {i !== recentActivities.slice(0, 7).length - 1 && (
-                  <div className="absolute left-[11px] top-6 bottom-[-16px] w-px bg-slate-200 dark:bg-slate-800" />
-                )}
+          {recentActivities.length === 0 ? (
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No recent activity" />
+          ) : (
+            <div className="space-y-4">
+              {recentActivities.slice(0, 7).map((activity, i) => (
                 <motion.div
-                  className={cn(
-                    "w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-2 border-white dark:border-slate-900 z-10 mt-0.5",
-                    activityDotColor[activity.type] || "bg-slate-400"
-                  )}
-                  whileHover={{ scale: 1.2 }}
-                  transition={{ type: "spring", stiffness: 400 }}
+                  key={activity.id}
+                  initial={{ x: 14 }}
+                  animate={{ x: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 28, delay: i * 0.05 }}
+                  className="relative flex gap-3"
                 >
-                  <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                  {i !== recentActivities.slice(0, 7).length - 1 && (
+                    <div className="absolute left-[11px] top-6 bottom-[-16px] w-px bg-slate-200 dark:bg-slate-800" />
+                  )}
+                  <motion.div
+                    className={cn(
+                      "w-6 h-6 rounded-full flex items-center justify-center shrink-0 border-2 border-white dark:border-slate-900 z-10 mt-0.5",
+                      activityDotColor[activity.type] || "bg-slate-400"
+                    )}
+                    whileHover={{ scale: 1.2 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                    <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                  </motion.div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-800 dark:text-slate-200 leading-snug">
+                      <span className="font-semibold">{activity.actor}</span>{" "}
+                      <span className="text-slate-500 dark:text-slate-400">{activity.action}</span>{" "}
+                      <span className="font-medium text-indigo-600 dark:text-indigo-400 truncate">{activity.target}</span>
+                    </p>
+                    <p className="text-xs text-slate-400 mt-0.5">{new Date(activity.time).toLocaleString()}</p>
+                  </div>
                 </motion.div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-800 dark:text-slate-200 leading-snug">
-                    <span className="font-semibold">{activity.actor}</span>{" "}
-                    <span className="text-slate-500 dark:text-slate-400">{activity.action}</span>{" "}
-                    <span className="font-medium text-indigo-600 dark:text-indigo-400 truncate">{activity.target}</span>
-                  </p>
-                  <p className="text-xs text-slate-400 mt-0.5">{activity.time}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </SectionCard>
       </div>
 
-      {/* Top Orgs + Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <SectionCard title="Top Active Organizations" description="By number of members" className="lg:col-span-2">
-          <div className="space-y-3">
-            {topOrgs.map((org, i) => (
-              <motion.div
-                key={org.id}
-                initial={{ x: -16 }}
-                animate={{ x: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 28, delay: i * 0.06 }}
-                whileHover={{ x: 4 }}
-                className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors cursor-default"
-              >
-                <Avatar className={cn("h-9 w-9 shrink-0 text-sm font-semibold", org.avatarColor)}>
-                  {org.name.slice(0, 2).toUpperCase()}
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{org.name}</p>
-                  <p className="text-xs text-slate-500">{org.plan}</p>
-                </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-full">
-                    {org.users} users
-                  </span>
-                  <span className="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full">
-                    {org.projects} projects
-                  </span>
-                  <StatusBadge status={org.status} />
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          {topOrgs.length === 0 ? (
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No organizations yet" />
+          ) : (
+            <div className="space-y-3">
+              {topOrgs.map((org, i) => (
+                <motion.div
+                  key={org.id}
+                  initial={{ x: -16 }}
+                  animate={{ x: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 28, delay: i * 0.06 }}
+                  whileHover={{ x: 4 }}
+                  className="flex items-center gap-4 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors cursor-default"
+                >
+                  <Avatar className={cn("h-9 w-9 shrink-0 text-sm font-semibold", org.avatarColor)}>
+                    {org.name.slice(0, 2).toUpperCase()}
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{org.name}</p>
+                    <p className="text-xs text-slate-500 truncate">{org.owner || "No owner"}</p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-full">
+                      {org.users} users
+                    </span>
+                    <span className="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full">
+                      {org.projects} projects
+                    </span>
+                    <StatusBadge status={org.status} />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </SectionCard>
 
         <SectionCard title="Quick Actions">
@@ -195,7 +324,7 @@ export default function PlatformDashboard() {
               { label: "Audit Logs", href: "/admin/audit-logs", color: "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60", icon: CheckCircle2 },
               { label: "System Health", href: "/admin/health", color: "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50", icon: Activity },
             ].map(({ label, href, color, icon: Icon }, i) => (
-              <Link key={label} href={href}>
+              <Link key={label} to={href}>
                 <motion.div
                   initial={{ scale: 0.88 }}
                   animate={{ scale: 1 }}

@@ -15,7 +15,10 @@ const UserLayout = () => {
             {/* Main Content Wrapper - flex-1 and min-w-0 allow proper shrinking */}
             <div className="flex flex-col flex-1 min-w-0 overflow-hidden transition-all duration-300 ease-in-out">
                 {/* Topbar */}
-                <TopBar currentPageTitle="Workspaces" />
+                <TopBar
+                    currentPageTitle="Workspaces"
+                    onSidebarToggle={() => setIsCollapsed(!isCollapsed)}
+                />
 
                 {/* Content Area - min-w-0 ensures cards shrink during sidebar transition */}
                 <main className="flex-1 min-w-0 overflow-auto bg-slate-50 dark:bg-slate-950">

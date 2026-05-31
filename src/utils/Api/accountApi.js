@@ -74,6 +74,11 @@ const githubLoginApi = (code) => {
     return axios.post(URL_API, { code });
 };
 
+const getPublicAuthSettingsApi = () => {
+    const URL_API = "/v1/api/system-settings/public-auth";
+    return axios.get(URL_API);
+};
+
 export {
     signUpApi,
     loginApi,
@@ -86,5 +91,6 @@ export {
     githubLoginApi,
     googleLoginApi,
     forgotPasswordApi,
-    changePasswordApi
+    changePasswordApi,
+    getPublicAuthSettingsApi
 };

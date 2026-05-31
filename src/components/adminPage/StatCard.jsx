@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function AnimatedNumber({ value }) {
@@ -39,8 +39,10 @@ const toneClasses = {
 };
 
 export default function StatCard({ title, value, change, icon: Icon, tone, delay = 0, className }) {
-  const isPositive = change?.startsWith("+");
-  const isNegativeChange = change?.startsWith("-");
+  const changeValue = Number(String(change || "").match(/[+-]?\d+(\.\d+)?/)?.[0] || 0);
+  const isPositive = changeValue > 0 && String(change).trim().startsWith("+");
+  const isNegativeChange = changeValue < 0;
+  const isNeutralChange = change && !isPositive && !isNegativeChange;
 
   return (
     <motion.div
@@ -73,11 +75,12 @@ export default function StatCard({ title, value, change, icon: Icon, tone, delay
                 ? "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/30"
                 : isNegativeChange
                 ? "text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/30"
-                : "text-slate-700 bg-slate-50 dark:text-slate-400 dark:bg-slate-800"
+                : "text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-900/30"
             )}
           >
             {isPositive && <TrendingUp className="w-3 h-3" />}
             {isNegativeChange && <TrendingDown className="w-3 h-3" />}
+            {isNeutralChange && <Minus className="w-3 h-3" />}
             {change}
           </motion.div>
         )}

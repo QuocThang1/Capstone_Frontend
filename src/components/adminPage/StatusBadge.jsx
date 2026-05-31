@@ -8,8 +8,8 @@ export default function StatusBadge({ status, className }) {
   let dotColor = null;
   let pulse = false;
 
-  const emeralds = ["active", "operational", "success", "healthy", "paid", "completed", "resolved", "sent", "enabled"];
-  const ambers = ["warning", "trial", "pending", "scheduled", "draft", "in progress", "processing", "degraded", "open"];
+  const emeralds = ["active", "operational", "success", "healthy", "completed", "resolved", "sent", "enabled"];
+  const ambers = ["warning", "pending", "scheduled", "draft", "in progress", "processing", "degraded", "open"];
   const reds = ["suspended", "down", "critical", "failed", "locked", "overdue", "rejected", "closed", "cancelled"];
   const blues = ["info", "monitoring", "investigating"];
 

@@ -1,29 +1,89 @@
-import { useState } from "react";
-import { Table, Button, Dropdown, Modal, Avatar, Space } from "antd";
-import { MoreHorizontal, Lock, Unlock, Eye } from "lucide-react";
-import { message } from "antd";
+import { useEffect, useState } from "react";
+import { Avatar, Button, Dropdown, Modal, Space, Table, Tag, message } from "antd";
+import { Eye, Lock, MoreHorizontal, Unlock } from "lucide-react";
 import SearchFilterBar from "@/components/adminPage/SearchFilterBar";
 import StatusBadge from "@/components/adminPage/StatusBadge";
-import { cn } from "@/lib/utils";
+import {
+  getAllPlatformUsersApi,
+  togglePlatformUserLockApi,
+} from "@/utils/Api/adminApi";
 
-const initialUsers = [];
+function isValidUrl(str) {
+  if (!str) return false;
+  try {
+    new URL(str);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function getInitials(name) {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
+
+function normalizeUser(user) {
+  const organizations = Array.isArray(user.organizations) ? user.organizations : [];
+
+  return {
+    id: user._id || user.id,
+    name: user.fullName || user.email || "User",
+    email: user.email || "",
+    avatar: user.avatar,
+    role: user.role || "user",
+    major: user.major || "Not set",
+    organizations,
+    organization: organizations.map((org) => org.name).join(", ") || "No organization",
+    status: user.active ? "Active" : "Locked",
+    lastLogin: user.lastLogin || user.updatedAt || user.createdAt,
+    raw: user,
+  };
+}
 
 export default function PlatformUsersPage() {
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
   const [viewUser, setViewUser] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
-  const filteredUsers = users.filter(u => 
-    u.name.toLowerCase().includes(search.toLowerCase()) || 
-    u.email.toLowerCase().includes(search.toLowerCase()) ||
-    u.organization.toLowerCase().includes(search.toLowerCase())
+  const fetchUsers = async () => {
+    setLoading(true);
+    const res = await getAllPlatformUsersApi({ limit: 100 });
+    if (res?.EC === 0) {
+      setUsers((res.data?.users || []).map(normalizeUser));
+    } else {
+      message.error(res?.EM || "Failed to load platform users");
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const filteredUsers = users.filter((user) =>
+    user.name.toLowerCase().includes(search.toLowerCase()) ||
+    user.email.toLowerCase().includes(search.toLowerCase()) ||
+    user.major.toLowerCase().includes(search.toLowerCase()) ||
+    user.organization.toLowerCase().includes(search.toLowerCase()) ||
+    user.role.toLowerCase().includes(search.toLowerCase())
   );
 
-  const toggleLock = (userId, currentStatus) => {
-    const newStatus = currentStatus === 'Locked' ? 'Active' : 'Locked';
-    setUsers(users.map(u => u.id === userId ? { ...u, status: newStatus } : u));
-    message.success(`User account ${newStatus.toLowerCase()}`);
+  const toggleLock = async (userId) => {
+    const res = await togglePlatformUserLockApi(userId);
+    if (res?.EC === 0) {
+      setUsers(users.map((user) => user.id === userId ? normalizeUser({ ...res.data, organizations: user.organizations }) : user));
+      message.success(res.EM || "User status updated");
+    } else {
+      message.error(res?.EM || "Failed to update user status");
+    }
   };
 
   const handleViewUser = (user) => {
@@ -33,53 +93,87 @@ export default function PlatformUsersPage() {
 
   const columns = [
     {
-      title: 'User',
-      dataIndex: 'name',
-      key: 'user',
-      render: (text, record) => (
+      title: "User",
+      dataIndex: "name",
+      key: "user",
+      render: (_, record) => (
         <div className="flex items-center gap-3">
-          <Avatar size={32}>
-            {record.name.split(' ').map(n => n[0]).join('')}
+          <Avatar
+            size={34}
+            src={isValidUrl(record.avatar) ? record.avatar : undefined}
+            className="bg-indigo-100 text-indigo-700 text-xs font-bold"
+          >
+            {getInitials(record.name)}
           </Avatar>
-          <div>
-            <div className="font-medium text-slate-900 dark:text-slate-100">{record.name}</div>
-            <div className="text-xs text-slate-500">{record.email}</div>
+          <div className="min-w-0">
+            <div className="font-medium text-slate-900 dark:text-slate-100 truncate">{record.name}</div>
+            <div className="text-xs text-slate-500 truncate">{record.email}</div>
           </div>
         </div>
       ),
     },
     {
-      title: 'Organization',
-      dataIndex: 'organization',
-      key: 'organization',
-      render: (text) => <span className="text-slate-600 dark:text-slate-300">{text}</span>,
+      title: "Organization",
+      dataIndex: "organization",
+      key: "organization",
+      render: (_, record) => {
+        const organizations = Array.isArray(record.organizations) ? record.organizations : [];
+
+        if (!organizations.length) {
+          return <span className="text-slate-400">No organization</span>;
+        }
+
+        return (
+          <div className="flex flex-wrap gap-1.5">
+            {organizations.slice(0, 2).map((org) => (
+              <Tag key={org.id} color="geekblue" className="m-0">
+                {org.name}
+              </Tag>
+            ))}
+            {organizations.length > 2 && (
+              <Tag className="m-0">+{organizations.length - 2}</Tag>
+            )}
+          </div>
+        );
+      },
     },
     {
-      title: 'Role',
-      dataIndex: 'role',
-      key: 'role',
+      title: "Major",
+      dataIndex: "major",
+      key: "major",
+      render: (major) => <span className="text-slate-600 dark:text-slate-300">{major}</span>,
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Role",
+      dataIndex: "role",
+      key: "role",
+      render: (role) => (
+        <Tag color={role === "admin" ? "purple" : role === "leader" ? "blue" : "default"}>
+          {role}
+        </Tag>
+      ),
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
       render: (status) => <StatusBadge status={status} />,
     },
     {
-      title: 'Last Login',
-      dataIndex: 'lastLogin',
-      key: 'lastLogin',
+      title: "Last Login",
+      dataIndex: "lastLogin",
+      key: "lastLogin",
       render: (date) => (
         <span className="text-slate-600 dark:text-slate-300">
-          {date ? new Date(date).toLocaleDateString() : 'Never'}
+          {date ? new Date(date).toLocaleDateString() : "Never"}
         </span>
       ),
     },
     {
-      title: '',
-      key: 'actions',
+      title: "",
+      key: "actions",
       width: 50,
-      render: (text, record) => (
+      render: (_, record) => (
         <Dropdown
           menu={{
             items: [
@@ -90,13 +184,13 @@ export default function PlatformUsersPage() {
                     <span>View Profile</span>
                   </Space>
                 ),
-                key: 'view',
+                key: "view",
                 onClick: () => handleViewUser(record),
               },
               {
                 label: (
                   <Space size={8}>
-                    {record.status === 'Locked' ? (
+                    {record.status === "Locked" ? (
                       <>
                         <Unlock size={16} />
                         <span>Unlock Account</span>
@@ -109,13 +203,13 @@ export default function PlatformUsersPage() {
                     )}
                   </Space>
                 ),
-                key: 'lock',
-                className: record.status === 'Locked' ? 'text-emerald-600' : 'text-amber-600',
-                onClick: () => toggleLock(record.id, record.status),
+                key: "lock",
+                className: record.status === "Locked" ? "text-emerald-600" : "text-amber-600",
+                onClick: () => toggleLock(record.id),
               },
             ],
           }}
-          trigger={['click']}
+          trigger={["click"]}
         >
           <Button type="text" size="small" icon={<MoreHorizontal size={16} />} />
         </Dropdown>
@@ -129,12 +223,12 @@ export default function PlatformUsersPage() {
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Platform Users</h2>
       </div>
 
-      <SearchFilterBar 
-        searchValue={search} 
+      <SearchFilterBar
+        searchValue={search}
         onSearch={setSearch}
         filters={[
-          { name: "role", label: "Role", options: ["Super Admin", "Org Admin", "Project Manager", "Developer", "Designer"] },
-          { name: "status", label: "Status", options: ["Active", "Locked", "Pending", "Suspended"] }
+          { name: "role", label: "Role", options: ["admin", "leader", "user"] },
+          { name: "status", label: "Status", options: ["Active", "Locked"] },
         ]}
       />
 
@@ -142,12 +236,13 @@ export default function PlatformUsersPage() {
         <Table
           columns={columns}
           dataSource={filteredUsers}
+          loading={loading}
           rowKey="id"
           pagination={{
             pageSize: 10,
             total: filteredUsers.length,
           }}
-          scroll={{ x: 800 }}
+          scroll={{ x: 900 }}
         />
       </div>
 
@@ -164,8 +259,12 @@ export default function PlatformUsersPage() {
         {viewUser && (
           <div className="space-y-4 pt-4">
             <div className="flex items-center gap-4">
-              <Avatar size={64}>
-                {viewUser.name.split(' ').map(n => n[0]).join('')}
+              <Avatar
+                size={64}
+                src={isValidUrl(viewUser.avatar) ? viewUser.avatar : undefined}
+                className="bg-indigo-100 text-indigo-700 font-bold"
+              >
+                {getInitials(viewUser.name)}
               </Avatar>
               <div>
                 <h3 className="text-lg font-semibold">{viewUser.name}</h3>
@@ -178,6 +277,10 @@ export default function PlatformUsersPage() {
                 <p>{viewUser.organization}</p>
               </div>
               <div>
+                <p className="text-sm font-medium text-slate-500">Major</p>
+                <p>{viewUser.major}</p>
+              </div>
+              <div>
                 <p className="text-sm font-medium text-slate-500">Role</p>
                 <p>{viewUser.role}</p>
               </div>
@@ -187,7 +290,7 @@ export default function PlatformUsersPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-slate-500">Last Login</p>
-                <p>{viewUser.lastLogin ? new Date(viewUser.lastLogin).toLocaleString() : 'Never'}</p>
+                <p>{viewUser.lastLogin ? new Date(viewUser.lastLogin).toLocaleString() : "Never"}</p>
               </div>
             </div>
           </div>

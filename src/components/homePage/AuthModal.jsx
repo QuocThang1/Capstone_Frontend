@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CloseOutlined, CheckCircleOutlined, GoogleOutlined, GithubOutlined } from "@ant-design/icons";
 import { useGoogleLogin } from "@react-oauth/google";
 import { AuthContext } from "../../context/auth.context";
-import { loginApi, signUpApi, sendOtpApi, verifyOtpApi, googleLoginApi, githubLoginApi } from "../../utils/Api/accountApi";
+import { getPublicAuthSettingsApi, loginApi, signUpApi, sendOtpApi, verifyOtpApi, googleLoginApi, githubLoginApi } from "../../utils/Api/accountApi";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
 import { ChangePasswordModal } from "./ChangePasswordModal";
 import { toast } from "react-toastify";
@@ -38,7 +38,7 @@ const SuccessStep = ({ modalMode }) => (
 );
 
 // Signup Steps Component
-const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleContinue, handleBack, setModalMode, resetModal, handleSocialAuth, isSubmitting, handleGoogleLogin, otpExpiresAt, otpCountdown, onResendOtp }) => (
+const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleContinue, handleBack, setModalMode, resetModal, handleSocialAuth, isSubmitting, handleGoogleLogin, otpExpiresAt, otpCountdown, onResendOtp, allowPasswordLogin, allowThirdPartyLogin }) => (
   <AnimatePresence mode="wait">
     {currentStep === 1 && (
       <motion.div
@@ -51,7 +51,7 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
       >
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2 text-slate-900 dark:text-slate-50">
-            Start Your Free Trial
+            Create Your TASKA Account
           </h2>
           <p className="text-slate-500 dark:text-slate-400">
             Join thousands of teams already using TASKA
@@ -63,7 +63,7 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
           )}
         </div>
 
-        <div className="space-y-4">
+        <div className={allowPasswordLogin ? "space-y-4" : "hidden"}>
           <div>
             <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">
               Email address
@@ -87,11 +87,12 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
           type="button"
           onClick={handleContinue}
           disabled={isSubmitting}
-          className="w-full py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow"
+          className={`${allowPasswordLogin ? "block" : "hidden"} w-full py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow`}
         >
           Continue
         </button>
 
+        <div className={allowThirdPartyLogin ? "contents" : "hidden"}>
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-slate-200 dark:border-slate-700" />
@@ -118,6 +119,7 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
             <GithubOutlined className="text-gray-900 dark:text-gray-100" />
             <span className="text-sm font-medium">GitHub</span>
           </button>
+        </div>
         </div>
 
         <p className="text-center text-sm text-slate-500 dark:text-slate-400">
@@ -309,7 +311,7 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
 );
 
 // Login Step Component
-const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitting, setModalMode, resetModal, handleSocialAuth, handleGoogleLogin, setIsForgotPasswordOpen }) => (
+const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitting, setModalMode, resetModal, handleSocialAuth, handleGoogleLogin, setIsForgotPasswordOpen, allowPasswordLogin, allowPublicSignups, allowThirdPartyLogin }) => (
   <motion.div
     key="login"
     initial={{ x: 20, opacity: 0 }}
@@ -332,7 +334,7 @@ const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitt
       )}
     </div>
 
-    <div className="space-y-4">
+    <div className={allowPasswordLogin ? "space-y-4" : "hidden"}>
       <div>
         <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">
           Email address
@@ -395,11 +397,12 @@ const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitt
       type="button"
       onClick={handleLogin}
       disabled={isSubmitting}
-      className="w-full py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow"
+      className={`${allowPasswordLogin ? "block" : "hidden"} w-full py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow`}
     >
       Sign In
     </button>
 
+    <div className={allowThirdPartyLogin ? "contents" : "hidden"}>
     <div className="relative">
       <div className="absolute inset-0 flex items-center">
         <div className="w-full border-t border-slate-200 dark:border-slate-700" />
@@ -427,7 +430,9 @@ const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitt
         <span className="text-sm font-medium">GitHub</span>
       </button>
     </div>
+    </div>
 
+    {allowPublicSignups && (
     <p className="text-center text-sm text-slate-500 dark:text-slate-400">
       Don't have an account?{" "}
       <button
@@ -440,6 +445,7 @@ const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitt
         Sign up
       </button>
     </p>
+    )}
   </motion.div>
 );
 
@@ -464,6 +470,11 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
     const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
     const [otpExpiresAt, setOtpExpiresAt] = useState(null);
     const [otpCountdown, setOtpCountdown] = useState(0);
+    const [authSettings, setAuthSettings] = useState({
+      allowPublicSignups: true,
+      allowPasswordLogin: true,
+      allowThirdPartyLogin: false,
+    });
     const countdownInterval = useRef(null);
 
     // Countdown effect - now currentStep is already defined
@@ -814,6 +825,22 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
     // We intentionally omit formData from deps to avoid full reinitialization while open.
   }, [isOpen, mode, initialStep, initialEmail]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const fetchAuthSettings = async () => {
+      const res = await getPublicAuthSettingsApi();
+      if (res?.EC === 0) {
+        setAuthSettings((current) => ({ ...current, ...res.data }));
+        if (!res.data?.allowPublicSignups) {
+          setModalMode("login");
+        }
+      }
+    };
+
+    fetchAuthSettings();
+  }, [isOpen]);
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -907,6 +934,8 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
                       otpExpiresAt={otpExpiresAt}
                       otpCountdown={otpCountdown}
                       onResendOtp={handleResendOtp}
+                      allowPasswordLogin={authSettings.allowPasswordLogin}
+                      allowThirdPartyLogin={authSettings.allowThirdPartyLogin}
                     />
                   ) : (
                     <LoginStep
@@ -921,6 +950,9 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
                       handleSocialAuth={handleSocialAuth}
                       handleGoogleLogin={googleLogin}
                       setIsForgotPasswordOpen={setIsForgotPasswordOpen}
+                      allowPasswordLogin={authSettings.allowPasswordLogin}
+                      allowPublicSignups={authSettings.allowPublicSignups}
+                      allowThirdPartyLogin={authSettings.allowThirdPartyLogin}
                     />
                   )}
                 </AnimatePresence>

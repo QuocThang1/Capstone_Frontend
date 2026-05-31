@@ -25,13 +25,6 @@ const platformRoles = [
     color: "bg-emerald-100 text-emerald-600",
   },
   {
-    id: "billing-manager",
-    name: "Billing Manager",
-    description: "Manages subscriptions, plans, invoices, and organization billing status.",
-    userCount: 4,
-    color: "bg-amber-100 text-amber-700",
-  },
-  {
     id: "read-only-auditor",
     name: "Read-only Auditor",
     description: "View-only access to all platform data and audit logs.",
@@ -43,7 +36,6 @@ const platformRoles = [
 const permissions = [
   "Manage Organizations",
   "Manage Platform Users",
-  "Manage Subscriptions",
   "Manage System Settings",
   "Manage Platform Roles",
   "View Audit Logs",
@@ -64,11 +56,6 @@ const initialMatrix = {
     "Manage System Settings": true,
     "View Audit Logs": true,
     "Monitor System Health": true,
-  },
-  "Billing Manager": {
-    "Manage Organizations": true,
-    "Manage Subscriptions": true,
-    "View Audit Logs": true,
   },
   "Read-only Auditor": {
     "View Audit Logs": true,

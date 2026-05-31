@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import AdminSidebar from "../components/adminPage/AdminSidebar";
-import AdminTopbar from "../components/adminPage/AdminTopbar";
-import { cn } from "@/lib/utils";
+import AdminSidebar from "../components/mainPage/AdminSidebar";
+import TopBar from "../components/mainPage/topBar";
 
 export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
@@ -11,15 +10,11 @@ export default function AdminLayout() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex font-sans">
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans">
       <AdminSidebar collapsed={collapsed} />
 
-      <motion.div
-        animate={{ marginLeft: collapsed ? 64 : 240 }}
-        transition={{ type: "spring", stiffness: 350, damping: 35 }}
-        className="flex-1 flex flex-col min-w-0 md:ml-0"
-      >
-        <AdminTopbar
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <TopBar
           onMobileMenuClick={() => setMobileMenuOpen(true)}
           onSidebarToggle={() => setCollapsed(!collapsed)}
         />
@@ -38,7 +33,7 @@ export default function AdminLayout() {
             </AnimatePresence>
           </div>
         </main>
-      </motion.div>
+      </div>
     </div>
   );
 }

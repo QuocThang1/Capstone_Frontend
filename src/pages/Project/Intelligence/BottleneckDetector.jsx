@@ -32,8 +32,8 @@ const BOTTLENECKS = [
     delay: "2h 10m",
     confidence: 88,
     trend: "stable",
-    description: "Invoice approvals are blocked at the finance manager step. 14 invoices pending over 2 hours.",
-    suggestion: "Auto-approve invoices under $500 based on historical approval rate of 99.4%.",
+    description: "Access reviews are blocked at the manager verification step. 14 requests have been pending for over 2 hours.",
+    suggestion: "Auto-approve low-risk access reviews based on the historical approval rate of 99.4%.",
     color: "amber",
   },
   {

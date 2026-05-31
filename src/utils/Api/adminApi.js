@@ -1,5 +1,10 @@
 import axios from '../axios.customize';
 
+// ========== PLATFORM DASHBOARD ==========
+export const getPlatformDashboardApi = (params) => {
+  return axios.get("/v1/api/admin/dashboard", { params });
+};
+
 // ========== ORGANIZATIONS ==========
 export const getAllOrganizationsApi = (params) => {
   return axios.get("/v1/api/admin/organizations", { params });
@@ -146,13 +151,17 @@ export const updateRolePermissionsApi = (roleId, permissions) => {
 
 // ========== SYSTEM SETTINGS ==========
 export const getSystemSettingsApi = () => {
-  return axios.get("/v1/api/admin/settings");
+  return axios.get("/api/admin/system-settings");
 };
 
 export const updateSystemSettingsApi = (settings) => {
-  return axios.put("/v1/api/admin/settings", settings);
+  return axios.put("/api/admin/system-settings", settings);
 };
 
 export const resetSystemSettingsApi = () => {
   return axios.post("/v1/api/admin/settings/reset");
+};
+
+export const sendSystemSettingsTestEmailApi = (payload) => {
+  return axios.post("/api/admin/system-settings/test-email", payload);
 };
