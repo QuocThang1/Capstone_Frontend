@@ -31,6 +31,11 @@ const completeSprintApi = (sprintId) => {
     return axios.post(URL_API);
 }
 
+const getOccupiedSprintsRangeApi = (projectId) => {
+    const URL_API = `/v1/api/sprints/project/${projectId}/occupied-ranges`;
+    return axios.get(URL_API);
+};
+
 export {
     createSprintApi,
     getSprintsByProjectApi,
@@ -38,4 +43,5 @@ export {
     deleteSprintApi,
     startSprintApi,
     completeSprintApi,
+    getOccupiedSprintsRangeApi,
 };

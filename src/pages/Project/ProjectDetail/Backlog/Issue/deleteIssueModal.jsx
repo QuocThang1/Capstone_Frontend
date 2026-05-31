@@ -12,12 +12,20 @@ const DeleteIssueModal = ({ isOpen, onClose, onConfirm, loading, issue }) => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-50 flex justify-center items-center p-4 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm"
+            onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+            }}
         >
             <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 280, damping: 22 }}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onClose();
+                }}
                 className="glass-card rounded-xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-700 transition-all duration-300"
             >
                 {/* Modal Header */}

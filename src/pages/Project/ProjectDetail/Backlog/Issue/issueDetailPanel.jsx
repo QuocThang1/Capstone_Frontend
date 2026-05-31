@@ -44,7 +44,9 @@ const IssueDetailPanel = ({ project, sprints, issue, onClose, onDataUpdate, onDe
     ];
 
     const sprintOptions = [
-        ...(sprints || []).map(s => ({ value: s._id, label: s.name }))
+        ...(sprints || [])
+            .filter(s => s.status !== 'completed')
+            .map(s => ({ value: s._id, label: s.name }))
     ];
 
     const priorityOptionsList = ["Highest", "High", "Medium", "Low", "Lowest"];
@@ -359,7 +361,7 @@ const IssueDetailPanel = ({ project, sprints, issue, onClose, onDataUpdate, onDe
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2"><Target className="w-4 h-4" />Sprint</label>
                         <SelectDropdown
-                            value={issue.sprintId || 'null'}
+                            value={issue.sprintId._id || 'null'}
                             options={sprintOptions}
                             onChange={(val) => handleFieldChange('sprintId', val === 'null' ? null : val)}
                             placeholder="Add to sprint"
@@ -500,10 +502,6 @@ const IssueDetailPanel = ({ project, sprints, issue, onClose, onDataUpdate, onDe
                     isSubtaskMode={true}
                     onClose={() => setSelectedSubtask(null)}
                     onDataUpdate={onDataUpdate || fetchIssuesData}
-                    onDeleteRequest={selected => {
-                        onDeleteRequest(selected);
-                        setSelectedSubtask(null);
-                    }}
                 />
             )}
         </motion.div>

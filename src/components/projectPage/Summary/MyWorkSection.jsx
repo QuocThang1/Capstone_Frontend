@@ -34,7 +34,7 @@ const SimpleIssueCard = ({ issue, projectId, navigate, activeTab }) => {
 
     return (
         <div
-            onClick={() => navigate(`/projects/${projectId}/issues?search=${issue.issueKey}`)}
+            onClick={() => navigate(`/projects/${projectId}/list?issueId=${issue._id}`)}
             className="flex items-center gap-4 py-3.5 px-3 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer group"
         >
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-sm ${iconBg}`}>

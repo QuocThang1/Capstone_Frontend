@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext, useNavigate } from 'react-router-dom';
+import { useOutletContext, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Search, Filter, CheckSquare, Bug, Bookmark, CornerDownRight, // Thêm CornerDownRight
@@ -12,6 +12,7 @@ import { getIssuesByProjectApi } from '../../../../utils/Api/issueApi';
 import { getSprintsByProjectApi } from '../../../../utils/Api/sprintApi';
 import Spinner from '../../../../components/spinner';
 import SelectDropdown from '../../../../components/selectDropdown';
+import IssueListDetail from './issueListDetail';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -24,9 +25,12 @@ const rowVariants = {
 };
 
 const IssueList = () => {
-    const { project } = useOutletContext();
+    const { project, fetchIssuesData } = useOutletContext();
     const navigate = useNavigate();
+    const location = useLocation();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [issues, setIssues] = useState([]);
+    const [selectedIssue, setSelectedIssue] = useState(null);
     const [sprints, setSprints] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingPage, setLoadingPage] = useState(true);
@@ -39,6 +43,23 @@ const IssueList = () => {
         assignee: '',
         type: '' // THÊM filter cho Type
     });
+
+    const canEditIssueStatus = (issue) => {
+        if (!issue || issue.parentId) return false;
+
+        const sprint = issue.sprintId || issue.sprint;
+        if (!sprint || typeof sprint === 'string') return false;
+
+        const sprintStatus = String(sprint.status || '').toLowerCase();
+
+        return (
+            sprint.isCompleted === true ||
+            sprint.completed === true ||
+            sprint.completedAt ||
+            sprintStatus === 'completed' ||
+            sprintStatus === 'done'
+        );
+    };
 
     useEffect(() => {
         setLoadingPage(true);
@@ -59,32 +80,7 @@ const IssueList = () => {
     useEffect(() => {
         if (!project?._id) return;
 
-        const fetchFilteredIssues = async () => {
-            setLoading(true);
-            try {
-                const apiFilters = {
-                    title: searchTerm,
-                    sprint: filters.sprint,
-                    priority: filters.priority,
-                    status: filters.status,
-                    assignee: filters.assignee,
-                    type: filters.type // THÊM gửi type param
-                };
-
-                Object.keys(apiFilters).forEach(key => {
-                    if (!apiFilters[key]) delete apiFilters[key];
-                });
-
-                const res = await getIssuesByProjectApi(project._id, apiFilters);
-                if (res && res.EC === 0) {
-                    setIssues(res.data || []);
-                }
-            } catch (error) {
-                console.error("Lỗi lọc danh sách issue:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        fetchFilteredIssues();
 
         const delayTimer = setTimeout(() => {
             fetchFilteredIssues();
@@ -92,6 +88,50 @@ const IssueList = () => {
 
         return () => clearTimeout(delayTimer);
     }, [searchTerm, filters, project]);
+
+    useEffect(() => {
+        const issueId = searchParams.get('issueId');
+        if (!issueId || !issues.length) return;
+
+        const matchedIssue = issues.find(issue => issue._id === issueId);
+        if (matchedIssue) {
+            setSelectedIssue(matchedIssue);
+        }
+    }, [issues, searchParams]);
+
+    const fetchFilteredIssues = async () => {
+        setLoading(true);
+        try {
+            const apiFilters = {
+                title: searchTerm,
+                sprint: filters.sprint,
+                priority: filters.priority,
+                status: filters.status,
+                assignee: filters.assignee,
+                type: filters.type // THÊM gửi type param
+            };
+
+            Object.keys(apiFilters).forEach(key => {
+                if (!apiFilters[key]) delete apiFilters[key];
+            });
+
+            const res = await getIssuesByProjectApi(project._id, apiFilters);
+            if (res && res.EC === 0) {
+                setIssues(res.data || []);
+            }
+        } catch (error) {
+            console.error("Lỗi lọc danh sách issue:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCloseModal = () => {
+        setSelectedIssue(null);
+        const nextParams = new URLSearchParams(searchParams);
+        nextParams.delete('issueId');
+        setSearchParams(nextParams, { replace: true });
+    };
 
     const formatDate = (dateString, formatStr = 'MMM d, yyyy') => {
         if (!dateString) return <span className="text-slate-400 italic">None</span>;
@@ -221,6 +261,7 @@ const IssueList = () => {
                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-36">Status</th>
                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-32">Resolution</th>
                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">Priority</th>
+                            <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-28">Story Points</th>
                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">Assignee</th>
                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-40">Reporter</th>
                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-44">Start Date</th>
@@ -236,7 +277,7 @@ const IssueList = () => {
                     >
                         {issues.length === 0 ? (
                             <tr>
-                                <td colSpan="11" className="px-6 py-20">
+                                <td colSpan="12" className="px-6 py-20">
                                     <div className="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
                                         <Inbox className="w-12 h-12 mb-3 text-slate-300 dark:text-slate-600" />
                                         <p className="text-base font-semibold text-slate-700 dark:text-slate-300">No issues found</p>
@@ -247,7 +288,7 @@ const IssueList = () => {
                         ) : (
                             issues.map((issue) => (
                                 <motion.tr
-                                    variants={rowVariants} key={issue._id}
+                                    variants={rowVariants} key={issue._id} onClick={() => setSelectedIssue(issue)}
                                     className="group hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
                                 >
                                     <td className="px-4 py-4 text-center border-r border-slate-100 dark:border-slate-800/60">
@@ -277,6 +318,11 @@ const IssueList = () => {
                                                 <span className={`font-bold text-[13px] tracking-wide ${issue.resolution === 'Done' ? 'text-slate-400 line-through' : 'text-slate-600 dark:text-slate-400'}`}>
                                                     {issue.issueKey}
                                                 </span>
+                                                {issue.parentId && (
+                                                    <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
+                                                        Parent: {issue.parentId?.issueKey || issue.parentId || 'N/A'}
+                                                    </span>
+                                                )}
                                                 <span className={`font-medium truncate max-w-sm ${issue.resolution === 'Done' ? 'text-slate-400 line-through' : 'text-slate-900 dark:text-slate-100'} group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors`}>
                                                     {issue.title}
                                                 </span>
@@ -296,6 +342,10 @@ const IssueList = () => {
 
                                     <td className="px-6 py-4">
                                         {getPriorityDisplay(issue.priority)}
+                                    </td>
+
+                                    <td className="px-6 py-4 font-medium text-sm text-slate-700 dark:text-slate-300">
+                                        {issue.storyPoints ?? 0}
                                     </td>
 
                                     <td className="px-6 py-4">
@@ -331,6 +381,20 @@ const IssueList = () => {
                     </motion.tbody>
                 </table>
             </div>
+            <AnimatePresence>
+                {selectedIssue && (
+                    <IssueListDetail
+                        project={project}
+                        issue={selectedIssue}
+                        onClose={handleCloseModal}
+                        onDataUpdate={() => {
+                            fetchFilteredIssues();
+                            fetchIssuesData();
+                        }}
+                        canEditStatus={canEditIssueStatus(selectedIssue)}
+                    />
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 };
