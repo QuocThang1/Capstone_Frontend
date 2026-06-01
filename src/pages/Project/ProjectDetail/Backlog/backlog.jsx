@@ -7,7 +7,6 @@ import { toast } from 'react-toastify';
 
 import { getSprintsByProjectApi, createSprintApi, updateSprintApi, deleteSprintApi, startSprintApi, completeSprintApi } from '../../../../utils/Api/sprintApi';
 import { deleteIssueApi, updateIssueApi } from '../../../../utils/Api/issueApi';
-import { containerVariants, itemVariants, buttonVariants } from '../../../../utils/motionVariants';
 
 import Spinner from '../../../../components/spinner';
 import SprintContainer from '../../../../components/projectPage/Backlog/sprintContainer';
@@ -16,6 +15,17 @@ import EditSprintModal from './Sprint/editSprintModal';
 import DeleteSprintModal from './Sprint/deleteSprintModal';
 import IssueDetailPanel from './Issue/issueDetailPanel';
 import DeleteIssueModal from './Issue/deleteIssueModal';
+
+// Thêm variants animation
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } }
+};
+
+const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+};
 
 
 const Backlog = () => {
@@ -248,28 +258,22 @@ const Backlog = () => {
                         animate="visible"
                         style={{ height: '100%', minHeight: 0 }}
                     >
-                        <div className="mx-auto space-y-6">
-                            <motion.header variants={itemVariants} className="flex justify-between items-end">
-                                <div>
-                                    <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Sprint Planning</h1>
-                                    <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">Organize and manage sprint tasks, priorities, and delivery schedules.</p>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    {!isCreating && (
-                                        <motion.button
-                                            variants={buttonVariants}
-                                            whileHover="hover"
-                                            whileTap="tap"
-                                            onClick={() => setIsCreating(true)}
-                                            className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 transition-all cursor-pointer"
-                                        >
-                                            + Create Sprint
-                                        </motion.button>
-                                    )}
-                                </div>
-                            </motion.header>
+                        <div className="max-w-5xl mx-auto space-y-6 pt-6 px-6 pb-64">
+                            <motion.div variants={itemVariants} className="flex items-center justify-between mb-8">
+                                <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Sprints</h2>
+                                {!isCreating && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => setIsCreating(true)}
+                                        className="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all cursor-pointer"
+                                    >
+                                        + Create Sprint
+                                    </motion.button>
+                                )}
+                            </motion.div>
 
-                            <motion.section variants={itemVariants} className="space-y-4">
+                            <motion.div variants={itemVariants} className="space-y-4">
                                 {regularSprints.map(sprint => (
                                     <SprintContainer
                                         key={sprint._id}
@@ -285,64 +289,34 @@ const Backlog = () => {
                                         onCompleteSprint={handleCompleteSprint}
                                     />
                                 ))}
-                            </motion.section>
+                            </motion.div>
 
                             <AnimatePresence>
                                 {isCreating && (
                                     <motion.div
-                                        initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                                        transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-                                        className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-indigo-200 dark:border-indigo-900/50 shadow-xl"
+                                        initial={{ opacity: 0, y: -20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -20 }}
+                                        className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-indigo-100 dark:border-indigo-900/50 shadow-xl"
                                     >
-                                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">New Sprint</p>
                                         <input
                                             type="text"
                                             value={newSprintName}
                                             onChange={(e) => setNewSprintName(e.target.value)}
-                                            placeholder="Enter sprint name (e.g. Sprint 1, Q2 Release)..."
-                                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm font-medium"
+                                            placeholder="Sprint Name (e.g. Sprint 1)..."
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
                                             autoFocus
                                         />
                                         <div className="flex justify-end gap-3 mt-4">
-                                            <motion.button
-                                                whileHover={{ scale: 1.02 }}
-                                                whileTap={{ scale: 0.98 }}
-                                                onClick={() => setIsCreating(false)}
-                                                className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors"
-                                            >
-                                                Cancel
-                                            </motion.button>
-                                            <motion.button
-                                                variants={buttonVariants}
-                                                whileHover="hover"
-                                                whileTap="tap"
-                                                onClick={handleCreateSprint}
-                                                disabled={actionLoading}
-                                                className="px-6 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed cursor-pointer transition-colors"
-                                            >
-                                                {actionLoading ? <ButtonSpinner /> : 'Create Sprint'}
-                                            </motion.button>
+                                            <button onClick={() => setIsCreating(false)} className="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-700 cursor-pointer">Cancel</button>
+                                            <button onClick={handleCreateSprint} disabled={actionLoading} className="px-6 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md cursor-pointer hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed">
+                                                {actionLoading ? <ButtonSpinner /> : 'Create'}
+                                            </button>
                                         </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
 
-                            <motion.section variants={itemVariants} className="mt-2 pt-6 border-t border-slate-200 dark:border-slate-800">
-                                <div className="flex items-center justify-between mb-6">
-                                    <div className="flex items-center gap-3">
-                                        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Product Backlog</h2>
-                                        <motion.span
-                                            initial={{ scale: 0.8, opacity: 0 }}
-                                            animate={{ scale: 1, opacity: 1 }}
-                                            className="px-3 py-1 bg-slate-200 dark:bg-slate-800 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300"
-                                        >
-                                            {issues.filter(i => i.sprintId === backlogSprint?._id).length}
-                                        </motion.span>
-                                    </div>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Issues ready for planning</p>
-                                </div>
                             <motion.div variants={itemVariants} className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800">
                                 <div className="flex items-center gap-2 mb-4">
                                     <h3 className="text-lg font-black text-slate-800 dark:text-slate-200">Project Backlog</h3>
@@ -361,7 +335,6 @@ const Backlog = () => {
                                     />
                                 )}
                             </motion.div>
-                            </motion.section>
                         </div>
                     </motion.div>
                 </DndContext>
@@ -382,7 +355,7 @@ const Backlog = () => {
             </div>
 
             {/* Modals remain outside the flex layout */}
-            <EditSprintModal isOpen={isEditModalOpen} onClose={handleCloseSprintModals} onUpdate={handleUpdateSprint} sprint={selectedSprint} loading={actionLoading} projectId={project?._id} />
+            <EditSprintModal isOpen={isEditModalOpen} onClose={handleCloseSprintModals} onUpdate={handleUpdateSprint} sprint={selectedSprint} loading={actionLoading} projectId={project?._id} projectTimezone={project?.timezone || 'UTC'} />
             <DeleteSprintModal isOpen={isDeleteModalOpen} onClose={handleCloseSprintModals} onConfirm={handleDeleteSprint} sprint={selectedSprint} loading={actionLoading} />
             <DeleteIssueModal isOpen={!!issueToDelete} onClose={() => setIssueToDelete(null)} onConfirm={handleConfirmDeleteIssue} issue={issueToDelete} loading={actionLoading} />
         </>

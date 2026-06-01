@@ -31,6 +31,22 @@ import {
 import { getProjectMembersApi } from '../../../../utils/Api/projectApi';
 import DeleteIssueModal from '../Backlog/Issue/deleteIssueModal';
 
+const toUtcIsoString = (localDateTime, timeZone) => {
+    if (!localDateTime) return null;
+    try {
+        const tempDate = new Date(`${localDateTime}:00`);
+        const tzStr = new Intl.DateTimeFormat('en-US', {
+            timeZone: timeZone || 'UTC',
+            timeZoneName: 'longOffset'
+        }).format(tempDate);
+
+        let offset = tzStr.split(' ').pop().replace('GMT', '');
+        return new Date(`${localDateTime}:00${offset || '+00:00'}`).toISOString();
+    } catch (e) {
+        return new Date(localDateTime).toISOString();
+    }
+};
+
 const IssueListDetail = ({
     project,
     issue,
@@ -56,12 +72,23 @@ const IssueListDetail = ({
 
     const allowStatusEdit = canEditStatus;
 
-    const formatDateTimeLocal = (dateString) => {
+    const formatDateTimeLocal = (dateString, timeZone) => {
         if (!dateString) return '';
-        const d = new Date(dateString);
-        return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-            .toISOString()
-            .slice(0, 16);
+        try {
+            const d = new Date(dateString);
+            const options = {
+                timeZone: timeZone || 'UTC',
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+            };
+            const parts = new Intl.DateTimeFormat('en-US', options).formatToParts(d);
+            const map = {};
+            parts.forEach(p => map[p.type] = p.value);
+            return `${map.year}-${map.month}-${map.day}T${map.hour}:${map.minute}`;
+        } catch (error) {
+            const d = new Date(dateString);
+            return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        }
     };
 
     const resetFormToIssue = () => {
@@ -78,8 +105,8 @@ const IssueListDetail = ({
             status: issue.status || '',
             storyPoints: issue.storyPoints || 0,
             timeExpect: issue.timeExpect || 0,
-            startDate: formatDateTimeLocal(issue.startDate),
-            dueDate: formatDateTimeLocal(issue.dueDate),
+            startDate: formatDateTimeLocal(issue.startDate, project?.timezone),
+            dueDate: formatDateTimeLocal(issue.dueDate, project?.timezone),
         });
     };
 
@@ -164,8 +191,8 @@ const IssueListDetail = ({
             assigneeId: data.assigneeId === 'null' ? null : data.assigneeId,
             priority: data.priority,
             storyPoints: Number(data.storyPoints) || 0,
-            startDate: data.startDate || null,
-            dueDate: data.dueDate || null,
+            startDate: toUtcIsoString(data.startDate, project?.timezone),
+            dueDate: toUtcIsoString(data.dueDate, project?.timezone),
         };
 
         if (allowStatusEdit) {

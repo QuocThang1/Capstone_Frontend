@@ -9,10 +9,18 @@ import IssueRow from './issueRow';
 import ButtonSpinner from '../../ButtonSpinner';
 import SelectDropdown from '../../selectDropdown';
 
-const formatDate = (dateString) => {
+const formatDate = (dateString, timeZone) => {
     if (!dateString) return null;
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    try {
+        return new Intl.DateTimeFormat('en-GB', {
+            timeZone: timeZone || 'UTC',
+            day: 'numeric',
+            month: 'short'
+        }).format(new Date(dateString));
+    } catch (error) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
 };
 
 const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSelect, onOpenDeleteIssueModal, onDataUpdate, onStartSprint, onCompleteSprint }) => {
@@ -28,8 +36,8 @@ const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSel
 
     const { setNodeRef, isOver } = useDroppable({ id: sprint._id });
 
-    const formattedStartDate = formatDate(sprint.startDate);
-    const formattedEndDate = formatDate(sprint.endDate);
+    const formattedStartDate = formatDate(sprint.startDate, project?.timezone);
+    const formattedEndDate = formatDate(sprint.endDate, project?.timezone);
 
     const totalStoryPoints = issues.reduce((sum, issue) => sum + (issue.storyPoints || 0), 0);
 

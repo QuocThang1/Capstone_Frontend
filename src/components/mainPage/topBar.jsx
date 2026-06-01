@@ -31,23 +31,30 @@ const adminRoutes = {
 const projectRoutes = {
   "/projects": "Dashboard",
   "/overview": "Overview Dashboard",
-  "/events": "Events",
-  "/process": "Process Flow",
-  "/bottlenecks": "Bottleneck Detector",
-  "/users": "Users Management",
-  "/team": "Team Health",
-  "/rbac": "RBAC & Permissions",
-  "/audit": "Audit Logs",
-  "/profile": "Profile Settings",
+  "/board": "Board",
+  "/backlog": "Backlog",
+  "/process-flow": "Process Flow",
+  "/list": "Issues List",
+  "/realtime-logs": "Realtime Logs",
+  "/bottleneck-detector": "Bottleneck Detector",
+  "/team-health": "Team Health",
+  "/rbac": "Roles & Permissions",
+  "/audit-logs": "Audit Logs",
+  "/automation-rules": "Automation Rules",
 };
 
 function getRouteTitle(pathname, routes, fallback) {
   let title = fallback;
+
   for (const [path, name] of Object.entries(routes)) {
-    if (pathname === path || (path !== "/" && pathname.startsWith(path))) {
+    if (pathname === path) {
+      title = name;
+    }
+    else if (path !== "/" && (pathname.endsWith(path) || pathname.includes(path + "/"))) {
       title = name;
     }
   }
+
   return title;
 }
 
@@ -151,7 +158,7 @@ const TopBar = ({
             }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <Menu className="w-5 h-5" />
           </motion.button>

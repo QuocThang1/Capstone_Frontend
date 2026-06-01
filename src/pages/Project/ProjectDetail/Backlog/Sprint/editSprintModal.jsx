@@ -7,7 +7,45 @@ import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { getOccupiedSprintsRangeApi } from '../../../../../utils/Api/sprintApi';
 
-const EditSprintModal = ({ isOpen, onClose, onUpdate, loading, sprint, projectId }) => {
+const formatToTimezoneDate = (isoString, timeZone) => {
+    if (!isoString) return '';
+    try {
+        return new Intl.DateTimeFormat('en-CA', {
+            timeZone: timeZone || 'UTC',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).format(new Date(isoString));
+    } catch (error) {
+        return new Date(isoString).toISOString().split('T')[0];
+    }
+};
+
+const getUtcStartOfDay = (dateString, timeZone) => {
+    if (!dateString) return null;
+    try {
+        const tempDate = new Date(`${dateString}T00:00:00`);
+        const tzStr = new Intl.DateTimeFormat('en-US', { timeZone: timeZone || 'UTC', timeZoneName: 'longOffset' }).format(tempDate);
+        let offset = tzStr.split(' ').pop().replace('GMT', '');
+        return new Date(`${dateString}T00:00:00${offset || '+00:00'}`).toISOString();
+    } catch (e) {
+        return new Date(dateString).toISOString();
+    }
+};
+
+const getUtcEndOfDay = (dateString, timeZone) => {
+    if (!dateString) return null;
+    try {
+        const tempDate = new Date(`${dateString}T23:59:59`);
+        const tzStr = new Intl.DateTimeFormat('en-US', { timeZone: timeZone || 'UTC', timeZoneName: 'longOffset' }).format(tempDate);
+        let offset = tzStr.split(' ').pop().replace('GMT', '');
+        return new Date(`${dateString}T23:59:59${offset || '+00:00'}`).toISOString();
+    } catch (e) {
+        return new Date(dateString).toISOString();
+    }
+};
+
+const EditSprintModal = ({ isOpen, onClose, onUpdate, loading, sprint, projectId, projectTimezone = "UTC" }) => {
     const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm();
     const [occupiedRanges, setOccupiedRanges] = useState([]);
     const [openPicker, setOpenPicker] = useState(null);
@@ -36,30 +74,34 @@ const EditSprintModal = ({ isOpen, onClose, onUpdate, loading, sprint, projectId
         if (sprint) {
             reset({
                 name: sprint.name || '',
-                startDate: sprint.startDate ? new Date(sprint.startDate).toISOString().split('T')[0] : '',
-                endDate: sprint.endDate ? new Date(sprint.endDate).toISOString().split('T')[0] : '',
+                startDate: formatToTimezoneDate(sprint.startDate, projectTimezone),
+                endDate: formatToTimezoneDate(sprint.endDate, projectTimezone),
                 goal: sprint.goal || '',
             });
         }
-    }, [sprint, reset, isOpen]);
+    }, [sprint, reset, isOpen, projectTimezone]);
 
     if (!isOpen) return null;
 
     const onSubmit = (data) => {
-        onUpdate(sprint._id, data);
+        const payload = {
+            ...data,
+            startDate: getUtcStartOfDay(data.startDate, projectTimezone),
+            endDate: getUtcEndOfDay(data.endDate, projectTimezone)
+        };
+        onUpdate(sprint._id, payload);
     };
 
     const isDateInRange = (date, range) => {
-        const current = new Date(date);
-        current.setHours(0, 0, 0, 0);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const currentStr = `${year}-${month}-${day}`;
 
-        const start = new Date(range.startDate);
-        start.setHours(0, 0, 0, 0);
+        const startStr = formatToTimezoneDate(range.startDate, projectTimezone);
+        const endStr = formatToTimezoneDate(range.endDate, projectTimezone);
 
-        const end = new Date(range.endDate);
-        end.setHours(23, 59, 59, 999);
-
-        return current >= start && current <= end;
+        return currentStr >= startStr && currentStr <= endStr;
     };
 
     const isOccupiedDate = (date) => {
@@ -84,8 +126,15 @@ const EditSprintModal = ({ isOpen, onClose, onUpdate, loading, sprint, projectId
     };
     const inputStyle = "w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white";
 
+    const parseLocalDay = (dateString) => {
+        if (!dateString) return undefined;
+        const [y, m, d] = dateString.split('-');
+        return new Date(y, m - 1, d);
+    };
+
     const DatePickerField = ({ label, value, field, alignRight }) => {
-        const isOccupied = value ? isOccupiedDate(new Date(value)) : false;
+        const selectedDate = value ? parseLocalDay(value) : undefined;
+        const isOccupied = value ? isOccupiedDate(selectedDate) : false;
 
         return (
             <div className="relative">
@@ -110,7 +159,7 @@ const EditSprintModal = ({ isOpen, onClose, onUpdate, loading, sprint, projectId
                         <div className="[&_.rdp]:m-0 [&_.rdp-month]:space-y-1 [&_.rdp-cell]:w-7 [&_.rdp-cell]:h-7 [&_.rdp-button_reset]:w-7 [&_.rdp-button_reset]:h-7 [&_.rdp-day]:text-xs [&_.rdp-caption_label]:text-sm [&_.rdp-head_cell]:text-[10px] [&_.rdp-head_cell]:font-medium [&_.rdp-head_cell]:text-slate-500 [&_.rdp-nav_button]:w-6 [&_.rdp-nav_button]:h-6">
                             <DayPicker
                                 mode="single"
-                                selected={value ? new Date(value) : undefined}
+                                selected={selectedDate}
                                 onSelect={(date) => handleSelectDate(field, date)}
                                 modifiers={{
                                     occupied: (day) => isOccupiedDate(day),

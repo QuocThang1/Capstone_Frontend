@@ -133,9 +133,21 @@ const IssueList = () => {
         setSearchParams(nextParams, { replace: true });
     };
 
-    const formatDate = (dateString, formatStr = 'MMM d, yyyy') => {
+    const formatDate = (dateString) => {
         if (!dateString) return <span className="text-slate-400 italic">None</span>;
-        return format(new Date(dateString), formatStr);
+        try {
+            return new Intl.DateTimeFormat('en-US', {
+                timeZone: project?.timezone || 'UTC',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            }).format(new Date(dateString));
+        } catch (error) {
+            return format(new Date(dateString), 'MMM d, yyyy, h:mm a');
+        }
     };
 
     const getPriorityDisplay = (priority) => {
@@ -361,19 +373,19 @@ const IssueList = () => {
                                     </td>
 
                                     <td className="px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                                        {formatDate(issue.startDate, 'MMM d, yyyy, h:mm a')}
+                                        {formatDate(issue.startDate)}
                                     </td>
 
                                     <td className="px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                                        {formatDate(issue.dueDate, 'MMM d, yyyy, h:mm a')}
+                                        {formatDate(issue.dueDate)}
                                     </td>
 
                                     <td className="px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                                        {formatDate(issue.completedAt, 'MMM d, yyyy, h:mm a')}
+                                        {formatDate(issue.completedAt)}
                                     </td>
 
                                     <td className="px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                                        {formatDate(issue.createdAt, 'MMM d, yyyy, h:mm a')}
+                                        {formatDate(issue.createdAt)}
                                     </td>
                                 </motion.tr>
                             ))

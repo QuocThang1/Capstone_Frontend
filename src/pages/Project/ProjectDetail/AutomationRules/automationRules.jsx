@@ -64,7 +64,7 @@ const AutomationRules = () => {
     label: `${h.toString().padStart(2, '0')} (Hour)`
   }));
 
-  const minuteOptions = [0, 15, 30, 45].map(m => ({
+  const minuteOptions = [...Array(60).keys()].map(m => ({
     value: m,
     label: `${m.toString().padStart(2, '0')} (Minute)`
   }));
