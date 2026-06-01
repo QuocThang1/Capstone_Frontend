@@ -150,6 +150,7 @@ const TeamHealth = () => {
         selectedMember={selectedMember}
         selectedMemberIssues={selectedMemberIssues}
         onClose={() => setSelectedMember(null)}
+        projectTimezone={project?.timezone}
       />
     </>
   );

@@ -16,6 +16,22 @@ import HistorySection from '../../../../../components/projectPage/IssueDetail/hi
 import AiSuggestModal from '../../../../../components/projectPage/IssueDetail/aiSuggestModal';
 import AiSuggestButton from '../../../../../components/projectPage/IssueDetail/aiSuggestButton';
 
+const toUtcIsoString = (localDateTime, timeZone) => {
+    if (!localDateTime) return null;
+    try {
+        const tempDate = new Date(`${localDateTime}:00`);
+        const tzStr = new Intl.DateTimeFormat('en-US', {
+            timeZone: timeZone || 'UTC',
+            timeZoneName: 'longOffset'
+        }).format(tempDate);
+
+        let offset = tzStr.split(' ').pop().replace('GMT', '');
+        return new Date(`${localDateTime}:00${offset || '+00:00'}`).toISOString();
+    } catch (e) {
+        return new Date(localDateTime).toISOString();
+    }
+};
+
 const IssueDetailPanel = ({ project, sprints, issue, onClose, onDataUpdate, onDeleteRequest, subtaskTrigger }) => {
     const [projectMembers, setProjectMembers] = useState([]);
     const [subtasks, setSubtasks] = useState([]);
@@ -55,10 +71,24 @@ const IssueDetailPanel = ({ project, sprints, issue, onClose, onDataUpdate, onDe
     const resetFormToOriginal = () => {
         if (!issue) return;
         setAttachments(issue.attachments || []);
-        const formatForDateTimeLocal = (dateString) => {
+        const formatForDateTimeLocal = (dateString, timeZone) => {
             if (!dateString) return '';
-            const d = new Date(dateString);
-            return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            try {
+                const d = new Date(dateString);
+                const options = {
+                    timeZone: timeZone || 'UTC',
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', hour12: false
+                };
+                const parts = new Intl.DateTimeFormat('en-US', options).formatToParts(d);
+                const map = {};
+                parts.forEach(p => map[p.type] = p.value);
+                const hour = map.hour === '24' ? '00' : map.hour;
+                return `${map.year}-${map.month}-${map.day}T${hour}:${map.minute}`;
+            } catch (error) {
+                const d = new Date(dateString);
+                return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            }
         };
         reset({
             title: issue.title,
@@ -69,8 +99,8 @@ const IssueDetailPanel = ({ project, sprints, issue, onClose, onDataUpdate, onDe
             status: issue.status,
             storyPoints: issue.storyPoints || 0,
             timeExpect: issue.timeExpect || 0,
-            startDate: formatForDateTimeLocal(issue.startDate),
-            dueDate: formatForDateTimeLocal(issue.dueDate),
+            startDate: formatForDateTimeLocal(issue.startDate, project?.timezone),
+            dueDate: formatForDateTimeLocal(issue.dueDate, project?.timezone),
         });
     };
 
@@ -120,7 +150,14 @@ const IssueDetailPanel = ({ project, sprints, issue, onClose, onDataUpdate, onDe
                 ? data.requiredSkills.split(',').map(s => s.trim()).filter(Boolean)
                 : [];
 
-            const updateData = { ...data, requiredSkills: parsedSkills, assigneeId: data.assigneeId === "null" ? null : data.assigneeId, storyPoints: Number(data.storyPoints) || 0, startDate: data.startDate || null, dueDate: data.dueDate || null };
+            const updateData = {
+                ...data,
+                requiredSkills: parsedSkills,
+                assigneeId: data.assigneeId === "null" ? null : data.assigneeId,
+                storyPoints: Number(data.storyPoints) || 0,
+                startDate: toUtcIsoString(data.startDate, project?.timezone),
+                dueDate: toUtcIsoString(data.dueDate, project?.timezone)
+            };
             const res = await updateIssueApi(issue._id, updateData);
             if (res.EC === 0) {
                 toast.success(res.EM || "Issue updated!");

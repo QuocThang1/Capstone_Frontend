@@ -220,11 +220,11 @@ const Board = () => {
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    className="h-full flex flex-col space-y-6 overflow-hidden p-2"
+                    className="h-full min-h-[700px] flex flex-col p-6 space-y-6 overflow-hidden"
                 >
                     <motion.header variants={itemVariants} className="flex justify-between items-end">
                         <div>
-                            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+                            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                                 {activeSprint ? activeSprint.name : 'Board Overview'}
                             </h1>
                             <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">
@@ -289,51 +289,37 @@ const Board = () => {
                             </SortableContext>
                         </div>
                     </motion.main>
-
-                    <DragOverlay dropAnimation={{ duration: 300, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
-                        {activeElement && (
-                            <motion.div
-                                initial={{ scale: 1 }}
-                                animate={{
-                                    scale: 1.05,
-                                    rotate: activeElement.type === 'Column' ? 2 : 1,
-                                    boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
-                                }}
-                            >
-                                {activeElement.type === 'Column' ? (
-                                    <BoardColumn column={activeElement.column} issues={issuesByColumn[activeElement.column.name] || []} />
-                                ) : (
-                                    <IssueCard issue={activeElement.issue} />
-                                )}
-                            </motion.div>
-                        )}
-                    </DragOverlay>
                 </motion.div>
+
+                <DragOverlay dropAnimation={{ duration: 300, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
+                    {activeElement && (
+                        <motion.div
+                            initial={{ scale: 1 }}
+                            animate={{
+                                scale: 1.05,
+                                rotate: activeElement.type === 'Column' ? 2 : 1,
+                                boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
+                            }}
+                        >
+                            {activeElement.type === 'Column' ? (
+                                <BoardColumn column={activeElement.column} issues={issuesByColumn[activeElement.column.name] || []} />
+                            ) : (
+                                <IssueCard issue={activeElement.issue} />
+                            )}
+                        </motion.div>
+                    )}
+                </DragOverlay>
             </DndContext>
-
-        {selectedIssue && (
-            <IssueDetailModal
-                project={project}
-                issue={selectedIssue}
-                onClose={() => setSelectedIssue(null)}
-                onDataUpdate={fetchIssuesData}
-                onDeleteRequest={(issueObj) => {
-                    setSelectedIssue(null);
-                    setIssueToDelete(issueObj);
-                }}
-            />
-        )}
-
-        <DeleteIssueModal
-            isOpen={!!issueToDelete}
-            onClose={() => setIssueToDelete(null)}
-            issue={issueToDelete}
-            onDeleteSuccess={() => {
-                fetchIssuesData();
-                setIssueToDelete(null);
-            }}
-        />
+            {selectedIssue && (
+                <IssueDetailModal
+                    project={project}
+                    issue={selectedIssue}
+                    onClose={() => setSelectedIssue(null)}
+                    onDataUpdate={fetchIssuesData}
+                />
+            )}
         </>
     );
 };
+
 export default Board;

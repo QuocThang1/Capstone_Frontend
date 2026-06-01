@@ -6,12 +6,12 @@ import { useNavigate } from "react-router-dom";
 import { Calendar, Clock, CheckCircle2 } from "lucide-react"; // Bổ sung icon thời gian
 
 // Hàm Helper để format thời gian hiển thị đẹp mắt
-const formatDate = (dateString) => {
+const formatDate = (dateString, timezone = "Asia/Ho_Chi_Minh") => {
     if (!dateString) return "";
     const date = new Date(dateString);
 
     return date.toLocaleString("en-US", {
-        timeZone: "Asia/Ho_Chi_Minh", // Ép chuẩn múi giờ Việt Nam
+        timeZone: timezone,
         month: "short",
         day: "2-digit",
         year: "numeric",
@@ -21,7 +21,7 @@ const formatDate = (dateString) => {
     });
 };
 
-const SimpleIssueCard = ({ issue, projectId, navigate, activeTab }) => {
+const SimpleIssueCard = ({ issue, projectId, navigate, activeTab, projectTimezone }) => {
     const isDone = issue.status?.toLowerCase() === 'done';
     const isOverdue = !isDone && issue.dueDate && new Date(issue.dueDate) < new Date();
     const iconBg = isDone ? 'bg-emerald-500' : isOverdue ? 'bg-rose-500' : 'bg-blue-600';
@@ -70,7 +70,7 @@ const SimpleIssueCard = ({ issue, projectId, navigate, activeTab }) => {
                     issue.completedAt && (
                         <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded">
                             <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span>{formatDate(issue.completedAt)}</span>
+                            <span>{formatDate(issue.completedAt, projectTimezone)}</span>
                         </div>
                     )
                 ) : (
@@ -78,13 +78,13 @@ const SimpleIssueCard = ({ issue, projectId, navigate, activeTab }) => {
                         {issue.startDate && (
                             <div className="flex items-center gap-1.5 text-slate-500 font-medium">
                                 <Calendar className="w-3.5 h-3.5" />
-                                <span>{formatDate(issue.startDate)}</span>
+                                <span>{formatDate(issue.startDate, projectTimezone)}</span>
                             </div>
                         )}
                         {issue.dueDate && (
                             <div className={`flex items-center gap-1.5 font-medium ${isOverdue ? 'text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 px-1.5 py-0.5 rounded' : 'text-slate-600 dark:text-slate-300'}`}>
                                 <Clock className="w-3.5 h-3.5" />
-                                <span>{formatDate(issue.dueDate)}</span>
+                                <span>{formatDate(issue.dueDate, projectTimezone)}</span>
                             </div>
                         )}
                     </div>
@@ -230,6 +230,7 @@ const MyWorkSection = ({ project }) => {
                                         projectId={project._id}
                                         navigate={navigate}
                                         activeTab={activeTab}
+                                        projectTimezone={project.timezone}
                                     />
                                 ))
                             )}

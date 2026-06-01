@@ -14,7 +14,6 @@ const DeleteIssueModal = ({ isOpen, onClose, onConfirm, loading, issue }) => {
             className="fixed inset-0 z-50 flex justify-center items-center p-4 bg-slate-900/50 dark:bg-slate-900/80 backdrop-blur-sm"
             onClick={(e) => {
                 e.stopPropagation();
-                onClose();
             }}
         >
             <motion.div

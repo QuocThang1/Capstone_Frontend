@@ -19,6 +19,17 @@ function isValidUrl(str) {
   try { new URL(str); return true; } catch { return false; }
 }
 
+function getInitials(name) {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
+
+
 const NavItem = ({ to, icon: Icon, label, badge, isActive, isCollapsed }) => {
   const navigate = useNavigate();
   const [tooltipPos, setTooltipPos] = useState(null);
@@ -192,9 +203,9 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
             animate={{ width: isCollapsed ? 32 : "auto" }}
             transition={{ type: "spring", stiffness: 360, damping: 32 }}
             className={cn(
-            "flex items-center gap-3 transition-all duration-300 overflow-hidden",
-            isCollapsed ? "w-8" : "flex-1"
-          )}>
+              "flex items-center gap-3 transition-all duration-300 overflow-hidden",
+              isCollapsed ? "w-8" : "flex-1"
+            )}>
             {/* Logo SVG */}
             <motion.div
               whileHover={{ rotate: [0, -12, 12, -6, 6, 0] }}
@@ -339,7 +350,7 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
             <button
               onClick={() => navigate("/admin")}
               className={cn(
-                "flex items-center justify-center gap-2.5 rounded-lg font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all duration-200",
+                "flex items-center justify-center gap-2.5 rounded-lg font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all duration-200 cursor-pointer",
                 isCollapsed ? "p-2 w-10 h-10" : "w-full px-3 py-2"
               )}
               title={isCollapsed ? "Switch to Admin" : undefined}
@@ -353,7 +364,7 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
                     animate={{ opacity: 1, x: 0, width: "auto" }}
                     exit={{ opacity: 0, x: -8, width: 0 }}
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    className="text-sm whitespace-nowrap overflow-hidden"
+                    className="text-sm whitespace-nowrap overflow-hidden cursor-pointer"
                   >
                     Switch to Admin
                   </motion.span>
@@ -364,71 +375,71 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
 
           {/* User Profile Card - Expanded Only */}
           <AnimatePresence initial={false}>
-          {!isCollapsed && (
-            <motion.button
-              key="profile-card"
-              onClick={() => navigate("/profile")}
-              className="w-full px-3 py-3 mb-3 rounded-xl border bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 transition-all duration-300 cursor-pointer text-left hover:shadow-md"
-              initial={{ opacity: 0, x: -12, height: 0 }}
-              animate={{ opacity: 1, x: 0, height: "auto" }}
-              exit={{ opacity: 0, x: -12, height: 0 }}
-              transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            >
-              <div className="flex items-center gap-2.5">
-                {/* Avatar */}
-                <div className="flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 overflow-hidden bg-transparent">
-                  {auth.user.avatar && isValidUrl(auth.user.avatar) ? (
-                    <img
-                      src={auth.user.avatar}
-                      alt={auth.user.fullName || "User"}
-                      className="w-full h-full object-cover rounded-full"
-                    />
-                  ) : (
-                    <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
-                      {getInitials(auth.user.fullName)}
-                    </span>
-                  )}
-                </div>            
-                {/* User Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-medium truncate text-slate-900 dark:text-white">
-                    {user?.fullName || "User"}
-                  </p>
-                  <p className="text-[10px] truncate text-slate-500 dark:text-slate-400">
-                    {user?.email || "email@example.com"}
-                  </p>
-                </div>
-                {/* Role Badge - on the right */}
-                {user?.role && (
-                  <div className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider flex-shrink-0 bg-purple-500/20 dark:bg-purple-500/30 text-purple-700 dark:text-purple-300">
-                    {user.role}
+            {!isCollapsed && (
+              <motion.button
+                key="profile-card"
+                onClick={() => navigate("/profile")}
+                className="w-full px-3 py-3 mb-3 rounded-xl border bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 transition-all duration-300 cursor-pointer text-left hover:shadow-md"
+                initial={{ opacity: 0, x: -12, height: 0 }}
+                animate={{ opacity: 1, x: 0, height: "auto" }}
+                exit={{ opacity: 0, x: -12, height: 0 }}
+                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+              >
+                <div className="flex items-center gap-2.5">
+                  {/* Avatar */}
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 overflow-hidden bg-transparent">
+                    {auth.user.avatar && isValidUrl(auth.user.avatar) ? (
+                      <img
+                        src={auth.user.avatar}
+                        alt={auth.user.fullName || "User"}
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    ) : (
+                      <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
+                        {getInitials(auth.user.fullName)}
+                      </span>
+                    )}
                   </div>
-                )}
-              </div>
-            </motion.button>
-          )}
+                  {/* User Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-medium truncate text-slate-900 dark:text-white">
+                      {user?.fullName || "User"}
+                    </p>
+                    <p className="text-[10px] truncate text-slate-500 dark:text-slate-400">
+                      {user?.email || "email@example.com"}
+                    </p>
+                  </div>
+                  {/* Role Badge - on the right */}
+                  {user?.role && (
+                    <div className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider flex-shrink-0 bg-purple-500/20 dark:bg-purple-500/30 text-purple-700 dark:text-purple-300">
+                      {user.role}
+                    </div>
+                  )}
+                </div>
+              </motion.button>
+            )}
           </AnimatePresence>
 
           {/* User Avatar - Collapsed Only */}
           <AnimatePresence initial={false}>
-          {isCollapsed && (
-            <motion.div
-              key="profile-avatar"
-              className="mb-3 flex justify-center"
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.85 }}
-              transition={{ type: "spring", stiffness: 420, damping: 24 }}
-            >
-              <div className="w-10 h-10 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white text-sm font-semibold cursor-pointer hover:shadow-lg transition-shadow duration-200 dark:shadow-indigo-500/30 overflow-hidden" title={user?.fullName || "User"}>
-                {user?.avatar && isValidUrl(user.avatar) ? (
-                  <img src={user.avatar} alt={user?.fullName || "User"} className="w-full h-full object-cover" />
-                ) : (
-                  user?.fullName ? user.fullName.charAt(0).toUpperCase() : "U"
-                )}
-              </div>
-            </motion.div>
-          )}
+            {isCollapsed && (
+              <motion.div
+                key="profile-avatar"
+                className="mb-3 flex justify-center"
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.85 }}
+                transition={{ type: "spring", stiffness: 420, damping: 24 }}
+              >
+                <div className="w-10 h-10 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white text-sm font-semibold cursor-pointer hover:shadow-lg transition-shadow duration-200 dark:shadow-indigo-500/30 overflow-hidden" title={user?.fullName || "User"}>
+                  {user?.avatar && isValidUrl(user.avatar) ? (
+                    <img src={user.avatar} alt={user?.fullName || "User"} className="w-full h-full object-cover" />
+                  ) : (
+                    user?.fullName ? user.fullName.charAt(0).toUpperCase() : "U"
+                  )}
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
 
           {/* Footer Action Buttons - smooth transitions */}
@@ -439,7 +450,7 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
             <button
               onClick={() => navigate("/")}
               className={cn(
-                "flex items-center justify-center gap-2.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all duration-200",
+                "flex items-center justify-center gap-2.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all duration-200 cursor-pointer",
                 isCollapsed ? "p-2 w-10 h-10" : "flex-1 px-3 py-2"
               )}
               title={isCollapsed ? "Home" : "Back to Home"}
@@ -453,7 +464,7 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
                     animate={{ opacity: 1, x: 0, width: "auto" }}
                     exit={{ opacity: 0, x: -8, width: 0 }}
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                    className="text-sm font-medium whitespace-nowrap overflow-hidden cursor-pointer"
                   >
                     Home
                   </motion.span>
@@ -463,7 +474,7 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
             <button
               onClick={handleLogout}
               className={cn(
-                "flex items-center justify-center gap-2.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200",
+                "flex items-center justify-center gap-2.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200 cursor-pointer",
                 isCollapsed ? "p-2 w-10 h-10" : "flex-1 px-3 py-2"
               )}
               title={isCollapsed ? "Logout" : "Logout"}
@@ -477,7 +488,7 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
                     animate={{ opacity: 1, x: 0, width: "auto" }}
                     exit={{ opacity: 0, x: -8, width: 0 }}
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                    className="text-sm font-medium whitespace-nowrap overflow-hidden cursor-pointer"
                   >
                     Logout
                   </motion.span>

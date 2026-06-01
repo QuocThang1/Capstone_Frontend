@@ -200,7 +200,7 @@ export default function AdminSidebar({ collapsed }) {
         <button
           onClick={() => navigate("/projects")}
           className={cn(
-            "flex items-center justify-center gap-2.5 rounded-lg font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all duration-200",
+            "flex items-center justify-center gap-2.5 rounded-lg font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all duration-200 cursor-pointer",
             collapsed ? "p-2 w-10 h-10" : "w-full px-3 py-2"
           )}
           title={collapsed ? "Switch to Project" : undefined}
@@ -262,13 +262,13 @@ export default function AdminSidebar({ collapsed }) {
         )}
 
         <div className={cn(
-          "flex gap-2 transition-all duration-300",
+          "flex gap-2 transition-all duration-300 cursor-pointer",
           collapsed ? "flex-col items-center justify-center w-full" : "flex-row"
         )}>
           <button
             onClick={() => navigate("/")}
             className={cn(
-              "flex items-center justify-center gap-2.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all duration-200",
+              "flex items-center justify-center gap-2.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all duration-200 cursor-pointer",
               collapsed ? "p-2 w-10 h-10" : "flex-1 px-3 py-2"
             )}
             title={collapsed ? "Home" : "Back to Home"}
@@ -279,7 +279,7 @@ export default function AdminSidebar({ collapsed }) {
           <button
             onClick={handleLogout}
             className={cn(
-              "flex items-center justify-center gap-2.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200",
+              "flex items-center justify-center gap-2.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200 cursor-pointer ",
               collapsed ? "p-2 w-10 h-10" : "flex-1 px-3 py-2"
             )}
             title="Logout"

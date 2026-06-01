@@ -5,7 +5,24 @@ import { getSubtaskApi } from "../../../../utils/Api/issueApi";
 import { s } from "framer-motion/client";
 import Spinner from "../../../../components/spinner";
 
-const MemberIssuesModal = ({ selectedMember, selectedMemberIssues, onClose }) => {
+const formatDate = (dateString, timeZone) => {
+    if (!dateString) return '';
+    try {
+        return new Intl.DateTimeFormat('en-US', {
+            timeZone: timeZone || 'UTC',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        }).format(new Date(dateString));
+    } catch (error) {
+        return new Date(dateString).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+};
+
+const MemberIssuesModal = ({ selectedMember, selectedMemberIssues, onClose, projectTimezone }) => {
     // State quản lý việc hiển thị modal subtask
     const [selectedIssueForSubtasks, setSelectedIssueForSubtasks] = useState(null);
     const [subtasks, setSubtasks] = useState([]);
@@ -120,17 +137,17 @@ const MemberIssuesModal = ({ selectedMember, selectedMemberIssues, onClose }) =>
                                             </div>
                                             <div className="flex items-center gap-1.5" title="Start Date">
                                                 <Calendar className="w-3.5 h-3.5 text-sky-500" />
-                                                <span>Start Date: {issue.startDate ? new Date(issue.startDate).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'No start date'}</span>
+                                                <span>Start Date: {issue.startDate ? formatDate(issue.startDate, projectTimezone) : 'No start date'}</span>
                                             </div>
                                             <div className="flex items-center gap-1.5" title="Due Date">
                                                 <Calendar className="w-3.5 h-3.5 text-amber-500" />
-                                                <span>Due Date: {issue.dueDate ? new Date(issue.dueDate).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'No due date'}</span>
+                                                <span>Due Date: {issue.dueDate ? formatDate(issue.dueDate, projectTimezone) : 'No due date'}</span>
                                             </div>
                                         </div>
                                         <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400 mt-2">
                                             <div className="flex items-center gap-1.5" title="Complete At">
                                                 <Calendar className="w-3.5 h-3.5 text-green-500" />
-                                                <span>Completed At: {issue.completedAt ? new Date(issue.completedAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Not completed yet'}</span>
+                                                <span>Completed At: {issue.completedAt ? formatDate(issue.completedAt, projectTimezone) : 'Not completed yet'}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -209,7 +226,7 @@ const MemberIssuesModal = ({ selectedMember, selectedMemberIssues, onClose }) =>
                                                         <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400 mt-2">
                                                             <div className="flex items-center gap-1.5" title="Complete At">
                                                                 <Calendar className="w-3.5 h-3.5 text-green-500" />
-                                                                <span>Completed At: {sub.completedAt ? new Date(sub.completedAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Not completed yet'}</span>
+                                                                <span>Completed At: {sub.completedAt ? formatDate(sub.completedAt, projectTimezone) : 'Not completed yet'}</span>
                                                             </div>
                                                         </div>
                                                     </div>
