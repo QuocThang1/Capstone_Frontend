@@ -64,6 +64,10 @@ export const getAllSupportTicketsApi = (params) => {
   return axios.get("/v1/api/admin/support-tickets", { params });
 };
 
+export const createSupportTicketApi = (data) => {
+  return axios.post("/v1/api/admin/support-tickets", data);
+};
+
 export const getSupportTicketByIdApi = (ticketId) => {
   return axios.get(`/v1/api/admin/support-tickets/${ticketId}`);
 };
@@ -78,6 +82,10 @@ export const closeSupportTicketApi = (ticketId) => {
 
 export const assignSupportTicketApi = (ticketId, assigneeId) => {
   return axios.patch(`/v1/api/admin/support-tickets/${ticketId}/assign`, { assigneeId });
+};
+
+export const runSupportDiagnosticApi = (diagnostic) => {
+  return axios.post(`/v1/api/admin/support/diagnostics/${diagnostic}`);
 };
 
 // ========== AUDIT LOGS ==========
@@ -119,7 +127,15 @@ export const deleteGlobalNotificationApi = (notifId) => {
   return axios.delete(`/v1/api/admin/notifications/global/${notifId}`);
 };
 
+export const getAdminMessageTemplatesApi = () => {
+  return axios.get("/v1/api/admin/message-templates");
+};
+
 // ========== DATA SECURITY & PRIVACY ==========
+export const getDataSecurityApi = () => {
+  return axios.get("/v1/api/admin/security");
+};
+
 export const getAllDataRequestsApi = (params) => {
   return axios.get("/v1/api/admin/data-requests", { params });
 };
