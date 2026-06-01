@@ -1,7 +1,10 @@
 import axios from "axios";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+
 // Set config defaults when creating the instance
 const instance = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL,
+    baseURL: BACKEND_URL,
     timeout: 30000, // 30 seconds timeout
 });
 
