@@ -4,23 +4,25 @@ import Spinner from "../components/spinner";
 import { AuthContext } from "./auth.context";
 import socket from "../utils/socket";
 
+const emptyAuth = {
+    isAuthenticated: false,
+    user: {
+        _id: "",
+        email: "",
+        fullName: "",
+        username: "",
+        dob: "",
+        gender: "",
+        phone: "",
+        avatar: "",
+        bio: "",
+        role: "",
+        skills: [],
+    },
+};
+
 export const AuthWrapper = (props) => {
-    const [auth, setAuth] = useState({
-        isAuthenticated: false,
-        user: {
-            _id: "",
-            email: "",
-            fullName: "",
-            username: "",
-            dob: "",
-            gender: "",
-            phone: "",
-            avatar: "",
-            bio: "",
-            role: "",
-            skills: [],
-        },
-    });
+    const [auth, setAuth] = useState(emptyAuth);
 
     const [appLoading, setAppLoading] = useState(true);
 
@@ -54,48 +56,27 @@ export const AuthWrapper = (props) => {
                     });
                 } else {
                     localStorage.removeItem("access_token");
-                    setAuth({
-                        isAuthenticated: false,
-                        user: {
-                            _id: "",
-                            email: "",
-                            fullName: "",
-                            username: "",
-                            dob: "",
-                            gender: "",
-                            phone: "",
-                            avatar: "",
-                            bio: "",
-                            role: "",
-                            skills: [],
-                        },
-                    });
+                    setAuth(emptyAuth);
                 }
             } catch (error) {
                 console.error("Error fetching account:", error);
                 localStorage.removeItem("access_token");
-                setAuth({
-                    isAuthenticated: false,
-                    user: {
-                        _id: "",
-                        email: "",
-                        fullName: "",
-                        username: "",
-                        dob: "",
-                        gender: "",
-                        phone: "",
-                        avatar: "",
-                        bio: "",
-                        role: "",
-                        skills: [],
-                    },
-                });
+                setAuth(emptyAuth);
             } finally {
                 setAppLoading(false);
             }
         };
 
         fetchAccount();
+    }, []);
+
+    useEffect(() => {
+        const handleUnauthorized = () => {
+            setAuth(emptyAuth);
+        };
+
+        window.addEventListener("auth:unauthorized", handleUnauthorized);
+        return () => window.removeEventListener("auth:unauthorized", handleUnauthorized);
     }, []);
 
     useEffect(() => {

@@ -1,48 +1,92 @@
-import { useState } from "react";
-const initialReqs = [];
-import { Table, Button, Card, Row, Col, message } from "antd";
+import { useEffect, useState } from "react";
+import { App, Button, Empty, Spin, Table } from "antd";
 import StatusBadge from "@/components/adminPage/StatusBadge";
 import { Shield, Lock, FileKey, Database, FileCheck, AlertTriangle, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  approveDataRequestApi,
+  getDataSecurityApi,
+  rejectDataRequestApi,
+} from "@/utils/Api/adminApi";
+
+const iconMap = {
+  "alert-triangle": AlertTriangle,
+  database: Database,
+  "file-check": FileCheck,
+  "file-key": FileKey,
+  lock: Lock,
+  shield: Shield,
+};
 
 export default function DataSecurityPage() {
-  const [requests, setRequests] = useState(initialReqs);
+  const { message } = App.useApp();
+  const [cards, setCards] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null);
 
-  const handleAction = (id, action) => {
-    setRequests(requests.map(r => r.id === id ? { ...r, status: action === 'approve' ? 'Processing' : 'Rejected' } : r));
-    message.success(`Request ${action === 'approve' ? 'approved for processing' : 'rejected'}`);
+  useEffect(() => {
+    const loadSecurity = async () => {
+      setLoading(true);
+      const res = await getDataSecurityApi();
+      if (res?.EC === 0) {
+        setCards(res.data?.posture || []);
+        setRequests(res.data?.requests || []);
+      } else {
+        message.error(res?.EM || "Failed to load data security");
+      }
+      setLoading(false);
+    };
+
+    loadSecurity();
+  }, [message]);
+
+  const handleAction = async (id, action) => {
+    setActionLoading(id);
+    const res = action === "approve"
+      ? await approveDataRequestApi(id)
+      : await rejectDataRequestApi(id);
+
+    if (res?.EC === 0) {
+      setRequests((current) => current.map((request) => request.id === id ? res.data : request));
+      message.success(res.EM);
+    } else {
+      message.error(res?.EM || "Failed to update data privacy request");
+    }
+    setActionLoading(null);
   };
 
-  const cards = [
-    { title: "Encryption at Rest", status: "Active", icon: Lock, tone: "emerald" },
-    { title: "Encryption in Transit", status: "Active", icon: Shield, tone: "emerald" },
-    { title: "Automated Backups", status: "Daily", icon: Database, tone: "indigo" },
-    { title: "MFA Enforcement", status: "Optional", icon: FileKey, tone: "amber" },
-    { title: "Compliance Audits", status: "Passed", icon: FileCheck, tone: "emerald" },
-    { title: "Vulnerability Scans", status: "1 Issue", icon: AlertTriangle, tone: "amber" }
-  ];
+  if (loading) {
+    return (
+      <div className="flex min-h-[420px] items-center justify-center">
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Security Posture</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {cards.map((card, i) => (
-            <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 flex items-center gap-4">
+          {cards.map((card) => {
+            const CardIcon = iconMap[card.icon] || Shield;
+            return (
+            <div key={card.key} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 flex items-center gap-4">
               <div className={cn(
                 "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
                 card.tone === "emerald" ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" :
                 card.tone === "indigo" ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400" :
                 "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
               )}>
-                <card.icon className="w-5 h-5" />
+                <CardIcon className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-sm text-slate-500 font-medium">{card.title}</p>
                 <p className="text-lg font-bold text-slate-900 dark:text-white">{card.status}</p>
               </div>
             </div>
-          ))}
+          )})}
         </div>
       </div>
 
@@ -52,6 +96,7 @@ export default function DataSecurityPage() {
           <Table
             dataSource={requests}
             rowKey="id"
+            locale={{ emptyText: <Empty description="No data privacy requests" /> }}
             columns={[
               { title: 'Organization', dataIndex: 'organization', key: 'organization' },
               { title: 'Type', dataIndex: 'requestType', key: 'requestType' },
@@ -63,10 +108,10 @@ export default function DataSecurityPage() {
                 key: 'actions',
                 render: (_, req) => req.status === 'Pending' && (
                   <div className="flex gap-2">
-                    <Button danger size="small" onClick={() => handleAction(req.id, 'reject')}>
+                    <Button danger size="small" loading={actionLoading === req.id} onClick={() => handleAction(req.id, 'reject')}>
                       <X className="w-4 h-4 mr-1" /> Reject
                     </Button>
-                    <Button type="primary" size="small" onClick={() => handleAction(req.id, 'approve')}>
+                    <Button type="primary" size="small" loading={actionLoading === req.id} onClick={() => handleAction(req.id, 'approve')}>
                       <Check className="w-4 h-4 mr-1" /> Approve
                     </Button>
                   </div>

@@ -1,113 +1,168 @@
-import { useState } from "react";
-const supportTickets = [];
-import { Table, Button, Modal, Space, Descriptions, message } from "antd";
+import { useCallback, useEffect, useState } from "react";
+import { App, Button, Descriptions, Empty, Modal, Table } from "antd";
+import { Activity, Database, Eye, Mail, Stethoscope } from "lucide-react";
 import SearchFilterBar from "@/components/adminPage/SearchFilterBar";
 import StatusBadge from "@/components/adminPage/StatusBadge";
-import { Eye, Stethoscope, Mail, Activity, Database } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  closeSupportTicketApi,
+  getAllSupportTicketsApi,
+  getSupportTicketByIdApi,
+  runSupportDiagnosticApi,
+} from "@/utils/Api/adminApi";
+
+const diagnostics = [
+  { key: "mail", name: "Check Mail Queue", icon: Mail },
+  { key: "websocket", name: "Test WebSockets", icon: Activity },
+  { key: "database-indexes", name: "Verify DB Indexes", icon: Database },
+  { key: "full", name: "Full System Check", icon: Stethoscope },
+];
 
 export default function SupportCenterPage() {
+  const { message } = App.useApp();
+  const [tickets, setTickets] = useState([]);
   const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("all");
+  const [priority, setPriority] = useState("all");
+  const [loading, setLoading] = useState(true);
   const [viewTicket, setViewTicket] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [runningDiagnostic, setRunningDiagnostic] = useState(null);
+  const [diagnosticResult, setDiagnosticResult] = useState(null);
 
-  const filteredTickets = supportTickets.filter(t => 
-    t.organization.toLowerCase().includes(search.toLowerCase()) || 
-    t.subject.toLowerCase().includes(search.toLowerCase())
-  );
+  const loadTickets = useCallback(async () => {
+    setLoading(true);
+    const res = await getAllSupportTicketsApi({
+      limit: 100,
+      search: search.trim() || undefined,
+      status: status === "all" ? undefined : status,
+      priority: priority === "all" ? undefined : priority,
+    });
+    if (res?.EC === 0) {
+      setTickets(res.data?.tickets || []);
+    } else {
+      message.error(res?.EM || "Failed to load support tickets");
+    }
+    setLoading(false);
+  }, [message, priority, search, status]);
 
-  const runDiagnostic = (name) => {
-    message.info(`Running ${name}...`);
-    setTimeout(() => {
-      message.success(`${name} completed. All systems nominal.`);
-    }, 1500);
+  useEffect(() => {
+    const timer = setTimeout(loadTickets, 250);
+    return () => clearTimeout(timer);
+  }, [loadTickets]);
+
+  const handleViewTicket = async (ticket) => {
+    setViewTicket(ticket);
+    setDetailLoading(true);
+    const res = await getSupportTicketByIdApi(ticket.id);
+    if (res?.EC === 0) {
+      setViewTicket(res.data);
+    } else {
+      message.error(res?.EM || "Failed to load ticket details");
+    }
+    setDetailLoading(false);
   };
 
-  const diagnostics = [
-    { name: "Check Mail Queue", icon: Mail },
-    { name: "Test WebSockets", icon: Activity },
-    { name: "Verify DB Indexes", icon: Database },
-    { name: "Full System Check", icon: Stethoscope }
-  ];
+  const handleResolveTicket = async () => {
+    setActionLoading(true);
+    const res = await closeSupportTicketApi(viewTicket.id);
+    if (res?.EC === 0) {
+      setViewTicket(res.data);
+      setTickets((current) => current.map((ticket) => ticket.id === res.data.id ? res.data : ticket));
+      message.success(res.EM);
+    } else {
+      message.error(res?.EM || "Failed to resolve support ticket");
+    }
+    setActionLoading(false);
+  };
+
+  const runDiagnostic = async (diagnostic) => {
+    setRunningDiagnostic(diagnostic.key);
+    const res = await runSupportDiagnosticApi(diagnostic.key);
+    if (res?.EC === 0) {
+      setDiagnosticResult({ name: diagnostic.name, ...res.data });
+      if (res.data.status === "Operational") {
+        message.success(`${diagnostic.name} completed`);
+      } else {
+        message.warning(`${diagnostic.name} requires review`);
+      }
+    } else {
+      message.error(res?.EM || `${diagnostic.name} failed`);
+    }
+    setRunningDiagnostic(null);
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Support Center</h2>
-        <div className="flex gap-2">
-          {diagnostics.map(d => (
-            <Button key={d.name} size="small" onClick={() => runDiagnostic(d.name)} className="hidden sm:flex bg-white dark:bg-slate-900">
-              <d.icon className="w-4 h-4 mr-2" /> {d.name}
+        <div className="flex flex-wrap gap-2">
+          {diagnostics.map((diagnostic) => (
+            <Button key={diagnostic.key} size="small" loading={runningDiagnostic === diagnostic.key} onClick={() => runDiagnostic(diagnostic)}>
+              <diagnostic.icon className="mr-2 h-4 w-4" /> {diagnostic.name}
             </Button>
           ))}
         </div>
       </div>
 
-      <SearchFilterBar 
-        searchValue={search} 
+      <SearchFilterBar
+        searchValue={search}
         onSearch={setSearch}
         filters={[
-          { name: "status", label: "Status", options: ["Open", "In Progress", "Resolved", "Closed"] },
-          { name: "priority", label: "Priority", options: ["Low", "Medium", "High", "Critical"] }
+          { name: "status", label: "Status", value: status, options: ["Open", "In Progress", "Resolved", "Closed"] },
+          { name: "priority", label: "Priority", value: priority, options: ["Low", "Medium", "High", "Critical"] },
         ]}
+        onFilter={(name, value) => name === "status" ? setStatus(value) : setPriority(value)}
       />
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <Table
-          dataSource={filteredTickets}
+          dataSource={tickets}
+          loading={loading}
           rowKey="id"
+          locale={{ emptyText: <Empty description="No support tickets" /> }}
           columns={[
-            { title: 'Ticket ID', dataIndex: 'id', key: 'id', render: (id) => <span className="font-mono text-xs text-slate-500">{id}</span> },
-            { title: 'Subject', dataIndex: 'subject', key: 'subject', render: (subject) => <span className="font-medium">{subject}</span> },
-            { title: 'Organization', dataIndex: 'organization', key: 'organization', render: (org, record) => (
-              <div><div className="text-sm">{org}</div><div className="text-xs text-slate-500">{record.user}</div></div>
-            )},
-            { title: 'Priority', dataIndex: 'priority', key: 'priority', render: (priority) => <StatusBadge status={priority} /> },
-            { title: 'Status', dataIndex: 'status', key: 'status', render: (status) => <StatusBadge status={status} /> },
-            { title: 'Assignee', dataIndex: 'assignedTo', key: 'assignedTo', render: (assignee) => <span className={cn(assignee === 'Unassigned' ? "text-slate-400 italic" : "")}>{assignee}</span> },
-            {
-              title: '',
-              key: 'actions',
-              width: 50,
-              render: (_, ticket) => (
-                <Button type="text" size="small" icon={<Eye className="w-4 h-4" />} onClick={() => setViewTicket(ticket)} />
-              )
-            }
+            { title: "Ticket ID", dataIndex: "ticketCode", key: "ticketCode", render: (id) => <span className="font-mono text-xs text-slate-500">{id}</span> },
+            { title: "Subject", dataIndex: "subject", key: "subject", render: (subject) => <span className="font-medium">{subject}</span> },
+            { title: "Organization", dataIndex: "organization", key: "organization", render: (organization, ticket) => <div><div>{organization}</div><div className="text-xs text-slate-500">{ticket.user}</div></div> },
+            { title: "Priority", dataIndex: "priority", key: "priority", render: (value) => <StatusBadge status={value} /> },
+            { title: "Status", dataIndex: "status", key: "status", render: (value) => <StatusBadge status={value} /> },
+            { title: "Assignee", dataIndex: "assignedTo", key: "assignedTo", render: (assignee) => <span className={cn(assignee === "Unassigned" && "italic text-slate-400")}>{assignee}</span> },
+            { title: "", key: "actions", width: 50, render: (_, ticket) => <Button type="text" size="small" aria-label={`View ${ticket.ticketCode}`} icon={<Eye className="h-4 w-4" />} onClick={() => handleViewTicket(ticket)} /> },
           ]}
         />
       </div>
 
-      <Modal open={!!viewTicket} onCancel={() => setViewTicket(null)} title={viewTicket?.subject} width={800} footer={null}>
+      <Modal open={!!viewTicket} onCancel={() => setViewTicket(null)} title={viewTicket?.subject} width={720} loading={detailLoading} footer={null}>
         {viewTicket && (
-          <div className="space-y-6 pt-2">
-            <div>
-              <p className="font-mono text-xs text-slate-500">{viewTicket.id} • Created {new Date(viewTicket.createdAt).toLocaleString()}</p>
-            </div>
-            <div className="flex gap-2">
-              <StatusBadge status={viewTicket.status} />
-              <StatusBadge status={viewTicket.priority} />
-            </div>
-            
-            <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-100 dark:border-slate-700 grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-slate-500 block mb-1">Organization</span>
-                <span className="font-medium">{viewTicket.organization}</span>
-              </div>
-              <div>
-                <span className="text-slate-500 block mb-1">Reporter</span>
-                <span>{viewTicket.user}</span>
-              </div>
-              <div>
-                <span className="text-slate-500 block mb-1">Assigned To</span>
-                <span>{viewTicket.assignedTo}</span>
-              </div>
-            </div>
-
-            <div className="border-t border-slate-200 dark:border-slate-800 pt-4 flex justify-end gap-2">
+          <div className="space-y-5 pt-2">
+            <div className="flex gap-2"><StatusBadge status={viewTicket.status} /><StatusBadge status={viewTicket.priority} /></div>
+            <Descriptions bordered size="small" column={2}>
+              <Descriptions.Item label="Ticket">{viewTicket.ticketCode}</Descriptions.Item>
+              <Descriptions.Item label="Created">{new Date(viewTicket.createdAt).toLocaleString()}</Descriptions.Item>
+              <Descriptions.Item label="Organization">{viewTicket.organization}</Descriptions.Item>
+              <Descriptions.Item label="Reporter">{viewTicket.user}</Descriptions.Item>
+              <Descriptions.Item label="Assigned To">{viewTicket.assignedTo}</Descriptions.Item>
+              <Descriptions.Item label="Description" span={2}>{viewTicket.description || "No description provided."}</Descriptions.Item>
+            </Descriptions>
+            <div className="flex justify-end gap-2">
               <Button onClick={() => setViewTicket(null)}>Close</Button>
-              <Button type="primary">Take Action</Button>
+              {!["Resolved", "Closed"].includes(viewTicket.status) && <Button type="primary" loading={actionLoading} onClick={handleResolveTicket}>Resolve Ticket</Button>}
             </div>
           </div>
         )}
+      </Modal>
+
+      <Modal open={!!diagnosticResult} onCancel={() => setDiagnosticResult(null)} title={diagnosticResult?.name} footer={<Button onClick={() => setDiagnosticResult(null)}>Close</Button>}>
+        <div className="space-y-3 pt-2">
+          {diagnosticResult?.results?.map((result) => (
+            <div key={`${result.key}-${result.label}`} className="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+              <div className="mb-1 flex items-center justify-between gap-3"><span className="font-medium">{result.label}</span><StatusBadge status={result.status} /></div>
+              <p className="text-sm text-slate-500">{result.detail}</p>
+            </div>
+          ))}
+        </div>
       </Modal>
     </div>
   );
