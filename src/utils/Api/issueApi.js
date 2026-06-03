@@ -65,6 +65,11 @@ const deleteAttachmentApi = (issueId, attachmentId) => {
     return axios.delete(URL_API);
 };
 
+const getTop3EarliestDueIssuesApi = () => {
+    const URL_API = `/v1/api/issues/my/earliest-due`;
+    return axios.get(URL_API);
+};
+
 export {
     createIssueApi,
     getIssuesBySprintApi,
@@ -78,4 +83,5 @@ export {
     suggestAssigneesByAiApi,
     uploadAttachmentApi,
     deleteAttachmentApi,
+    getTop3EarliestDueIssuesApi,
 };
