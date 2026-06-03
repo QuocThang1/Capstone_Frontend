@@ -7,6 +7,7 @@ import { getPublicAuthSettingsApi, loginApi, signUpApi, sendOtpApi, verifyOtpApi
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
 import { ChangePasswordModal } from "./ChangePasswordModal";
 import { toast } from "react-toastify";
+import { useNavigate, useLocation } from "react-router-dom";
 
 // Success Step Component
 const SuccessStep = ({ modalMode }) => (
@@ -453,6 +454,8 @@ import { useRef } from "react";
 
 export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "", initialStep = 1 }) => {
     // Define all state hooks FIRST before using them in effects
+    const navigate = useNavigate();
+    const location = useLocation();
     const [modalMode, setModalMode] = useState(mode); // "signup" or "login"
     const [currentStep, setCurrentStep] = useState(initialStep); // 1: email, 2: otp, 3: profile
     const [formData, setFormData] = useState({
@@ -550,6 +553,9 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
             setIsSuccess(false);
             onClose();
             resetModal();
+            if (location.state?.from) {
+              navigate(location.state.from, { replace: true });
+            }
           }, 1200);
         } else {
           const errorMessage = res.EM || "Google login failed";
@@ -692,6 +698,9 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
             setIsSuccess(false);
             onClose();
             resetModal();
+            if (location.state?.from) {
+              navigate(location.state.from, { replace: true });
+            }
           }, 1200);
         } else {
           const errorMessage = res.EM || "Registration failed";
@@ -757,6 +766,9 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
           setIsSuccess(false);
           onClose();
           resetModal();
+          if (location.state?.from) {
+            navigate(location.state.from, { replace: true });
+          }
         }, 1200);
       } else {
         const errorMessage = res.EM || "Login failed";
