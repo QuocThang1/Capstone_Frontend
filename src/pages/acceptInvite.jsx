@@ -1,14 +1,16 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useContext } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { respondToInvitationApi } from '../utils/Api/projectApi';
 import Spinner from '../components/spinner';
+import { ProjectContext } from '../context/project.context';
 
 const AcceptInvite = () => {
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
     const navigate = useNavigate();
     const [status, setStatus] = useState('processing');
+    const { fetchAllProjects } = useContext(ProjectContext);
 
     // Khóa chống gọi lặp 2 lần do React StrictMode
     const hasRequested = useRef(false);
@@ -30,6 +32,8 @@ const AcceptInvite = () => {
                 if (res && res.EC === 0) {
                     setStatus('success');
                     toast.success(res.EM || "Joined project successfully!");
+                    // Refresh lại danh sách project trong context để UI tự động cập nhật
+                    fetchAllProjects();
                     setTimeout(() => navigate('/projects'), 2000);
                 } else {
                     setStatus('error');

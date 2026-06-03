@@ -5,7 +5,7 @@ import { Drawer, Dropdown } from "antd";
 import { AuthModal } from "./AuthModal";
 import { useTheme } from "../../context/theme.context";
 import { AuthContext } from "../../context/auth.context";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export const Header = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -15,6 +15,14 @@ export const Header = () => {
   const { theme, toggleTheme } = useTheme();
   const { isAuthenticated, user, setAuth } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.openLogin) {
+      setModalState({ isOpen: true, mode: "login" });
+      navigate(location.pathname, { replace: true, state: { ...location.state, openLogin: false } });
+    }
+  }, [location.state, navigate, location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");

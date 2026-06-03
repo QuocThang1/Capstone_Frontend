@@ -240,7 +240,7 @@ const ProcessFlow = () => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="flex flex-col h-full min-h-full flex-1 font-sans antialiased bg-slate-50 dark:bg-slate-900"
+        className="flex flex-col h-full min-h-full flex-1 font-sans antialiased bg-slate-50 dark:bg-slate-900 "
       >
         <motion.div variants={itemVariants} className="flex items-center justify-between mb-6 shrink-0 flex-wrap gap-4">
           <div>
@@ -280,7 +280,7 @@ const ProcessFlow = () => {
           </div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="min-h-[700px] flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950 shadow-sm">
+        <motion.div variants={itemVariants} className="min-h-[700px] flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950 shadow-sm ">
           {activeWorkflow ? (
             <div className="flex flex-col h-full">
               <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">

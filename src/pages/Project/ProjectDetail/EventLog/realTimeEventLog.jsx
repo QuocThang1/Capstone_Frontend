@@ -196,7 +196,14 @@ const RealTimeEventLog = () => {
 
   const sprintOptions = [
     { value: '', label: 'All Sprints' },
-    ...sprints.map(s => ({ value: s._id, label: s.name }))
+    ...sprints.map(s => {
+      const isBacklog = s.name?.toLowerCase() === 'backlog';
+      const statusLabel = s.status ? ` (${s.status.charAt(0).toUpperCase() + s.status.slice(1)})` : '';
+      return {
+        value: s._id,
+        label: isBacklog ? s.name : `${s.name}${statusLabel}`
+      };
+    })
   ];
 
   // Tải dữ liệu lịch sử
@@ -265,7 +272,7 @@ const RealTimeEventLog = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="h-[calc(100vh-8rem)] flex flex-col pt-4 pr-6 pl-2" // Thêm padding căn viền giống backlog/processFlow
+      className="h-[calc(100vh-24px)] flex flex-col pt-4 pr-6 pl-2 pb-20" // Thêm padding căn viền giống backlog/processFlow
     >
       <motion.div variants={itemVariants} className="flex items-center justify-between mb-6 shrink-0 flex-wrap gap-4">
         <div>

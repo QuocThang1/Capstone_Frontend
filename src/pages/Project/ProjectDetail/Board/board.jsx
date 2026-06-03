@@ -12,7 +12,7 @@ import { updateBoardColumnsApi } from '../../../../utils/Api/projectApi';
 
 import Spinner from '../../../../components/Spinner';
 import ButtonSpinner from '../../../../components/ButtonSpinner';
-import IssueDetailModal from './IssueDetailModal';
+import IssueDetailModal from './issueDetailModal';
 import BoardColumn from '../../../../components/projectPage/Board/BoardColumn';
 import IssueCard from '../../../../components/projectPage/Board/IssueCard';
 

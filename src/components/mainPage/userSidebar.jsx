@@ -192,7 +192,8 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
         animate={{ width: isCollapsed ? 64 : 256 }}
         transition={{ type: "spring", stiffness: 360, damping: 36 }}
         className={cn(
-          "relative bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col flex-shrink-0 z-40 overflow-x-hidden overflow-y-auto group"
+          "relative bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col flex-shrink-0 z-40 overflow-x-hidden overflow-y-auto group",
+          isCreateModalOpen && "z-[60]"
         )}
       >
         {/* Logo Section Header */}

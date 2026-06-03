@@ -11,6 +11,7 @@ import ProjectNavbar from '../components/ProjectNavbar';
 import AddMemberModal from '../pages/Project/ProjectDetail/addMemberModal';
 import EditBoardColumnsModal from '../pages/Project/ProjectDetail/editboardColumnModal';
 import EditIssueTypesModal from '../pages/Project/ProjectDetail/editIssueTypesModal';
+import FloatingReviewBanner from '../components/projectPage/FloatingReviewBanner';
 
 const ProjectDetailsLayout = () => {
     const { projectId } = useParams();
@@ -134,6 +135,7 @@ const ProjectDetailsLayout = () => {
                     <main className="flex-1 overflow-y-auto p-4 lg:p-4 relative">
                         <Outlet context={{ project, setProject, issues, setIssues, fetchProjectData, fetchIssuesData, socket }} />
                     </main>
+                    <FloatingReviewBanner project={project} fetchProjectData={fetchProjectData} />
                 </div>
             )}
 
