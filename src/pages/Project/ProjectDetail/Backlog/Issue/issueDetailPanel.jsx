@@ -50,7 +50,7 @@ const IssueDetailPanel = ({ project, sprints, issue, onClose, onDataUpdate, onDe
     const fileInputRef = useRef(null);
     const subtaskInputRef = useRef(null);
 
-    const { register, handleSubmit, reset, watch, setValue } = useForm();
+    const { register, handleSubmit, reset, watch, setValue, getValues } = useForm();
     const assigneeValue = watch('assigneeId');
     const priorityValue = watch('priority');
 
@@ -144,6 +144,16 @@ const IssueDetailPanel = ({ project, sprints, issue, onClose, onDataUpdate, onDe
         fetchSubtasks();
     }, [fetchSubtasks, subtaskTrigger]);
 
+    // Đồng bộ selectedSubtask khi danh sách subtasks thay đổi
+    useEffect(() => {
+        if (selectedSubtask) {
+            const updatedSub = subtasks.find(s => s._id === selectedSubtask._id);
+            if (updatedSub && JSON.stringify(updatedSub) !== JSON.stringify(selectedSubtask)) {
+                setSelectedSubtask(updatedSub);
+            }
+        }
+    }, [subtasks, selectedSubtask]);
+
     const onSubmit = async (data) => {
         try {
             const parsedSkills = data.requiredSkills
@@ -195,6 +205,28 @@ const IssueDetailPanel = ({ project, sprints, issue, onClose, onDataUpdate, onDe
 
     const handleFieldChange = (field, val) => {
         setValue(field, val, { shouldValidate: true });
+
+        // Tự động tính toán timeExpect trên giao diện nếu một trong các trường ảnh hưởng thay đổi
+        if (field === 'storyPoints' || field === 'startDate' || field === 'dueDate') {
+            const formValues = getValues();
+            const currentStoryPoints = field === 'storyPoints' ? val : formValues.storyPoints;
+            const currentStartDate = field === 'startDate' ? val : formValues.startDate;
+            const currentDueDate = field === 'dueDate' ? val : formValues.dueDate;
+
+            if (currentStoryPoints && currentStartDate && currentDueDate) {
+                const sDate = new Date(currentStartDate);
+                const dDate = new Date(currentDueDate);
+                if (dDate > sDate) {
+                    const calculatedTime = (Number(currentStoryPoints) || 0) * 4;
+                    setValue('timeExpect', parseFloat(calculatedTime.toFixed(1)), { shouldValidate: true });
+                } else {
+                    setValue('timeExpect', 0, { shouldValidate: true });
+                }
+            } else {
+                setValue('timeExpect', 0, { shouldValidate: true });
+            }
+        }
+
         handleSubmit(onSubmit)();
     };
 
@@ -418,7 +450,7 @@ const IssueDetailPanel = ({ project, sprints, issue, onClose, onDataUpdate, onDe
                             <Clock className="w-4 h-4 text-orange-500" />Time Expect (hrs)
                         </label>
                         <input type="text" {...register("timeExpect")} readOnly className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold text-slate-500 cursor-not-allowed shadow-inner" />
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 italic tracking-tight">Auto-calc: StoryPoints × (DueDate - StartDate)</p>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 italic tracking-tight">Auto-calc: StoryPoints × 4</p>
                     </div>
                     <div className="col-span-2">
                         <label className="text-sm font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-2 transition-colors duration-300 mb-1"><Calendar className="w-4 h-4" />Start Date</label>

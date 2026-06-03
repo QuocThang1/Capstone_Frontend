@@ -25,7 +25,7 @@ export const ProjectProvider = ({ children }) => {
             if (res && res.EC === 0) {
                 setAllProjects(res.data.projects);
                 setPagination({
-                    page: res.data.currentPage,
+                    page: res.data.page,
                     totalPages: res.data.totalPages,
                 });
             } else {

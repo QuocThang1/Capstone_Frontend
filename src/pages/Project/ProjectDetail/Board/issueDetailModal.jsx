@@ -51,7 +51,7 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
     const fileInputRef = useRef(null);
     const subtaskInputRef = useRef(null);
 
-    const { register, handleSubmit, reset, watch, setValue } = useForm();
+    const { register, handleSubmit, reset, watch, setValue, getValues } = useForm();
     const assigneeValue = watch('assigneeId');
     const priorityValue = watch('priority');
     const statusValue = watch('status');
@@ -140,6 +140,16 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
         fetchSubtasks();
     }, [fetchSubtasks]);
 
+    // Đồng bộ selectedSubtask khi danh sách subtasks thay đổi
+    useEffect(() => {
+        if (selectedSubtask) {
+            const updatedSub = subtasks.find(s => s._id === selectedSubtask._id);
+            if (updatedSub && JSON.stringify(updatedSub) !== JSON.stringify(selectedSubtask)) {
+                setSelectedSubtask(updatedSub);
+            }
+        }
+    }, [subtasks, selectedSubtask]);
+
     // Handle Form update
     const onSubmit = async (data) => {
         try {
@@ -171,6 +181,28 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
     // Auto-save wrapper behavior (tránh phải bấm Save)
     const handleFieldChange = (field, val) => {
         setValue(field, val, { shouldValidate: true });
+
+        // Tự động tính toán timeExpect trên giao diện nếu một trong các trường ảnh hưởng thay đổi
+        if (field === 'storyPoints' || field === 'startDate' || field === 'dueDate') {
+            const formValues = getValues();
+            const currentStoryPoints = field === 'storyPoints' ? val : formValues.storyPoints;
+            const currentStartDate = field === 'startDate' ? val : formValues.startDate;
+            const currentDueDate = field === 'dueDate' ? val : formValues.dueDate;
+
+            if (currentStoryPoints && currentStartDate && currentDueDate) {
+                const sDate = new Date(currentStartDate);
+                const dDate = new Date(currentDueDate);
+                if (dDate > sDate) {
+                    const calculatedTime = (Number(currentStoryPoints) || 0) * 4;
+                    setValue('timeExpect', parseFloat(calculatedTime.toFixed(1)), { shouldValidate: true });
+                } else {
+                    setValue('timeExpect', 0, { shouldValidate: true });
+                }
+            } else {
+                setValue('timeExpect', 0, { shouldValidate: true });
+            }
+        }
+
         // Gọi Submit "tay" tại đây nếu muốn lưu tự động luôn. Tạm thời dùng onBlur ở thẻ Form
         handleSubmit(onSubmit)();
     };
@@ -614,7 +646,7 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                                         className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-500 shadow-inner cursor-not-allowed"
                                     />
                                     <p className="text-[10px] text-slate-400 mt-1 italic">
-                                        Calculated by system: StoryPoints × Duration
+                                        Calculated by system: StoryPoints × 4
                                     </p>
                                 </div>
 
