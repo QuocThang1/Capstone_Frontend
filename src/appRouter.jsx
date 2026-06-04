@@ -29,13 +29,9 @@ import IssueList from "./pages/Project/ProjectDetail/List/issueList";
 import RealTimeEventLog from "./pages/Project/ProjectDetail/EventLog/RealTimeEventLog";
 import AutomationRules from "./pages/Project/ProjectDetail/AutomationRules/automationRules";
 import OverviewDashboard from "./pages/Project/ProjectDetail/Summary/OverviewDashboard";
+import ChartPage from "./pages/Project/ProjectDetail/Chart/chartPage";
 import GitHubCallback from "./pages/auth/GitHubCallback";
 import GoogleCallback from "./pages/auth/GoogleCallback";
-
-// Coming Soon Pages
-import RBACPermissions from "./pages/Project/ProjectDetail/RBACPermissions";
-import AuditLogs from "./pages/Project/ProjectDetail/AuditLogs";
-import ImportExportData from "./pages/Project/Operations/ImportExportData";
 
 
 const router = createBrowserRouter([
@@ -218,6 +214,13 @@ const router = createBrowserRouter([
               </ProtectedRoute>
           },
           {
+            path: "chart",
+            element:
+              <ProtectedRoute allowedRoles={["admin", "user"]}>
+                <ChartPage />
+              </ProtectedRoute>
+          },
+          {
             path: "realtime-logs",
             element:
               <ProtectedRoute allowedRoles={["admin", "user"]}>
@@ -245,28 +248,6 @@ const router = createBrowserRouter([
             element:
               <ProtectedRoute allowedRoles={["admin", "user"]}>
                 <TeamHealth />
-              </ProtectedRoute>
-          },
-          {
-            path: "rbac",
-            element:
-              <ProtectedRoute allowedRoles={["admin", "user"]}>
-                <RBACPermissions />
-              </ProtectedRoute>
-          },
-          {
-            path: "audit-logs",
-            element:
-              <ProtectedRoute allowedRoles={["admin", "user"]}>
-                <AuditLogs />
-              </ProtectedRoute>
-          },
-          // Operations Section
-          {
-            path: "import-export",
-            element:
-              <ProtectedRoute allowedRoles={["admin", "user"]}>
-                <ImportExportData />
               </ProtectedRoute>
           },
           {
@@ -321,28 +302,6 @@ const router = createBrowserRouter([
         element:
           <ProtectedRoute allowedRoles={["admin", "user"]}>
             <TeamHealth />
-          </ProtectedRoute>
-      },
-      {
-        path: "rbac",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <RBACPermissions />
-          </ProtectedRoute>
-      },
-      {
-        path: "audit",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <AuditLogs />
-          </ProtectedRoute>
-      },
-      // Operations Section
-      {
-        path: "data",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <ImportExportData />
           </ProtectedRoute>
       },
       {

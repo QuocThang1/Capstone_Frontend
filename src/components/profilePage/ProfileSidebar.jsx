@@ -64,7 +64,7 @@ function ViewMode({ profile, onEdit }) {
           border border-slate-300 dark:border-slate-600
           text-slate-800 dark:text-slate-200
           hover:bg-slate-100 dark:hover:bg-slate-700
-          transition-colors"
+          transition-colors cursor-pointer"
       >
         <Pencil className="w-3.5 h-3.5" />
         Edit profile
@@ -78,7 +78,7 @@ export default function ProfileSidebar({ profile, onSave, isSaving, isEditing, s
   const { auth } = useContext(AuthContext);
   const [form, setForm] = useState({
     fullName: "", username: "", bio: "", email: "",
-    phone: "", dob: "", gender: "", avatar: "",
+    phone: "", dob: "", gender: "", avatar: "", skills: "",
   });
   const [errors, setErrors] = useState({});
 
@@ -93,6 +93,7 @@ export default function ProfileSidebar({ profile, onSave, isSaving, isEditing, s
         dob: profile.dob ? new Date(profile.dob).toISOString().split('T')[0] : "",
         gender: profile.gender || "",
         avatar: profile.avatar || "",
+        skills: Array.isArray(profile.skills) ? profile.skills.join(", ") : (typeof profile.skills === 'string' ? profile.skills : ""),
       });
     }
   }, [profile]);
@@ -114,6 +115,7 @@ export default function ProfileSidebar({ profile, onSave, isSaving, isEditing, s
       dob: profile.dob ? new Date(profile.dob).toISOString().split('T')[0] : "",
       gender: profile.gender || "",
       avatar: profile.avatar || "",
+      skills: Array.isArray(profile.skills) ? profile.skills.join(", ") : (typeof profile.skills === 'string' ? profile.skills : ""),
     });
     setErrors({});
     setIsEditing(false);
@@ -183,7 +185,7 @@ export default function ProfileSidebar({ profile, onSave, isSaving, isEditing, s
             className="flex-1 flex items-center justify-center gap-1.5 px-4 py-1.5 text-sm font-semibold rounded-md
               bg-[#6366F1] hover:bg-indigo-600 text-white
               focus:outline-none focus:ring-2 focus:ring-[#6366F1] focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900
-              transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
+              transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm cursor-pointer"
           >
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {isSaving ? "Saving…" : "Save"}
@@ -196,7 +198,7 @@ export default function ProfileSidebar({ profile, onSave, isSaving, isEditing, s
               border border-slate-300 dark:border-slate-600
               text-slate-700 dark:text-slate-300
               hover:bg-slate-100 dark:hover:bg-slate-700
-              transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             Cancel
           </button>

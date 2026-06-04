@@ -122,10 +122,14 @@ export default function ProfilePage() {
         updateData.avatar = formData.avatar;
       }
 
+      if (formData.skills !== undefined) {
+        updateData.skills = formData.skills.split(",").map(s => s.trim()).filter(s => s !== "");
+      }
+
       const res = await updateUserApi(auth.user._id, updateData);
 
       if (res?.EC === 0) {
-        const updatedUser = res.DT || { ...profile, ...formData };
+        const updatedUser = res.DT || { ...profile, ...updateData };
         setProfile(updatedUser);
         setAuth({
           isAuthenticated: true,

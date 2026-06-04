@@ -219,22 +219,22 @@ const ProjectManagement = () => {
                 </motion.div>
 
                 {/* Projects Table */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="bg-white dark:bg-slate-900/50 backdrop-blur-md rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="bg-white dark:bg-slate-900/50 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none">
                     {loading ? (
                         <div className="flex justify-center items-center h-64"><Spinner /></div>
                     ) : (
                         <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
                             <thead className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
                                 <tr>
-                                    <th scope="col" className="px-6 py-4 w-12"><span className="sr-only">Star</span></th>
+                                    <th scope="col" className="px-6 py-4 w-12 rounded-tl-2xl"><span className="sr-only">Star</span></th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Name</th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Key</th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Lead</th>
-                                    <th scope="col" className="relative px-6 py-4"><span className="sr-only">Actions</span></th>
+                                    <th scope="col" className="relative px-6 py-4 rounded-tr-2xl"><span className="sr-only">Actions</span></th>
                                 </tr>
                             </thead>
-                            <motion.tbody variants={containerVariants} initial="hidden" animate="visible" className="divide-y divide-slate-200 dark:divide-slate-800">
-                                {sortedProjects.length > 0 ? sortedProjects.map((project) => {
+                            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                                {sortedProjects.length > 0 ? sortedProjects.map((project, index) => {
                                     const isStarred = starredProjects.includes(project._id);
                                     const isLeader = project.members?.some(m => {
                                         const account = m.accountId || {};
@@ -242,9 +242,13 @@ const ProjectManagement = () => {
                                         return String(account._id || account) === String(auth?.user?.id || "") && m.role === 'leader';
                                     });
 
+                                    const isLastRow = index === sortedProjects.length - 1;
+                                    // Hiển thị dropdown hướng lên trên cho 2 dòng cuối để tránh bị che khuất
+                                    const showUpward = index >= sortedProjects.length - 2 && sortedProjects.length > 2;
+
                                     return (
-                                        <motion.tr variants={itemVariants} key={project._id} onClick={() => navigate(`/projects/${project._id}`)} className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all duration-300 cursor-pointer group">
-                                            <td className="px-6 py-4">
+                                        <tr key={project._id} onClick={() => navigate(`/projects/${project._id}`)} className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all duration-300 cursor-pointer group">
+                                            <td className={cn("px-6 py-4", isLastRow && "rounded-bl-2xl")}>
                                                 <button
                                                     onClick={(e) => handleToggleStar(e, project._id)}
                                                     disabled={starLoading[project._id]}
@@ -275,14 +279,17 @@ const ProjectManagement = () => {
                                                     <span>{project.members.find(m => m.role === 'leader')?.accountId?.fullName || project.members[0]?.accountId?.fullName || 'N/A'}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative">
+                                            <td className={cn("px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative", isLastRow && "rounded-br-2xl")}>
                                                 {isLeader && (
                                                     <>
                                                         <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(activeDropdown === project._id ? null : project._id); }} className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                                             <MoreHorizontal className="w-5 h-5" />
                                                         </button>
                                                         {activeDropdown === project._id && (
-                                                            <div ref={dropdownRef} className="origin-top-right absolute right-6 top-10 mt-0 w-48 rounded-xl shadow-2xl bg-white dark:bg-slate-800 ring-1 ring-black ring-opacity-5 dark:ring-white/10 focus:outline-none z-10 overflow-hidden">
+                                                            <div ref={dropdownRef} className={cn(
+                                                                "absolute right-6 w-48 rounded-xl shadow-2xl bg-white dark:bg-slate-800 ring-1 ring-black ring-opacity-5 dark:ring-white/10 focus:outline-none z-10 overflow-hidden",
+                                                                showUpward ? "bottom-full mb-1 origin-bottom-right" : "top-10 origin-top-right mt-0"
+                                                            )}>
                                                                 <div className="py-1">
                                                                     <button onClick={(e) => { e.stopPropagation(); handleOpenEditModal(project); }} className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer transition-all duration-200">
                                                                         <Edit className="w-4 h-4 text-slate-400" />
@@ -298,12 +305,12 @@ const ProjectManagement = () => {
                                                     </>
                                                 )}
                                             </td>
-                                        </motion.tr>
+                                        </tr>
                                     )
                                 }) : (
                                     <tr><td colSpan="5" className="text-center py-10 text-slate-500 dark:text-slate-400">No projects found.</td></tr>
                                 )}
-                            </motion.tbody>
+                            </tbody>
                         </table>
                     )}
                 </motion.div>
