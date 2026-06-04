@@ -29,7 +29,7 @@ const itemVariants = {
 const Board = () => {
     const context = useOutletContext();
     const navigate = useNavigate();
-    const { project, setProject, issues = [], setIssues, fetchIssuesData } = context || {};
+    const { project, setProject, issues = [], setIssues, fetchIssuesData, isLeader } = context || {};
 
     const [activeSprint, setActiveSprint] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -244,9 +244,9 @@ const Board = () => {
                                 </>
                             )}
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3 ml-auto shrink-0">
                             <AnimatePresence>
-                                {activeSprint && (
+                                {activeSprint && isLeader && (
                                     <motion.button
                                         initial={{ scale: 0.8, opacity: 0 }}
                                         animate={{ scale: 1, opacity: 1 }}

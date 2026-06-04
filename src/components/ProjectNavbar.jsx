@@ -22,7 +22,8 @@ const ProjectNavbar = ({
   onEditIssueTypes,
   isStarred,
   onToggleStar,
-  starLoading
+  starLoading,
+  isLeader
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -114,9 +115,11 @@ const ProjectNavbar = ({
   const unpinnedItems = allNavItems.filter(item => !item.fixed && !pinnedIds.includes(item.id));
 
   const projectMenuItems = [
-    { label: 'Add members', icon: UserPlus, action: onAddMember },
-    { label: 'Edit board columns', icon: Columns, action: onEditBoard },
-    { label: 'Edit issue types', icon: Tag, action: onEditIssueTypes },
+    { label: isLeader ? 'Add members' : 'View members', icon: isLeader ? UserPlus : Users, action: onAddMember },
+    ...(isLeader ? [
+      { label: 'Edit board columns', icon: Columns, action: onEditBoard },
+      { label: 'Edit issue types', icon: Tag, action: onEditIssueTypes },
+    ] : [])
   ];
 
   useEffect(() => {
@@ -186,6 +189,7 @@ const ProjectNavbar = ({
               placeholder="Select timezone"
               size="sm"
               width="w-44"
+              disabled={!isLeader}
             />
           </div>
           <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer">

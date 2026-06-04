@@ -41,7 +41,7 @@ const getStatusIcon = (status) => {
     return <AlertCircle className="w-4 h-4 text-slate-400" />;
 };
 
-const BottleneckCard = ({ bn, expanded, onToggle, onRequestResolve, onApproveResolve }) => {
+const BottleneckCard = ({ bn, expanded, onToggle, onRequestResolve, onApproveResolve, isLeader }) => {
     const isExpanded = expanded === bn._id;
 
     return (
@@ -137,7 +137,7 @@ const BottleneckCard = ({ bn, expanded, onToggle, onRequestResolve, onApproveRes
                                             </button>
                                         )}
 
-                                        {bn.status === "pending" && (
+                                        {bn.status === "pending" && isLeader && (
                                             <>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); onApproveResolve(bn._id, true); }}

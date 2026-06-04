@@ -23,7 +23,7 @@ const formatDate = (dateString, timeZone) => {
     }
 };
 
-const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSelect, onOpenDeleteIssueModal, onDataUpdate, onStartSprint, onCompleteSprint }) => {
+const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSelect, onOpenDeleteIssueModal, onDataUpdate, onStartSprint, onCompleteSprint, isLeader }) => {
     const [isCreatingIssue, setCreatingIssue] = useState(false);
     const [newIssueTitle, setNewIssueTitle] = useState('');
     const [selectedIssueType, setSelectedIssueType] = useState(project?.issueTypes?.[0]?.name || 'Task');
@@ -107,7 +107,7 @@ const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSel
                 {!isBacklog && (
                     <div className="flex items-center gap-2 relative">
                         <span className="text-sm font-semibold text-slate-500">{totalStoryPoints} story points</span>
-                        {sprint.status !== 'completed' && (
+                        {isLeader && sprint.status !== 'completed' && (
                             <button
                                 onClick={handleSprintAction}
                                 className="px-3 py-1 text-sm font-medium bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer"
@@ -115,14 +115,18 @@ const SprintContainer = ({ sprint, issues, project, onEdit, onDelete, onIssueSel
                                 {sprint.status === 'pending' ? 'Start sprint' : 'Complete sprint'}
                             </button>
                         )}
-                        <button onClick={() => setDropdownOpen(prev => !prev)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer"><MoreHorizontal className="w-5 h-5" /></button>
-                        {isDropdownOpen && (
-                            <div ref={dropdownRef} className="origin-top-right absolute right-0 mt-8 w-40 rounded-md shadow-lg bg-white dark:bg-slate-900 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                                <div className="py-1">
-                                    <button onClick={() => { onEdit(); setDropdownOpen(false); }} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"><Edit className="w-4 h-4" /><span>Edit sprint</span></button>
-                                    <button onClick={() => { onDelete(); setDropdownOpen(false); }} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer"><Trash2 className="w-4 h-4" /><span>Delete sprint</span></button>
-                                </div>
-                            </div>
+                        {isLeader && (
+                            <>
+                                <button onClick={() => setDropdownOpen(prev => !prev)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer"><MoreHorizontal className="w-5 h-5" /></button>
+                                {isDropdownOpen && (
+                                    <div ref={dropdownRef} className="origin-top-right absolute right-0 mt-8 w-40 rounded-md shadow-lg bg-white dark:bg-slate-900 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                                        <div className="py-1">
+                                            <button onClick={() => { onEdit(); setDropdownOpen(false); }} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"><Edit className="w-4 h-4" /><span>Edit sprint</span></button>
+                                            <button onClick={() => { onDelete(); setDropdownOpen(false); }} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer"><Trash2 className="w-4 h-4" /><span>Delete sprint</span></button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 )}
