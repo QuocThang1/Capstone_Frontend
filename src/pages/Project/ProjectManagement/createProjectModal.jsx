@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ProjectContext } from '../../../context/project.context';
 import { createSmartProjectApi } from '../../../utils/Api/projectApi';
 import { toast } from 'react-toastify';
+import ProjectWallpaper from '../../../assets/CreateProjectModel wallpaper.png';
 
 const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
     const { register, handleSubmit, formState: { errors }, reset, watch } = useForm();
@@ -146,16 +147,16 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                             </div>
 
                             {/* Right Side - Illustration */}
-                            <div className="w-full md:w-1/2 p-8 flex flex-col items-center justify-center border-l border-slate-200 bg-white">
+                            <div className="w-full md:w-1/2 p-8 flex flex-col items-center justify-center border-l border-slate-200 bg-slate-50/50">
                                 <img
-                                    src="https://jira-clone.fly.dev/static/media/project-illustration.0f207c41cf549450b4b5.svg"
+                                    src={ProjectWallpaper}
                                     alt="Project Illustration"
-                                    className="max-w-xs w-full"
+                                    className="w-full h-auto object-cover rounded-xl shadow-md border border-slate-200"
                                 />
-                                <div className="mt-6 text-center bg-slate-50 border border-slate-200 text-slate-700 rounded-md p-5 shadow-sm">
+                                <div className="mt-6 w-full text-center bg-white border border-slate-200 text-slate-700 rounded-xl p-5 shadow-sm">
                                     <p className="font-semibold text-lg">Create a new project</p>
                                     <p className="text-sm mt-2 text-slate-500">
-                                        Your issues will look like <span className="font-mono bg-slate-200 px-1 py-0.5 rounded text-slate-700 font-bold">{(projectKey || '').toUpperCase() || 'PROJ'}-1</span>.
+                                        Your issues will look like <span className="font-mono bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-slate-700 font-bold">{(projectKey || '').toUpperCase() || 'PROJ'}-1</span>.
                                     </p>
                                 </div>
                             </div>

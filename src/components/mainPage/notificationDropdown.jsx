@@ -75,10 +75,11 @@ const NotificationDropdown = () => {
     }, [isOpen]);
 
     const handleNotificationClick = (notif) => {
-        const projectId = notif.issueId?.projectId?._id;
+        const projectId = notif.issueId?.projectId?._id || notif.issueId?.projectId;
+        const issueId = notif.issueId?._id;
 
-        if (projectId) {
-            navigate(`/projects/${projectId}/backlog`);
+        if (projectId && issueId) {
+            navigate(`/projects/${projectId}/list?issueId=${issueId}`);
             setIsOpen(false);
         }
     };
