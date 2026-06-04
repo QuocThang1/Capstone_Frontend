@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, User, Calendar, Star, ChevronsRight, ChevronDown, MoreHorizontal, Plus, Columns, Eye, Share2, Expand, Clock, Paperclip, FileText, Loader2, Download } from 'lucide-react';
-import { updateIssueApi, createSubtaskApi, getSubtaskApi, deleteIssueApi } from '../../../../utils/Api/issueApi';
+import { updateIssueApi, createSubtaskApi, getSubtaskApi, deleteIssueApi, evaluateIssueApi, deleteEvaluationApi } from '../../../../utils/Api/issueApi';
 import { getProjectMembersApi } from '../../../../utils/Api/projectApi';
 import Spinner from '../../../../components/spinner';
 import SubtaskRow from '../../../../components/projectPage/IssueDetail/subtaskRow';
@@ -15,6 +15,7 @@ import AiSuggestModal from '../../../../components/projectPage/IssueDetail/aiSug
 import AiSuggestButton from '../../../../components/projectPage/IssueDetail/aiSuggestButton';
 import DeleteIssueModal from '../Backlog/Issue/deleteIssueModal';
 import { cn } from '../../../../lib/utils';
+import { AuthContext } from '../../../../context/auth.context';
 
 const toUtcIsoString = (localDateTime, timeZone) => {
     if (!localDateTime) return null;
@@ -47,6 +48,15 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
     const [isSuggesting, setIsSuggesting] = useState(false);
     const [showAiModal, setShowAiModal] = useState(false);
     const [aiSuggestions, setAiSuggestions] = useState([]);
+
+    const { user } = useContext(AuthContext);
+    const isLeader = project?.members?.some(m => m.role === 'leader' && m.accountId?._id === user?._id);
+    const [evalRating, setEvalRating] = useState(issue?.evaluation?.rating || 0);
+    const [evalFeedback, setEvalFeedback] = useState(issue?.evaluation?.feedback || '');
+    const [evalAt, setEvalAt] = useState(issue?.evaluation?.evaluatedAt || null);
+    const [isEvaluating, setIsEvaluating] = useState(false);
+    const [isEvalEditing, setIsEvalEditing] = useState(false);
+    const [showConfirmDeleteEval, setShowConfirmDeleteEval] = useState(false);
 
     const fileInputRef = useRef(null);
     const subtaskInputRef = useRef(null);
@@ -99,6 +109,10 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
             startDate: formatForDateTimeLocal(issue.startDate, project?.timezone),
             dueDate: formatForDateTimeLocal(issue.dueDate, project?.timezone),
         });
+        setEvalRating(issue.evaluation?.rating || 0);
+        setEvalFeedback(issue.evaluation?.feedback || '');
+        setEvalAt(issue.evaluation?.evaluatedAt || null);
+        setIsEvalEditing(false);
     };
 
     useEffect(() => {
@@ -273,6 +287,51 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
         setShowAiModal(false);
 
         handleSubmit(onSubmit)();
+    };
+
+    const handleEvaluateSubmit = async () => {
+        if (evalRating === 0) {
+            toast.warning("Please provide a star rating.");
+            return;
+        }
+        try {
+            setIsEvaluating(true);
+            const res = await evaluateIssueApi(issue._id, { rating: evalRating, feedback: evalFeedback });
+            if (res.EC === 0) {
+                toast.success("Evaluation submitted successfully");
+                setIsEvalEditing(false);
+                setEvalAt(new Date().toISOString());
+                if (onDataUpdate) onDataUpdate();
+            } else {
+                toast.error(res.EM || "Failed to submit evaluation");
+            }
+        } catch (error) {
+            toast.error("An error occurred while evaluating");
+        } finally {
+            setIsEvaluating(false);
+        }
+    };
+
+    const handleDeleteEvaluation = async () => {
+        try {
+            setIsEvaluating(true);
+            const res = await deleteEvaluationApi(issue._id);
+            if (res.EC === 0) {
+                toast.success(res.EM || "Evaluation deleted successfully");
+                setEvalRating(0);
+                setEvalFeedback('');
+                setEvalAt(null);
+                setIsEvalEditing(false);
+                setShowConfirmDeleteEval(false);
+                if (onDataUpdate) onDataUpdate();
+            } else {
+                toast.error(res.EM || "Failed to delete evaluation");
+            }
+        } catch (error) {
+            toast.error("An error occurred while deleting evaluation");
+        } finally {
+            setIsEvaluating(false);
+        }
     };
 
     const handleFileUpload = async (e) => {
@@ -533,6 +592,93 @@ const IssueDetailModal = ({ project, issue, onClose, onDataUpdate, onDeleteReque
                                     </div>
                                 </div>
                             )}
+
+                            {/* --- Evaluation Section --- */}
+                            <div className="mt-10 border border-slate-200 dark:border-slate-700 rounded-lg p-5 bg-slate-50/30 dark:bg-slate-800/20">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-[15px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                                        <Star className="w-4 h-4 text-amber-500" /> Leader Evaluation
+                                    </h3>
+                                    {isLeader && issue?.status === 'Done' && !isEvalEditing && (
+                                        <div className="flex items-center gap-3">
+                                            <button onClick={() => setIsEvalEditing(true)} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium cursor-pointer">
+                                                {evalRating ? 'Edit Evaluation' : 'Evaluate'}
+                                            </button>
+                                            {evalRating > 0 && (
+                                    <div className="relative">
+                                        <button onClick={() => setShowConfirmDeleteEval(true)} disabled={isEvaluating} className="text-xs text-rose-500 hover:text-rose-600 font-medium cursor-pointer disabled:opacity-50">
+                                            Delete
+                                        </button>
+                                        {showConfirmDeleteEval && (
+                                            <div className="absolute right-0 top-full mt-2 bg-white dark:bg-slate-800 shadow-xl border border-slate-200 dark:border-slate-700 rounded-md p-2 z-50 min-w-[120px]">
+                                                <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2 whitespace-nowrap text-center">Delete it?</p>
+                                                <div className="flex justify-center gap-2">
+                                                    <button onClick={() => setShowConfirmDeleteEval(false)} className="px-2 py-1 text-[10px] font-medium bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded cursor-pointer transition-colors">Cancel</button>
+                                                    <button onClick={handleDeleteEvaluation} className="px-2 py-1 text-[10px] font-medium bg-rose-500 hover:bg-rose-600 text-white rounded cursor-pointer transition-colors">Delete</button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {!isEvalEditing && evalRating ? (
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-1.5">
+                                                {[1, 2, 3, 4, 5].map(star => (
+                                                    <Star key={star} className={`w-5 h-5 ${star <= evalRating ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-600'}`} />
+                                                ))}
+                                            </div>
+                                            {evalAt && (
+                                                <span className="text-xs text-slate-400 font-medium">
+                                                    {new Date(evalAt).toLocaleString('en-US', {
+                                                        year: 'numeric', month: 'short', day: 'numeric',
+                                                        hour: '2-digit', minute: '2-digit'
+                                                    })}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {evalFeedback && (
+                                            <p className="text-sm text-slate-600 dark:text-slate-400 italic">"{evalFeedback}"</p>
+                                        )}
+                                    </div>
+                                ) : !isEvalEditing && (!evalRating) ? (
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">Not evaluated yet. {issue?.status !== 'Done' && ' (Issue must be Done to evaluate)'}</p>
+                                ) : null}
+
+                                {isEvalEditing && (
+                                    <div className="space-y-4 mt-2">
+                                        <div className="flex items-center gap-2">
+                                            {[1, 2, 3, 4, 5].map(star => (
+                                                <Star
+                                                    key={star}
+                                                    onClick={() => setEvalRating(star)}
+                                                    className={`w-7 h-7 cursor-pointer transition-colors ${star <= evalRating ? 'fill-amber-400 text-amber-400 hover:fill-amber-500 hover:text-amber-500' : 'text-slate-300 dark:text-slate-600 hover:text-amber-300'}`}
+                                                />
+                                            ))}
+                                        </div>
+                                        <textarea
+                                            value={evalFeedback}
+                                            onChange={(e) => setEvalFeedback(e.target.value)}
+                                            placeholder="Leave a feedback (optional)..."
+                                            rows="3"
+                                            className="w-full p-3 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                                        />
+                                        <div className="flex items-center gap-3">
+                                            <button onClick={handleEvaluateSubmit} disabled={isEvaluating} className="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors disabled:opacity-50 cursor-pointer">
+                                                {isEvaluating ? 'Saving...' : 'Save Evaluation'}
+                                            </button>
+                                            <button onClick={() => { setIsEvalEditing(false); setEvalRating(issue?.evaluation?.rating || 0); setEvalFeedback(issue?.evaluation?.feedback || ''); }} className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-md transition-colors cursor-pointer">
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            {/* --- End Evaluation Section --- */}
 
                             {/* Activity Section */}
                             <div className="mt-10">
