@@ -1,9 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Users, TrendingUp, CheckCircle2 } from "lucide-react";
 import Spinner from "../../../../components/spinner";
 import MemberIssuesModal from "./MemberIssuesModal";
+import { getBottlenecksByProjectApi } from "../../../../utils/Api/bottleneckApi";
+import { AlertTriangle } from "lucide-react";
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
@@ -28,6 +30,21 @@ const generateAvatarColor = (id) => {
 const TeamHealth = () => {
   const { project, issues } = useOutletContext();
   const [selectedMember, setSelectedMember] = useState(null);
+  const [bottlenecks, setBottlenecks] = useState([]);
+  const [loadingStats, setLoadingStats] = useState(false);
+
+  useEffect(() => {
+    if (project?._id) {
+      setLoadingStats(true);
+      getBottlenecksByProjectApi(project._id)
+        .then(res => {
+          if (res && res.EC === 0) {
+            setBottlenecks(res.data || []);
+          }
+        })
+        .finally(() => setLoadingStats(false));
+    }
+  }, [project?._id]);
 
   if (!project || !issues) {
     return <div className="flex items-center justify-center h-[calc(100vh-8rem)]"><Spinner /></div>;
@@ -39,6 +56,10 @@ const TeamHealth = () => {
     const totalTasks = assignedIssues.length;
     const velocity = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
+    const memberBottlenecks = bottlenecks.filter(
+      b => b.issueId?.assigneeId?._id === member.accountId._id && b.status !== 'resolved'
+    ).length;
+
     return {
       id: member.accountId._id,
       name: member.accountId.fullName,
@@ -48,6 +69,7 @@ const TeamHealth = () => {
       tasks: totalTasks,
       completed: completedTasks,
       velocity: velocity,
+      bottlenecksCount: memberBottlenecks
     };
   });
 
@@ -57,6 +79,8 @@ const TeamHealth = () => {
   const avgVelocity = teamData.length > 0
     ? Math.round(teamData.reduce((acc, member) => acc + member.velocity, 0) / teamData.length)
     : 0;
+
+  const totalUnresolvedBottlenecks = bottlenecks.filter(b => b.status !== 'resolved').length;
 
   const selectedMemberIssues = useMemo(() => {
     if (!selectedMember || !issues) return [];
@@ -77,11 +101,12 @@ const TeamHealth = () => {
         </motion.div>
 
         {/* KPI row */}
-        <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <motion.div variants={item} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { icon: TrendingUp, label: "Avg Velocity", value: `${avgVelocity}%`, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-900/20" },
             { icon: CheckCircle2, label: "Project Progress", value: `${completedProjectIssues}/${totalProjectIssues}`, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
             { icon: Users, label: "Active Members", value: teamData.length, color: "text-slate-700 dark:text-slate-300", bg: "bg-slate-50 dark:bg-slate-800" },
+            { icon: AlertTriangle, label: "Unresolved Bottlenecks", value: totalUnresolvedBottlenecks, color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-900/20" },
           ].map((kpi) => (
             <div key={kpi.label} className="bg-white dark:bg-slate-950/50 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-4 border border-slate-100 dark:border-slate-800">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${kpi.bg}`}>
@@ -122,9 +147,17 @@ const TeamHealth = () => {
                 </div>
 
                 {/* Tasks */}
-                <div className="hidden md:flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 w-28 shrink-0">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  <span>{member.completed}/{member.tasks} tasks done</span>
+                <div className="hidden md:flex flex-col gap-1 w-28 shrink-0 text-sm">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    <span>{member.completed}/{member.tasks}</span>
+                  </div>
+                  {member.bottlenecksCount > 0 && (
+                    <div className="flex items-center gap-2 text-rose-500 font-medium">
+                      <AlertTriangle className="w-4 h-4" />
+                      <span>{member.bottlenecksCount} delayed</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Velocity bar */}
