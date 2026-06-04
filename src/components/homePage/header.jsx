@@ -58,14 +58,18 @@ export const Header = () => {
         setDropdownOpen(false);
       },
     },
-    {
-      key: "admin",
-      label: "Admin",
-      onClick: () => {
-        navigate("/admin");
-        setDropdownOpen(false);
-      },
-    },
+    ...(user?.role === "admin"
+      ? [
+          {
+            key: "admin",
+            label: "Admin",
+            onClick: () => {
+              navigate("/admin");
+              setDropdownOpen(false);
+            },
+          },
+        ]
+      : []),
     {
       key: "projects",
       label: "Projects",
