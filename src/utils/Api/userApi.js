@@ -54,6 +54,10 @@ const updateUserApi = (userId, userData) => {
         data.bio = userData.bio;
     }
 
+    if (userData.skills !== undefined) {
+        data.skills = userData.skills;
+    }
+
     return axios.put(URL_API, data);
 };
 

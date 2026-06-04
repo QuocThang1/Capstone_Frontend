@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, Plus, MoreHorizontal, Share2, LayoutDashboard,
   CircuitBoard, Scroll, GitBranch, UserPlus, Columns, Tag, Star, LayoutList,
-  Activity, Zap, Users, Shield, FileText, Settings, X
+  Activity, Zap, Users, Shield, FileText, Settings, X, BarChart2
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { cn } from '../lib/utils';
@@ -44,13 +44,12 @@ const ProjectNavbar = ({
     { id: 'backlog', label: 'Backlog', icon: Scroll, path: `${basePath}/backlog`, fixed: true },
     { id: 'process-flow', label: 'Process Flow', icon: GitBranch, path: `${basePath}/process-flow`, fixed: true },
     { id: 'list', label: 'List', icon: LayoutList, path: `${basePath}/list`, fixed: true },
+    { id: 'chart', label: 'Chart', icon: BarChart2, path: `${basePath}/chart`, fixed: true },
 
     // Các tùy chọn nâng cao có thể Pin / Unpin
     { id: 'realtime-logs', label: 'Real-time Log', icon: Activity, path: `${basePath}/realtime-logs`, description: 'Monitor real-time events', fixed: false },
     { id: 'bottleneck-detector', label: 'Bottleneck', icon: Zap, path: `${basePath}/bottleneck-detector`, description: 'AI-powered analysis', tag: 'AI', fixed: false },
     { id: 'team-health', label: 'Team Health', icon: Users, path: `${basePath}/team-health`, description: 'Team metrics', fixed: false },
-    { id: 'rbac', label: 'RBAC', icon: Shield, path: `${basePath}/rbac`, description: 'Manage permissions', fixed: false },
-    { id: 'audit-logs', label: 'Audit Logs', icon: FileText, path: `${basePath}/audit-logs`, description: 'View audit trail', fixed: false },
     { id: 'automation-rules', label: 'Automation', icon: Settings, path: `${basePath}/automation-rules`, description: 'Set automation rules', fixed: false },
   ], [basePath]);
 

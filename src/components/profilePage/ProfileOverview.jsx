@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Calendar, Star, GitBranch, CheckCircle2, Clock, ShieldCheck, Folder, Info } from "lucide-react";
+import { Calendar, Star, GitBranch, CheckCircle2, Clock, ShieldCheck, Folder, Info, Code } from "lucide-react";
 import { getAllProjectsApi } from "../../utils/Api/projectApi";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -227,7 +227,7 @@ export default function ProfileOverview({ profile }) {
           <GitBranch className="w-4 h-4 text-[#6366F1]" />
           Popular Projects
         </h2>
-        <button className="text-xs text-[#6366F1] hover:underline font-medium">
+        <button className="text-xs text-[#6366F1] hover:underline font-medium cursor-pointer">
           Customize your pins
         </button>
       </div>
@@ -247,6 +247,25 @@ export default function ProfileOverview({ profile }) {
             <p>No projects found</p>
           </div>
         )}
+      </div>
+
+      {/* Skills section */}
+      <div className="bg-white/80 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-xl p-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <Code className="w-4 h-4 text-[#6366F1]" />
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Skills</h3>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {Array.isArray(profile?.skills) && profile.skills.length > 0 ? (
+            profile.skills.map((skill, i) => (
+              <span key={i} className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-md bg-[#6366F1]/10 text-[#6366F1] dark:bg-[#6366F1]/20 dark:text-indigo-300">
+                {skill}
+              </span>
+            ))
+          ) : (
+            <span className="text-xs text-slate-500 dark:text-slate-400 italic">No skills listed</span>
+          )}
+        </div>
       </div>
 
       {/* Activity section */}
