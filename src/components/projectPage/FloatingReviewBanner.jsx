@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ProjectContext } from '../../context/project.context';
 import { toast } from 'react-toastify';
 import ButtonSpinner from '../ButtonSpinner';
 import { confirmSmartProjectApi, deleteProjectApi } from '../../utils/Api/projectApi';
@@ -7,6 +8,7 @@ import { confirmSmartProjectApi, deleteProjectApi } from '../../utils/Api/projec
 const FloatingReviewBanner = ({ project, fetchProjectData }) => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const { fetchAllProjects } = useContext(ProjectContext);
 
     if (!project || !project.isAiDraft) return null;
 
@@ -16,7 +18,8 @@ const FloatingReviewBanner = ({ project, fetchProjectData }) => {
             const res = await confirmSmartProjectApi(project._id);
             if (res && res.EC === 0) {
                 toast.success("Project confirmed and saved!");
-                fetchProjectData(); // This will re-fetch the project and isAiDraft will be false
+                fetchAllProjects();
+                fetchProjectData();
             } else {
                 toast.error(res.EM || "Failed to confirm project.");
             }
@@ -33,7 +36,8 @@ const FloatingReviewBanner = ({ project, fetchProjectData }) => {
             const res = await deleteProjectApi(project._id);
             if (res && res.EC === 0) {
                 toast.info("Draft project discarded.");
-                navigate('/projects');
+                fetchAllProjects();
+                navigate("/projects");
             } else {
                 toast.error(res.EM || "Failed to discard project.");
                 setIsLoading(false);

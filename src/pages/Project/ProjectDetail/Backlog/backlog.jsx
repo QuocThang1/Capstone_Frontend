@@ -30,7 +30,7 @@ const itemVariants = {
 
 const Backlog = () => {
     const context = useOutletContext();
-    const { project, issues = [], setIssues, fetchIssuesData } = context || {};
+    const { project, issues = [], setIssues, fetchIssuesData, isLeader } = context || {};
 
     const [sprints, setSprints] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -261,7 +261,7 @@ const Backlog = () => {
                         <div className="max-w-5xl mx-auto space-y-6 pt-6 px-6 pb-64">
                             <motion.div variants={itemVariants} className="flex items-center justify-between mb-8">
                                 <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Sprints</h2>
-                                {!isCreating && (
+                                {!isCreating && isLeader && (
                                     <motion.button
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
@@ -287,6 +287,7 @@ const Backlog = () => {
                                         onDataUpdate={handleDataUpdate}
                                         onStartSprint={handleStartSprint}
                                         onCompleteSprint={handleCompleteSprint}
+                                        isLeader={isLeader}
                                     />
                                 ))}
                             </motion.div>
@@ -332,6 +333,7 @@ const Backlog = () => {
                                         onIssueSelect={setSelectedIssue}
                                         onOpenDeleteIssueModal={setIssueToDelete}
                                         onDataUpdate={handleDataUpdate}
+                                        isLeader={isLeader}
                                     />
                                 )}
                             </motion.div>

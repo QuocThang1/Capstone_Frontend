@@ -45,7 +45,7 @@ const parseBottleneckCron = (cronStr) => {
 };
 
 const AutomationRules = () => {
-  const { project, fetchProjectData } = useOutletContext();
+  const { project, fetchProjectData, isLeader } = useOutletContext();
   const [loadingNotif, setLoadingNotif] = useState(false);
   const [loadingBottle, setLoadingBottle] = useState(false);
 
@@ -152,7 +152,7 @@ const AutomationRules = () => {
                 <p className="text-xs font-semibold text-slate-500">Auto Push Deadline Alerts</p>
               </div>
             </div>
-            <Toggle enabled={isNotificationActive} onToggle={() => setIsNotificationActive(!isNotificationActive)} />
+            {isLeader && <Toggle enabled={isNotificationActive} onToggle={() => setIsNotificationActive(!isNotificationActive)} />}
           </div>
 
           <div className="p-6 flex-1 flex flex-col justify-between">
@@ -165,7 +165,7 @@ const AutomationRules = () => {
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-3">Execute Time (24H)</label>
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
-                    <div className={!isNotificationActive ? "opacity-50 pointer-events-none" : ""}>
+                    <div className={(!isNotificationActive || !isLeader) ? "opacity-50 pointer-events-none" : ""}>
                       <SelectDropdown
                         value={Number(notifHour)}
                         options={hourOptions}
@@ -176,7 +176,7 @@ const AutomationRules = () => {
                   </div>
                   <span className="text-lg font-black text-slate-400">:</span>
                   <div className="flex-1">
-                    <div className={!isNotificationActive ? "opacity-50 pointer-events-none" : ""}>
+                    <div className={(!isNotificationActive || !isLeader) ? "opacity-50 pointer-events-none" : ""}>
                       <SelectDropdown
                         value={Number(notifMinute)}
                         options={minuteOptions}
@@ -189,13 +189,15 @@ const AutomationRules = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => handleSave('notification')}
-              disabled={loadingNotif}
-              className="w-full mt-6 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition-colors cursor-pointer disabled:opacity-70 shadow-md shadow-indigo-500/20"
-            >
-              {loadingNotif ? <ButtonSpinner text="Saving..." /> : <><Save className="w-4 h-4" /> Save Configuration</>}
-            </button>
+            {isLeader && (
+              <button
+                onClick={() => handleSave('notification')}
+                disabled={loadingNotif}
+                className="w-full mt-6 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition-colors cursor-pointer disabled:opacity-70 shadow-md shadow-indigo-500/20"
+              >
+                {loadingNotif ? <ButtonSpinner text="Saving..." /> : <><Save className="w-4 h-4" /> Save Configuration</>}
+              </button>
+            )}
           </div>
         </motion.div>
 
@@ -211,7 +213,7 @@ const AutomationRules = () => {
                 <p className="text-xs font-semibold text-slate-500">Live AI Flow Scanning</p>
               </div>
             </div>
-            <Toggle enabled={isBottleneckActive} onToggle={() => setIsBottleneckActive(!isBottleneckActive)} />
+            {isLeader && <Toggle enabled={isBottleneckActive} onToggle={() => setIsBottleneckActive(!isBottleneckActive)} />}
           </div>
 
           <div className="p-6 flex-1 flex flex-col justify-between">
@@ -229,13 +231,13 @@ const AutomationRules = () => {
                       min="1"
                       value={bottleValue}
                       onChange={e => setBottleValue(e.target.value)}
-                      disabled={!isBottleneckActive}
+                      disabled={!isBottleneckActive || !isLeader}
                       className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-2.5 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-rose-500 outline-none transition-all disabled:opacity-50"
                       placeholder="Ex: 30"
                     />
                   </div>
                   <div className="flex-[3]">
-                    <div className={!isBottleneckActive ? "opacity-50 pointer-events-none" : ""}>
+                    <div className={(!isBottleneckActive || !isLeader) ? "opacity-50 pointer-events-none" : ""}>
                       <SelectDropdown
                         value={bottleType}
                         options={bottleTypeOptions}
@@ -252,13 +254,15 @@ const AutomationRules = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => handleSave('bottleneck')}
-              disabled={loadingBottle}
-              className="w-full mt-6 flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2.5 rounded-lg transition-colors cursor-pointer disabled:opacity-70 shadow-md shadow-rose-500/20"
-            >
-              {loadingBottle ? <ButtonSpinner text="Saving..." /> : <><Save className="w-4 h-4" /> Save Configuration</>}
-            </button>
+            {isLeader && (
+              <button
+                onClick={() => handleSave('bottleneck')}
+                disabled={loadingBottle}
+                className="w-full mt-6 flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2.5 rounded-lg transition-colors cursor-pointer disabled:opacity-70 shadow-md shadow-rose-500/20"
+              >
+                {loadingBottle ? <ButtonSpinner text="Saving..." /> : <><Save className="w-4 h-4" /> Save Configuration</>}
+              </button>
+            )}
           </div>
         </motion.div>
 

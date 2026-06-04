@@ -33,7 +33,7 @@ const severityClass = {
 };
 
 const BottleneckDetector = () => {
-  const { project, socket } = useOutletContext();
+  const { project, socket, isLeader } = useOutletContext();
   const [bottlenecks, setBottlenecks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
@@ -337,6 +337,7 @@ const BottleneckDetector = () => {
                 onToggle={setExpandedId}
                 onRequestResolve={handleRequestResolve}
                 onApproveResolve={handleApproveResolve}
+                isLeader={isLeader}
               />
             ))}
           </AnimatePresence>
