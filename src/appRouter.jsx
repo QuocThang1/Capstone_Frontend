@@ -17,6 +17,7 @@ import AuditLogsPage from "./pages/Admin/AuditLogsPage";
 import RolesPermissionsPage from "./pages/Admin/RolesPermissionsPage";
 import SystemSettingsPage from "./pages/Admin/SystemSettingsPage";
 import ForYou from "./pages/Project/forYou";
+import GettingStarted from "./pages/Project/gettingStarted";
 import ProjectManagement from "./pages/Project/ProjectManagement/projectManagement";
 import AcceptInvite from "./pages/acceptInvite";
 import ProjectDetailsLayout from "./layout/projectDetailsLayout";
@@ -160,6 +161,17 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
+        element: <Navigate to="getting-started" replace />
+      },
+      {
+        path: "getting-started",
+        element:
+          <ProtectedRoute allowedRoles={["admin", "user"]}>
+            <GettingStarted />
+          </ProtectedRoute>
+      },
+      {
+        path: "for-you",
         element:
           <ProtectedRoute allowedRoles={["admin", "user"]}>
             <ForYou />

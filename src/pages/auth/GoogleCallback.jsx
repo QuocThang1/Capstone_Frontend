@@ -50,6 +50,7 @@ export default function GoogleCallback() {
               avatar: account.avatar || "",
               bio: account.bio || "",
               role: account.role || "user",
+              skills: account.skills || [],
             },
           });
 

@@ -29,7 +29,9 @@ const adminRoutes = {
 };
 
 const projectRoutes = {
-  "/projects": "Dashboard",
+  "/getting-started": "Getting Started",
+  "/for-you": "For You",
+  "/management": "Project Management",
   "/overview": "Overview Dashboard",
   "/board": "Board",
   "/backlog": "Backlog",
