@@ -33,8 +33,14 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
     };
 
     const handleGenerateAI = async () => {
-        if (!aiPrompt || aiPrompt.trim().length < 10) {
-            toast.error("Please provide a more detailed description (at least 10 characters).");
+        const trimmedPrompt = aiPrompt ? aiPrompt.trim() : "";
+        if (trimmedPrompt.length < 15 || trimmedPrompt.length > 1000) {
+            toast.error("Please provide a more detailed description (15 to 1000 characters).");
+            return;
+        }
+
+        if (/^(.)\1+$/.test(trimmedPrompt) || (trimmedPrompt.length >= 15 && trimmedPrompt.indexOf(" ") === -1)) {
+            toast.error("Invalid description. Please enter actual project information.");
             return;
         }
         setIsGenerating(true);
