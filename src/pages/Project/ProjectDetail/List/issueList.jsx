@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -25,7 +25,7 @@ const rowVariants = {
 };
 
 const IssueList = () => {
-    const { project, fetchIssuesData } = useOutletContext();
+    const { project } = useOutletContext();
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -75,31 +75,9 @@ const IssueList = () => {
             }
         };
         fetchSprints();
-    }, [project?._id]);
+    }, [project]);
 
-    useEffect(() => {
-        if (!project?._id) return;
-
-        fetchFilteredIssues();
-
-        const delayTimer = setTimeout(() => {
-            fetchFilteredIssues();
-        }, 500);
-
-        return () => clearTimeout(delayTimer);
-    }, [searchTerm, filters, project]);
-
-    useEffect(() => {
-        const issueId = searchParams.get('issueId');
-        if (!issueId || !issues.length) return;
-
-        const matchedIssue = issues.find(issue => issue._id === issueId);
-        if (matchedIssue) {
-            setSelectedIssue(matchedIssue);
-        }
-    }, [issues, searchParams]);
-
-    const fetchFilteredIssues = async () => {
+    const fetchFilteredIssues = useCallback(async () => {
         setLoading(true);
         try {
             const apiFilters = {
@@ -108,7 +86,7 @@ const IssueList = () => {
                 priority: filters.priority,
                 status: filters.status,
                 assignee: filters.assignee,
-                type: filters.type // THÊM gửi type param
+                type: filters.type
             };
 
             Object.keys(apiFilters).forEach(key => {
@@ -124,7 +102,29 @@ const IssueList = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchTerm, filters, project]);
+
+    useEffect(() => {
+        if (!project?._id) return;
+
+        fetchFilteredIssues();
+
+        const delayTimer = setTimeout(() => {
+            fetchFilteredIssues();
+        }, 500);
+
+        return () => clearTimeout(delayTimer);
+    }, [fetchFilteredIssues, project?._id]);
+
+    useEffect(() => {
+        const issueId = searchParams.get('issueId');
+        if (!issueId || !issues.length) return;
+
+        const matchedIssue = issues.find(issue => issue._id === issueId);
+        if (matchedIssue) {
+            setSelectedIssue(matchedIssue);
+        }
+    }, [issues, searchParams]);
 
     const handleCloseModal = () => {
         setSelectedIssue(null);
@@ -425,7 +425,6 @@ const IssueList = () => {
                         onClose={handleCloseModal}
                         onDataUpdate={() => {
                             fetchFilteredIssues();
-                            fetchIssuesData();
                         }}
                         canEditStatus={canEditIssueStatus(selectedIssue)}
                     />

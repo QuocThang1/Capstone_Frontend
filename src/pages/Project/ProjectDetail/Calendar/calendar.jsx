@@ -7,13 +7,15 @@ import {
 } from 'date-fns';
 import { getSprintsByProjectApi } from '../../../../utils/Api/sprintApi';
 import { getProjectMembersApi } from '../../../../utils/Api/projectApi';
+import { getIssuesByProjectApi } from '../../../../utils/Api/issueApi';
 import CalendarCell from '../../../../components/projectPage/Calendar/calendarCell';
 import SelectDropdown from '../../../../components/selectDropdown';
 import Spinner from '../../../../components/spinner';
 
 const Calendar = () => {
-    const { project, issues } = useOutletContext();
+    const { project } = useOutletContext();
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [issues, setIssues] = useState([]);
     const [sprints, setSprints] = useState([]);
     const [members, setMembers] = useState([]);
     const [selectedAssignees, setSelectedAssignees] = useState([]); // array of user IDs
@@ -26,9 +28,10 @@ const Calendar = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const [sprintsRes, membersRes] = await Promise.all([
+                const [sprintsRes, membersRes, issuesRes] = await Promise.all([
                     getSprintsByProjectApi(project._id),
-                    getProjectMembersApi(project._id)
+                    getProjectMembersApi(project._id),
+                    getIssuesByProjectApi(project._id)
                 ]);
 
                 if (sprintsRes?.EC === 0) {
@@ -36,6 +39,9 @@ const Calendar = () => {
                 }
                 if (membersRes?.EC === 0) {
                     setMembers(membersRes.data || []);
+                }
+                if (issuesRes?.EC === 0) {
+                    setIssues(issuesRes.data || []);
                 }
             } catch (err) {
                 console.error("Error fetching calendar data", err);

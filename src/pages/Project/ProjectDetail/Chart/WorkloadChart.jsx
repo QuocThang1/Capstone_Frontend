@@ -20,32 +20,34 @@ ChartJS.register(
     Legend
 );
 
+const generateColor = (index, total) => {
+    const colors = [
+        'rgba(156, 163, 175, 0.8)', // Slate
+        'rgba(59, 130, 246, 0.8)', // Blue
+        'rgba(234, 179, 8, 0.8)', // Yellow
+        'rgba(249, 115, 22, 0.8)', // Orange
+        'rgba(139, 92, 246, 0.8)', // Violet
+    ];
+    
+    // Ensure the last column always gets Emerald (Done-like color)
+    if (index === total - 1 && total > 1) return 'rgba(16, 185, 129, 0.8)';
+    
+    return colors[index % colors.length];
+};
+
 const WorkloadChart = ({ labels, datasets }) => {
     const data = {
         labels: labels,
-        datasets: [
-            {
-                label: 'To Do',
-                data: datasets.todo,
-                backgroundColor: 'rgba(156, 163, 175, 0.8)', // Slate 400
-                borderColor: 'rgb(156, 163, 175)',
+        datasets: Array.isArray(datasets) ? datasets.map((ds, index) => {
+            const bgColor = generateColor(index, datasets.length);
+            return {
+                label: ds.label,
+                data: ds.data,
+                backgroundColor: bgColor,
+                borderColor: bgColor.replace('0.8)', '1)'),
                 borderWidth: 1
-            },
-            {
-                label: 'In Progress',
-                data: datasets.inprogress,
-                backgroundColor: 'rgba(234, 179, 8, 0.8)', // Yellow 500
-                borderColor: 'rgb(234, 179, 8)',
-                borderWidth: 1
-            },
-            {
-                label: 'Done',
-                data: datasets.done,
-                backgroundColor: 'rgba(16, 185, 129, 0.8)', // Emerald 500
-                borderColor: 'rgb(16, 185, 129)',
-                borderWidth: 1
-            }
-        ]
+            };
+        }) : []
     };
 
     const options = {

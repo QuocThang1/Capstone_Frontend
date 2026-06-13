@@ -5,6 +5,7 @@ import { Users, TrendingUp, CheckCircle2 } from "lucide-react";
 import Spinner from "../../../../components/spinner";
 import MemberIssuesModal from "./MemberIssuesModal";
 import { getBottlenecksByProjectApi } from "../../../../utils/Api/bottleneckApi";
+import { getIssuesByProjectApi } from "../../../../utils/Api/issueApi";
 import { AlertTriangle } from "lucide-react";
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } };
@@ -28,25 +29,33 @@ const generateAvatarColor = (id) => {
 };
 
 const TeamHealth = () => {
-  const { project, issues } = useOutletContext();
+  const { project } = useOutletContext();
+  const [issues, setIssues] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [bottlenecks, setBottlenecks] = useState([]);
-  const [loadingStats, setLoadingStats] = useState(false);
+  const [loadingStats, setLoadingStats] = useState(true);
 
   useEffect(() => {
     if (project?._id) {
       setLoadingStats(true);
-      getBottlenecksByProjectApi(project._id)
-        .then(res => {
-          if (res && res.EC === 0) {
-            setBottlenecks(res.data || []);
-          }
+      Promise.all([
+        getBottlenecksByProjectApi(project._id),
+        getIssuesByProjectApi(project._id)
+      ])
+        .then(([botRes, issRes]) => {
+          if (botRes?.EC === 0) setBottlenecks(botRes.data || []);
+          if (issRes?.EC === 0) setIssues(issRes.data || []);
         })
         .finally(() => setLoadingStats(false));
     }
-  }, [project?._id]);
+  }, [project]);
 
-  if (!project || !issues) {
+  const selectedMemberIssues = useMemo(() => {
+    if (!selectedMember || !issues) return [];
+    return issues.filter(issue => issue.assigneeId?._id === selectedMember.id && !issue.parentId);
+  }, [selectedMember, issues]);
+
+  if (!project || loadingStats) {
     return <div className="flex items-center justify-center h-[calc(100vh-8rem)]"><Spinner /></div>;
   }
 
@@ -81,11 +90,6 @@ const TeamHealth = () => {
     : 0;
 
   const totalUnresolvedBottlenecks = bottlenecks.filter(b => b.status !== 'resolved').length;
-
-  const selectedMemberIssues = useMemo(() => {
-    if (!selectedMember || !issues) return [];
-    return issues.filter(issue => issue.assigneeId?._id === selectedMember.id && !issue.parentId);
-  }, [selectedMember, issues]);
 
   return (
     <>

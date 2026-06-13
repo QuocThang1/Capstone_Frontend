@@ -16,7 +16,6 @@ const ProjectNavbar = ({
   projectId,
   projectTimezone,
   fetchProjectData,
-  fetchIssuesData,
   onAddMember,
   onEditBoard,
   onEditIssueTypes,
@@ -78,7 +77,6 @@ const ProjectNavbar = ({
       if (res?.EC === 0) {
         toast.success(res.EM || 'Timezone updated');
         fetchProjectData();
-        fetchIssuesData();
       } else {
         toast.error(res?.EM || 'Failed to update timezone');
       }
