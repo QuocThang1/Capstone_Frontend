@@ -31,6 +31,7 @@ import RealTimeEventLog from "./pages/Project/ProjectDetail/EventLog/RealTimeEve
 import AutomationRules from "./pages/Project/ProjectDetail/AutomationRules/automationRules";
 import OverviewDashboard from "./pages/Project/ProjectDetail/Summary/OverviewDashboard";
 import ChartPage from "./pages/Project/ProjectDetail/Chart/chartPage";
+import Calendar from "./pages/Project/ProjectDetail/Calendar/calendar";
 import GitHubCallback from "./pages/auth/GitHubCallback";
 import GoogleCallback from "./pages/auth/GoogleCallback";
 
@@ -230,6 +231,13 @@ const router = createBrowserRouter([
             element:
               <ProtectedRoute allowedRoles={["admin", "user"]}>
                 <ChartPage />
+              </ProtectedRoute>
+          },
+          {
+            path: "calendar",
+            element:
+              <ProtectedRoute allowedRoles={["admin", "user"]}>
+                <Calendar />
               </ProtectedRoute>
           },
           {

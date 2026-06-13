@@ -148,7 +148,7 @@ const ProjectDetailsLayout = () => {
                         starLoading={starLoading}
                         isLeader={isLeader}
                     />
-                    <main className="flex-1 overflow-y-auto p-4 lg:p-4 relative">
+                    <main className="flex-1 overflow-y-auto p-4 lg:p-4 pb-10 lg:pb-12 relative">
                         <Outlet context={{ project, setProject, issues, setIssues, fetchProjectData, fetchIssuesData, socket, isLeader }} />
                     </main>
                     <FloatingReviewBanner project={project} fetchProjectData={fetchProjectData} />

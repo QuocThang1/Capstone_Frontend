@@ -246,7 +246,7 @@ export const ChangePasswordModal = ({ isOpen, onClose, isInsideOverlay = false }
       setIsSubmitting(true);
 
       try {
-        const res = await sendOtpApi(auth.user.email);
+        const res = await sendOtpApi(auth.user.email, 'change_password');
 
         if (res.EC === 0) {
           toast.success(res.EM || "OTP sent to your email.");
