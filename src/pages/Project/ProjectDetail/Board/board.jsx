@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, closestCorners } from '@dnd-kit/core';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { GitBranch } from 'lucide-react';
 
 import { getSprintsByProjectApi, completeSprintApi } from '../../../../utils/Api/sprintApi';
-import { updateIssueApi } from '../../../../utils/Api/issueApi';
+import { updateIssueApi, getIssuesByProjectApi } from '../../../../utils/Api/issueApi';
 import { updateBoardColumnsApi } from '../../../../utils/Api/projectApi';
 
 import Spinner from '../../../../components/Spinner';
@@ -29,8 +29,9 @@ const itemVariants = {
 const Board = () => {
     const context = useOutletContext();
     const navigate = useNavigate();
-    const { project, setProject, issues = [], setIssues, fetchIssuesData, isLeader } = context || {};
+    const { project, setProject, isLeader } = context || {};
 
+    const [issues, setIssues] = useState([]);
     const [activeSprint, setActiveSprint] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isCompleting, setIsCompleting] = useState(false);
@@ -46,25 +47,39 @@ const Board = () => {
         activationConstraint: { distance: 10 },
     }));
 
+    const fetchIssuesData = useCallback(async () => {
+        if (!project?._id) return;
+        try {
+            const res = await getIssuesByProjectApi(project._id);
+            if (res?.EC === 0) setIssues(res.data || []);
+        } catch (error) {
+            toast.error(error.message || "Failed to fetch issues.");
+        }
+    }, [project]);
+
+    const findActiveSprint = useCallback(async () => {
+        if (!project?._id) return;
+        try {
+            const sprintsRes = await getSprintsByProjectApi(project._id);
+            const currentActiveSprint = sprintsRes.data.find(s => s.status === 'active');
+            setActiveSprint(currentActiveSprint || null);
+        } catch (error) {
+            toast.error(error.response?.data?.EM || "Failed to fetch sprints.");
+        }
+    }, [project]);
+
     useEffect(() => {
-        const findActiveSprint = async () => {
-            if (!project?._id) {
-                setLoading(false);
-                return;
-            }
+        const fetchInitialData = async () => {
             setLoading(true);
-            try {
-                const sprintsRes = await getSprintsByProjectApi(project._id);
-                const currentActiveSprint = sprintsRes.data.find(s => s.status === 'active');
-                setActiveSprint(currentActiveSprint || null);
-            } catch (error) {
-                toast.error(error.response?.data?.EM || "Failed to fetch sprints.");
-            } finally {
-                setLoading(false);
-            }
+            await Promise.all([findActiveSprint(), fetchIssuesData()]);
+            setLoading(false);
         };
-        findActiveSprint();
-    }, [project?._id]);
+        if (project) {
+            fetchInitialData();
+        } else {
+            setLoading(false);
+        }
+    }, [findActiveSprint, fetchIssuesData, project]);
 
     useEffect(() => {
         if (selectedIssue) {

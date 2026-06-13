@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 
 import { getSprintsByProjectApi, createSprintApi, updateSprintApi, deleteSprintApi, startSprintApi, completeSprintApi } from '../../../../utils/Api/sprintApi';
-import { deleteIssueApi, updateIssueApi } from '../../../../utils/Api/issueApi';
+import { deleteIssueApi, updateIssueApi, getIssuesByProjectApi } from '../../../../utils/Api/issueApi';
 
 import Spinner from '../../../../components/spinner';
 import SprintContainer from '../../../../components/projectPage/Backlog/sprintContainer';
@@ -30,8 +30,9 @@ const itemVariants = {
 
 const Backlog = () => {
     const context = useOutletContext();
-    const { project, issues = [], setIssues, fetchIssuesData, isLeader } = context || {};
+    const { project, isLeader } = context || {};
 
+    const [issues, setIssues] = useState([]);
     const [sprints, setSprints] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
@@ -59,6 +60,16 @@ const Backlog = () => {
 
     const getSprintId = (issue) => issue?.sprintId?._id || issue?.sprintId || null;
 
+    const fetchIssuesData = useCallback(async () => {
+        if (!project?._id) return;
+        try {
+            const res = await getIssuesByProjectApi(project._id);
+            if (res?.EC === 0) setIssues(res.data || []);
+        } catch (error) {
+            toast.error(error.message || "Failed to fetch issues.");
+        }
+    }, [project]);
+
     const fetchSprints = useCallback(async () => {
         if (!project?._id) return;
         try {
@@ -66,15 +77,19 @@ const Backlog = () => {
             if (sprintsRes?.EC === 0) setSprints(sprintsRes.data);
         } catch (error) {
             toast.error(error.message || "Failed to fetch sprints.");
-        } finally {
-            setLoading(false);
         }
-    }, [project?._id]);
+    }, [project]);
 
     useEffect(() => {
-        setLoading(true);
-        fetchSprints();
-    }, [fetchSprints]);
+        const fetchInitialData = async () => {
+            setLoading(true);
+            await Promise.all([fetchSprints(), fetchIssuesData()]);
+            setLoading(false);
+        };
+        if (project) {
+            fetchInitialData();
+        }
+    }, [fetchSprints, fetchIssuesData, project]);
 
     useEffect(() => {
         if (selectedIssue) {

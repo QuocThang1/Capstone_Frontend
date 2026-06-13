@@ -1,6 +1,9 @@
+import { useState, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { DownloadCloud } from "lucide-react";
 import { motion } from "framer-motion";
+import { getIssuesByProjectApi } from "../../../../utils/Api/issueApi";
+import Spinner from "../../../../components/spinner";
 import ProgressScore from "../../../../components/projectPage/Summary/ProgressScore";
 import StatusOverview from "../../../../components/projectPage/Summary/StatusOverview";
 import TypesOfWork from "../../../../components/projectPage/Summary/TypesOfWork";
@@ -29,10 +32,31 @@ const itemVariants = {
 };
 
 const OverviewDashboard = () => {
-  const { project, issues, socket } = useOutletContext();
+  const { project, socket } = useOutletContext();
   const navigate = useNavigate();
+  const [issues, setIssues] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  if (!project || !issues) return null;
+  useEffect(() => {
+    const fetchIssues = async () => {
+      if (!project?._id) return;
+      setLoading(true);
+      try {
+        const res = await getIssuesByProjectApi(project._id);
+        if (res?.EC === 0) {
+          setIssues(res.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching issues in Overview:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchIssues();
+  }, [project]);
+
+  if (!project) return null;
+  if (loading) return <div className="flex justify-center items-center h-[calc(100vh-200px)]"><Spinner /></div>;
 
   return (
     <motion.div
