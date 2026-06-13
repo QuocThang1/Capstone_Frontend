@@ -33,6 +33,7 @@ const projectRoutes = {
   "/for-you": "For You",
   "/management": "Project Management",
   "/overview": "Overview Dashboard",
+  "/calendar": "Calendar",
   "/board": "Board",
   "/backlog": "Backlog",
   "/process-flow": "Process Flow",
