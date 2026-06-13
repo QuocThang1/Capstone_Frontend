@@ -73,6 +73,15 @@ export default function ProfileForm({ form, errors, onChange }) {
         />
       </InputField>
 
+      <InputField label="Skills (comma separated)">
+        <Input
+          name="skills"
+          value={form.skills}
+          onChange={onChange}
+          placeholder="React, Node.js, Design"
+        />
+      </InputField>
+
       <InputField label="Email">
         <div className="relative">
           <Input

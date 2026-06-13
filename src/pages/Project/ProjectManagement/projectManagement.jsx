@@ -11,9 +11,21 @@ import { Search, MoreHorizontal, Edit, Trash2, Star } from 'lucide-react';
 import { getStarredProjectsApi, toggleStarProjectApi } from '../../../utils/Api/accountApi';
 import { toast } from 'react-toastify';
 import { cn } from '../../../lib/utils';
+import { AuthContext } from '../../../context/auth.context';
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.1 } }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 const ProjectManagement = () => {
     const navigate = useNavigate();
+    const { auth } = useContext(AuthContext);
 
     // Get state and functions from ProjectContext
     const {
@@ -175,19 +187,23 @@ const ProjectManagement = () => {
     return (
         <div className="p-4 sm:p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 min-h-full text-slate-900 dark:text-slate-50 transition-colors duration-300">
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Projects</h1>
+                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex justify-between items-center mb-8">
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                        <span className="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400 p-2 rounded-xl">
+                            <Star className="w-6 h-6 fill-current" />
+                        </span>
+                        Projects
+                    </h1>
                     <button
                         onClick={() => setCreateModalOpen(true)}
                         className="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 dark:bg-indigo-500/40 dark:text-indigo-100 rounded-xl shadow-sm dark:shadow-indigo-500/10 hover:bg-indigo-700 dark:hover:bg-indigo-500/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 cursor-pointer transition-all duration-200"
                     >
                         Create project
                     </button>
-                </div>
+                </motion.div>
 
                 {/* Search */}
-                <div className="mb-6">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }} className="mb-6">
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <Search className="w-5 h-5 text-slate-400 dark:text-slate-500" />
@@ -200,29 +216,39 @@ const ProjectManagement = () => {
                             className="w-full max-w-sm pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
                         />
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Projects Table */}
-                <div className="glass-card rounded-2xl overflow-hidden">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="bg-white dark:bg-slate-900/50 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none">
                     {loading ? (
                         <div className="flex justify-center items-center h-64"><Spinner /></div>
                     ) : (
                         <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
                             <thead className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
                                 <tr>
-                                    <th scope="col" className="px-6 py-4 w-12"><span className="sr-only">Star</span></th>
+                                    <th scope="col" className="px-6 py-4 w-12 rounded-tl-2xl"><span className="sr-only">Star</span></th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Name</th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Key</th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Lead</th>
-                                    <th scope="col" className="relative px-6 py-4"><span className="sr-only">Actions</span></th>
+                                    <th scope="col" className="relative px-6 py-4 rounded-tr-2xl"><span className="sr-only">Actions</span></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                                {sortedProjects.length > 0 ? sortedProjects.map((project) => {
+                                {sortedProjects.length > 0 ? sortedProjects.map((project, index) => {
                                     const isStarred = starredProjects.includes(project._id);
+                                    const isLeader = project.members?.some(m => {
+                                        const account = m.accountId || {};
+                                        if (account.email && auth?.user?.email && account.email === auth.user.email) return m.role === 'leader';
+                                        return String(account._id || account) === String(auth?.user?.id || "") && m.role === 'leader';
+                                    });
+
+                                    const isLastRow = index === sortedProjects.length - 1;
+                                    // Hiển thị dropdown hướng lên trên cho 2 dòng cuối để tránh bị che khuất
+                                    const showUpward = index >= sortedProjects.length - 2 && sortedProjects.length > 2;
+
                                     return (
-                                        <tr key={project._id} onClick={() => navigate(`/projects/${project._id}`)} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all duration-200 cursor-pointer">
-                                            <td className="px-6 py-4">
+                                        <tr key={project._id} onClick={() => navigate(`/projects/${project._id}`)} className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all duration-300 cursor-pointer group">
+                                            <td className={cn("px-6 py-4", isLastRow && "rounded-bl-2xl")}>
                                                 <button
                                                     onClick={(e) => handleToggleStar(e, project._id)}
                                                     disabled={starLoading[project._id]}
@@ -244,27 +270,39 @@ const ProjectManagement = () => {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-600 dark:text-slate-400">{project.key}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{project.key}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">
-                                                {project.members.find(m => m.role === 'leader')?.accountId?.fullName || project.members[0]?.accountId?.fullName || 'N/A'}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative">
-                                                <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(activeDropdown === project._id ? null : project._id); }} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all duration-200">
-                                                    <MoreHorizontal className="w-5 h-5" />
-                                                </button>
-                                                {activeDropdown === project._id && (
-                                                    <div ref={dropdownRef} className="origin-top-right absolute right-0 mt-2 w-40 rounded-lg shadow-lg glass-card ring-1 ring-black dark:ring-white ring-opacity-5 dark:ring-opacity-10 focus:outline-none z-10">
-                                                        <div className="py-1">
-                                                            <button onClick={(e) => { e.stopPropagation(); handleOpenEditModal(project); }} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 cursor-pointer transition-all duration-200">
-                                                                <Edit className="w-4 h-4" />
-                                                                <span>Edit</span>
-                                                            </button>
-                                                            <button onClick={(e) => { e.stopPropagation(); handleOpenDeleteModal(project); }} className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 cursor-pointer transition-all duration-200">
-                                                                <Trash2 className="w-4 h-4" />
-                                                                <span>Delete</span>
-                                                            </button>
-                                                        </div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-500 dark:text-slate-400">
+                                                        {(project.members.find(m => m.role === 'leader')?.accountId?.fullName || project.members[0]?.accountId?.fullName || 'N')?.charAt(0).toUpperCase()}
                                                     </div>
+                                                    <span>{project.members.find(m => m.role === 'leader')?.accountId?.fullName || project.members[0]?.accountId?.fullName || 'N/A'}</span>
+                                                </div>
+                                            </td>
+                                            <td className={cn("px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative", isLastRow && "rounded-br-2xl")}>
+                                                {isLeader && (
+                                                    <>
+                                                        <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(activeDropdown === project._id ? null : project._id); }} className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                            <MoreHorizontal className="w-5 h-5" />
+                                                        </button>
+                                                        {activeDropdown === project._id && (
+                                                            <div ref={dropdownRef} className={cn(
+                                                                "absolute right-6 w-48 rounded-xl shadow-2xl bg-white dark:bg-slate-800 ring-1 ring-black ring-opacity-5 dark:ring-white/10 focus:outline-none z-10 overflow-hidden",
+                                                                showUpward ? "bottom-full mb-1 origin-bottom-right" : "top-10 origin-top-right mt-0"
+                                                            )}>
+                                                                <div className="py-1">
+                                                                    <button onClick={(e) => { e.stopPropagation(); handleOpenEditModal(project); }} className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer transition-all duration-200">
+                                                                        <Edit className="w-4 h-4 text-slate-400" />
+                                                                        <span>Edit Project</span>
+                                                                    </button>
+                                                                    <button onClick={(e) => { e.stopPropagation(); handleOpenDeleteModal(project); }} className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 cursor-pointer transition-all duration-200">
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                        <span>Delete Project</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </>
                                                 )}
                                             </td>
                                         </tr>
@@ -275,7 +313,7 @@ const ProjectManagement = () => {
                             </tbody>
                         </table>
                     )}
-                </div>
+                </motion.div>
 
                 {/* Pagination */}
                 {pagination.totalPages > 1 && (

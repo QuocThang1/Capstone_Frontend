@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams, Outlet } from 'react-router-dom';
+import { AuthContext } from '../context/auth.context';
 import { getProjectByIdApi } from '../utils/Api/projectApi';
 import { getIssuesByProjectApi } from '../utils/Api/issueApi';
 import { getStarredProjectsApi, toggleStarProjectApi } from '../utils/Api/accountApi';
@@ -11,9 +12,12 @@ import ProjectNavbar from '../components/ProjectNavbar';
 import AddMemberModal from '../pages/Project/ProjectDetail/addMemberModal';
 import EditBoardColumnsModal from '../pages/Project/ProjectDetail/editboardColumnModal';
 import EditIssueTypesModal from '../pages/Project/ProjectDetail/editIssueTypesModal';
+import FloatingReviewBanner from '../components/projectPage/FloatingReviewBanner';
 
 const ProjectDetailsLayout = () => {
     const { projectId } = useParams();
+    const { auth } = useContext(AuthContext);
+    const currentUserId = auth?.user?.id;
 
     const [project, setProject] = useState(null);
     const [issues, setIssues] = useState([]);
@@ -114,6 +118,18 @@ const ProjectDetailsLayout = () => {
         return <div className="flex items-center justify-center h-screen text-red-500">{error}</div>;
     }
 
+    const isLeader = project?.members?.some(m => {
+        const account = m.accountId || {};
+
+        if (account.email && auth?.user?.email && account.email === auth.user.email) {
+            return m.role === 'leader';
+        }
+
+        const memberId = String(account._id || account);
+        const currId = String(currentUserId || "");
+        return memberId === currId && m.role === 'leader';
+    }) || false;
+
     return (
         <>
             {project && (
@@ -130,10 +146,12 @@ const ProjectDetailsLayout = () => {
                         isStarred={isStarred}
                         onToggleStar={handleToggleStar}
                         starLoading={starLoading}
+                        isLeader={isLeader}
                     />
                     <main className="flex-1 overflow-y-auto p-4 lg:p-4 relative">
-                        <Outlet context={{ project, setProject, issues, setIssues, fetchProjectData, fetchIssuesData, socket }} />
+                        <Outlet context={{ project, setProject, issues, setIssues, fetchProjectData, fetchIssuesData, socket, isLeader }} />
                     </main>
+                    <FloatingReviewBanner project={project} fetchProjectData={fetchProjectData} />
                 </div>
             )}
 

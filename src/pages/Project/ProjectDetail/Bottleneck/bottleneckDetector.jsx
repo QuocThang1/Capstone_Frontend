@@ -13,6 +13,7 @@ import {
   generateIntelligenceDetectReportApi
 } from '../../../../utils/Api/bottleneckApi';
 import BottleneckCard from '../../../../components/projectPage/Bottleneck/bottleneckCard';
+import SelectDropdown from '../../../../components/selectDropdown';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -32,7 +33,7 @@ const severityClass = {
 };
 
 const BottleneckDetector = () => {
-  const { project, socket } = useOutletContext();
+  const { project, socket, isLeader } = useOutletContext();
   const [bottlenecks, setBottlenecks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
@@ -40,10 +41,20 @@ const BottleneckDetector = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiResult, setAiResult] = useState(null);
 
+  // States for filters
+  const [filterLevel, setFilterLevel] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterAssignee, setFilterAssignee] = useState("");
+
   const fetchBottlenecks = async () => {
     setLoading(true);
     try {
-      const res = await getBottlenecksByProjectApi(project._id);
+      const activeFilters = {};
+      if (filterLevel) activeFilters.level = filterLevel;
+      if (filterStatus) activeFilters.status = filterStatus;
+      if (filterAssignee) activeFilters.assigneeId = filterAssignee;
+
+      const res = await getBottlenecksByProjectApi(project._id, activeFilters);
       if (res && res.EC === 0) {
         setBottlenecks(res.data);
       }
@@ -56,7 +67,7 @@ const BottleneckDetector = () => {
 
   useEffect(() => {
     if (project?._id) fetchBottlenecks();
-  }, [project?._id]);
+  }, [project?._id, filterLevel, filterStatus, filterAssignee]);
 
   useEffect(() => {
     if (!socket) return;
@@ -134,7 +145,7 @@ const BottleneckDetector = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="max-w-6xl mx-auto space-y-6"
+      className="max-w-6xl mx-auto space-y-6 pb-20"
     >
       <motion.header variants={itemVariants} className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
@@ -232,6 +243,78 @@ const BottleneckDetector = () => {
         )}
       </motion.section>
 
+
+      {/* Filter Bar */}
+      <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
+        <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200 shrink-0">
+          <Activity className="w-4 h-4 text-indigo-500" />
+          Filters:
+        </div>
+
+        <div className="flex flex-wrap gap-3 items-center flex-1">
+          <div className="w-48">
+            <SelectDropdown
+              value={filterLevel}
+              options={[
+                { value: "", label: "All Levels" },
+                { value: "Highest", label: "Highest" },
+                { value: "High", label: "High" },
+                { value: "Medium", label: "Medium" },
+                { value: "Low", label: "Low" },
+                { value: "Lowest", label: "Lowest" },
+              ]}
+              onChange={setFilterLevel}
+              placeholder="Level"
+              size="sm"
+            />
+          </div>
+
+          <div className="w-48">
+            <SelectDropdown
+              value={filterStatus}
+              options={[
+                { value: "", label: "All Statuses" },
+                { value: "unresolved", label: "Unresolved" },
+                { value: "pending", label: "Pending" },
+                { value: "resolved", label: "Resolved" },
+              ]}
+              onChange={setFilterStatus}
+              placeholder="Status"
+              size="sm"
+            />
+          </div>
+
+          <div className="w-56">
+            <SelectDropdown
+              value={filterAssignee}
+              options={[
+                { value: "", label: "All Assignees" },
+                ...(project?.members || []).map(m => ({
+                  value: m.accountId._id,
+                  label: m.accountId.fullName
+                }))
+              ]}
+              onChange={setFilterAssignee}
+              placeholder="Assignee"
+              size="sm"
+            />
+          </div>
+
+          {(filterLevel || filterStatus || filterAssignee) && (
+            <button
+              onClick={() => {
+                setFilterLevel("");
+                setFilterStatus("");
+                setFilterAssignee("");
+              }}
+              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer"
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
+      </motion.div>
+
       {loading ? (
         <motion.div variants={itemVariants} className="flex justify-center items-center py-20">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
@@ -254,6 +337,7 @@ const BottleneckDetector = () => {
                 onToggle={setExpandedId}
                 onRequestResolve={handleRequestResolve}
                 onApproveResolve={handleApproveResolve}
+                isLeader={isLeader}
               />
             ))}
           </AnimatePresence>

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context.jsx";
 
 
@@ -9,8 +9,12 @@ import { AuthContext } from "../context/auth.context.jsx";
  */
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const { auth } = useContext(AuthContext);
+    const location = useLocation();
 
     if (!auth.isAuthenticated) {
+        if (location.pathname.includes('/invite')) {
+            return <Navigate to="/" state={{ from: location.pathname + location.search, openLogin: true }} replace />;
+        }
         return <Navigate to="/" replace />;
     }
 

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, LayoutDashboard, Activity, GitBranch, Zap,
   Users, Shield, ClipboardList, ArrowLeftRight, Settings2,
-  LogOut, Plus, ArrowLeft, FolderOpen
+  LogOut, Plus, ArrowLeft, FolderOpen, BookOpen
 } from "lucide-react";
 import { useContext, useState } from "react";
 import { cn } from "../../lib/utils";
@@ -192,7 +192,8 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
         animate={{ width: isCollapsed ? 64 : 256 }}
         transition={{ type: "spring", stiffness: 360, damping: 36 }}
         className={cn(
-          "relative bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col flex-shrink-0 z-40 overflow-x-hidden overflow-y-auto group"
+          "relative bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col flex-shrink-0 z-40 overflow-x-hidden overflow-y-auto group",
+          isCreateModalOpen && "z-[60]"
         )}
       >
         {/* Logo Section Header */}
@@ -264,12 +265,21 @@ const UserSidebar = ({ isCollapsed = false, setIsCollapsed = () => { } }) => {
           isCollapsed ? "px-2 py-4 flex flex-col gap-2 items-center" : "px-2 py-4 space-y-4"
         )}>
 
+          {/* Getting Started */}
+          <NavItem
+            to="/projects/getting-started"
+            icon={BookOpen}
+            label="Getting Started"
+            isActive={isActiveRoute("/projects/getting-started") || isActiveRoute("/projects")}
+            isCollapsed={isCollapsed}
+          />
+
           {/* For You */}
           <NavItem
-            to="/projects"
+            to="/projects/for-you"
             icon={Sparkles}
             label="For You"
-            isActive={isActiveRoute("/projects")}
+            isActive={isActiveRoute("/projects/for-you")}
             isCollapsed={isCollapsed}
           />
 

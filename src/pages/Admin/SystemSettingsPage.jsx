@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Alert, App, Button, Input, Select, Spin, Switch } from "antd";
 import SectionCard from "@/components/adminPage/SectionCard";
+import SelectDropdown from "@/components/selectDropdown";
 import {
   getSystemSettingsApi,
   sendSystemSettingsTestEmailApi,
@@ -28,12 +29,7 @@ const defaultSettings = {
   lockAccountDurationMinutes: 15,
   sessionTimeoutMinutes: 60,
   requireStrongPassword: true,
-  enableBottleneckDetection: true,
-  warningThresholdHours: 24,
-  criticalThresholdHours: 48,
-  autoDetectSchedule: "Every 6 hours",
-  enableBottleneckNotification: true,
-  enableReportGeneration: true,
+  draftCleanupTime: "03:00",
   maintenanceMode: false,
   maintenanceMessage: "TASKA is currently under maintenance. Please try again later.",
   allowAdminAccessDuringMaintenance: true,
@@ -96,8 +92,7 @@ export default function SystemSettingsPage() {
     if (settings.maxLoginAttempts < 1 || settings.maxLoginAttempts > 20) return "Max login attempts must be between 1 and 20";
     if (settings.lockAccountDurationMinutes < 1 || settings.lockAccountDurationMinutes > 1440) return "Lock duration must be between 1 and 1440 minutes";
     if (settings.sessionTimeoutMinutes < 5 || settings.sessionTimeoutMinutes > 1440) return "Session timeout must be between 5 and 1440 minutes";
-    if (settings.warningThresholdHours < 1) return "Warning threshold must be at least 1 hour";
-    if (settings.criticalThresholdHours < settings.warningThresholdHours) return "Critical threshold must be greater than or equal to warning threshold";
+    if (settings.draftCleanupTime && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(settings.draftCleanupTime)) return "Draft cleanup time must be in HH:MM format";
     return null;
   };
 
@@ -225,18 +220,41 @@ export default function SystemSettingsPage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Bottleneck Detection" description="Configure platform defaults for workflow bottleneck monitoring">
+        <SectionCard title="System Automation" description="Configure platform background tasks and automatic cleanup" className="overflow-visible">
           <div className="space-y-5">
-            <SettingSwitch title="Enable Bottleneck Detection" checked={settings.enableBottleneckDetection} onChange={(value) => updateSetting("enableBottleneckDetection", value)} />
-            <div className="grid gap-5 sm:grid-cols-3">
-              <Field label="Warning Threshold (hours)"><Input type="number" min={1} value={settings.warningThresholdHours} onChange={(e) => updateSetting("warningThresholdHours", Number(e.target.value))} /></Field>
-              <Field label="Critical Threshold (hours)"><Input type="number" min={1} value={settings.criticalThresholdHours} onChange={(e) => updateSetting("criticalThresholdHours", Number(e.target.value))} /></Field>
-              <Field label="Auto Detect Schedule">
-                <Select className="w-full" value={settings.autoDetectSchedule} onChange={(value) => updateSetting("autoDetectSchedule", value)} options={[{ value: "Every hour" }, { value: "Every 6 hours" }, { value: "Every 12 hours" }, { value: "Daily" }]} />
-              </Field>
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-slate-900 dark:text-white">AI Draft Cleanup</h4>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field label="Cleanup Time (HH:MM)">
+                  <div className="flex items-center gap-2">
+                    <SelectDropdown
+                      value={settings.draftCleanupTime?.split(":")[0] || "03"}
+                      onChange={(val) => updateSetting("draftCleanupTime", `${val}:${settings.draftCleanupTime?.split(":")[1] || "00"}`)}
+                      options={Array.from({ length: 24 }, (_, i) => {
+                        const h = i.toString().padStart(2, "0");
+                        return { label: h, value: h };
+                      })}
+                      placeholder="HH"
+                      width="w-24"
+                    />
+                    <span className="font-bold text-slate-500 dark:text-slate-400">:</span>
+                    <SelectDropdown
+                      value={settings.draftCleanupTime?.split(":")[1] || "00"}
+                      onChange={(val) => updateSetting("draftCleanupTime", `${settings.draftCleanupTime?.split(":")[0] || "03"}:${val}`)}
+                      options={Array.from({ length: 60 }, (_, i) => {
+                        const m = i.toString().padStart(2, "0");
+                        return { label: m, value: m };
+                      })}
+                      placeholder="MM"
+                      width="w-24"
+                    />
+                  </div>
+                </Field>
+                <div className="flex items-center text-sm text-slate-500 dark:text-slate-400 self-end pb-2">
+                  * Runs based on the system's default time zone: {settings.defaultTimezone || "Asia/Ho_Chi_Minh"}
+                </div>
+              </div>
             </div>
-            <SettingSwitch title="Enable Bottleneck Notifications" checked={settings.enableBottleneckNotification} onChange={(value) => updateSetting("enableBottleneckNotification", value)} />
-            <SettingSwitch title="Enable Report Generation" checked={settings.enableReportGeneration} onChange={(value) => updateSetting("enableReportGeneration", value)} />
           </div>
         </SectionCard>
 

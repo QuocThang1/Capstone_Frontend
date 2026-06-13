@@ -8,6 +8,7 @@ import {
 } from '../utils/Api/projectApi';
 import { AuthContext } from './auth.context';
 import { ProjectContext } from './project.context';
+import socket from '../utils/socket';
 
 export const ProjectProvider = ({ children }) => {
     const { auth } = useContext(AuthContext);
@@ -25,7 +26,7 @@ export const ProjectProvider = ({ children }) => {
             if (res && res.EC === 0) {
                 setAllProjects(res.data.projects);
                 setPagination({
-                    page: res.data.currentPage,
+                    page: res.data.page,
                     totalPages: res.data.totalPages,
                 });
             } else {
@@ -42,6 +43,14 @@ export const ProjectProvider = ({ children }) => {
     useEffect(() => {
         if (auth.isAuthenticated) {
             fetchAllProjects();
+
+            socket.on("project_deleted", (data) => {
+                fetchAllProjects();
+            });
+
+            return () => {
+                socket.off("project_deleted");
+            };
         } else {
             setAllProjects([]);
             setPagination({ page: 1, totalPages: 1 });
@@ -54,7 +63,6 @@ export const ProjectProvider = ({ children }) => {
             const res = await createProjectApi(projectData);
             if (res && res.EC === 0) {
                 toast.success("Project created successfully!");
-                fetchAllProjects();
                 return res.data;
             } else {
                 toast.error(res.EM || "Failed to create project.");
@@ -74,7 +82,6 @@ export const ProjectProvider = ({ children }) => {
             const res = await updateProjectApi(projectId, projectData);
             if (res && res.EC === 0) {
                 toast.success("Project updated successfully!");
-                fetchAllProjects();
                 return res.data;
             } else {
                 toast.error(res.EM || "Failed to update project.");
@@ -94,7 +101,6 @@ export const ProjectProvider = ({ children }) => {
             const res = await deleteProjectApi(projectId);
             if (res && res.EC === 0) {
                 toast.success("Project deleted successfully!");
-                fetchAllProjects();
                 return true;
             } else {
                 toast.error(res.EM || "Failed to delete project.");

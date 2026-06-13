@@ -134,10 +134,16 @@ const MyWorkSection = ({ project }) => {
     }, [project?._id, project?.issueTypes, selectedSprint, selectedType]);
 
     const sprintOptions = [
-        { label: "All Sprints", value: "" },
-        ...sprints.map(s => ({ label: s.name, value: s._id }))
+        { value: '', label: 'All Sprints' },
+        ...sprints.map(s => {
+            const isBacklog = s.name?.toLowerCase() === 'backlog';
+            const statusLabel = s.status ? ` (${s.status.charAt(0).toUpperCase() + s.status.slice(1)})` : '';
+            return {
+                value: s._id,
+                label: isBacklog ? s.name : `${s.name}${statusLabel}`
+            };
+        })
     ];
-
     const typeOptions = [
         { label: "All Types", value: "" },
         { label: "Subtask", value: "Sub-task" },
@@ -219,7 +225,7 @@ const MyWorkSection = ({ project }) => {
                         <h4 className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 px-2 mt-4">
                             {activeTab === 'overdue' ? 'Requires Attention' : 'Your Work List'}
                         </h4>
-                        <div className="flex flex-col divide-y divide-slate-200 dark:divide-slate-700 border-t border-b border-slate-200 dark:border-slate-700 mt-2">
+                        <div className="flex flex-col max-h-[400px] overflow-y-auto pr-1 custom-scrollbar divide-y divide-slate-200 dark:divide-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800/30 mt-2">
                             {currentTabData.length === 0 ? (
                                 <p className="text-sm text-slate-500 py-6 px-2 text-center">No items in this category.</p>
                             ) : (
