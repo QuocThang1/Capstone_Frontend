@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { ProjectContext } from '../../../context/project.context';
 import { createSmartProjectApi } from '../../../utils/Api/projectApi';
 import { toast } from 'react-toastify';
-import ProjectWallpaper from '../../../assets/CreateProjectModel wallpaper.png';
 
 const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
     const { register, handleSubmit, formState: { errors }, reset, watch } = useForm();
@@ -155,7 +154,7 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                             {/* Right Side - Illustration */}
                             <div className="w-full md:w-1/2 p-8 flex flex-col items-center justify-center border-l border-slate-200 bg-slate-50/50">
                                 <img
-                                    src={ProjectWallpaper}
+                                    src="/TASKA.png"
                                     alt="Project Illustration"
                                     className="w-full h-auto object-cover rounded-xl shadow-md border border-slate-200"
                                 />
