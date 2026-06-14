@@ -10,7 +10,7 @@ import { getSprintsByProjectApi, completeSprintApi } from '../../../../utils/Api
 import { updateIssueApi, getIssuesByProjectApi } from '../../../../utils/Api/issueApi';
 import { updateBoardColumnsApi } from '../../../../utils/Api/projectApi';
 
-import Spinner from '../../../../components/Spinner';
+import Spinner from '../../../../components/spinner';
 import ButtonSpinner from '../../../../components/ButtonSpinner';
 import IssueDetailModal from './issueDetailModal';
 import BoardColumn from '../../../../components/projectPage/Board/BoardColumn';
