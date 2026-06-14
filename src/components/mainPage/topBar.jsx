@@ -6,7 +6,7 @@ import { AuthContext } from "../../context/auth.context";
 import useDarkMode from "../../hooks/useDarkMode";
 import { toast } from "react-toastify";
 import { Dropdown } from "antd";
-import NotificationDropdown from "./notificationDropdown";
+import NotificationDropdown from "./NotificationDropdown";
 
 // Helper function to validate URL
 function isValidUrl(str) {
@@ -29,8 +29,11 @@ const adminRoutes = {
 };
 
 const projectRoutes = {
-  "/projects": "Dashboard",
+  "/getting-started": "Getting Started",
+  "/for-you": "For You",
+  "/management": "Project Management",
   "/overview": "Overview Dashboard",
+  "/calendar": "Calendar",
   "/board": "Board",
   "/backlog": "Backlog",
   "/process-flow": "Process Flow",

@@ -2,7 +2,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
-import IssueCard from './issueCard';
+import IssueCard from './IssueCard';
 
 const BoardColumn = ({ column, issues, onIssueClick }) => {
     const { setNodeRef, isOver } = useDroppable({

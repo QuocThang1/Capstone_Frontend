@@ -34,9 +34,9 @@ const updateProfileApi = (profileData) => {
     return axios.put(URL_API, data);
 };
 
-const sendOtpApi = (email) => {
+const sendOtpApi = (email, type = 'register') => {
     const URL_API = "/v1/api/account/send-otp";
-    return axios.post(URL_API, { email });
+    return axios.post(URL_API, { email, type });
 };
 
 const verifyOtpApi = (email, otp) => {

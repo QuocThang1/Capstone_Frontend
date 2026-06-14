@@ -544,6 +544,7 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
               avatar: account.avatar || "",
               bio: account.bio || "",
               role: account.role || "user",
+              skills: account.skills || [],
             },
           });
 
@@ -688,6 +689,7 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
               gender: account.gender || "",
               phone: account.phone || "",
               role: account.role || "user",
+              skills: account.skills || [],
             },
           });
 
@@ -758,6 +760,7 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
             avatar: account.avatar || "",
             bio: account.bio || "",
             role: account.role || "user",
+            skills: account.skills || [],
           },
         });
         toast.success(res.EM || "Login successful!");

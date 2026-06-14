@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, Plus, MoreHorizontal, Share2, LayoutDashboard,
   CircuitBoard, Scroll, GitBranch, UserPlus, Columns, Tag, Star, LayoutList,
-  Activity, Zap, Users, Shield, FileText, Settings, X, BarChart2
+  Activity, Zap, Users, Shield, FileText, Settings, X, BarChart2, CalendarDays
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { cn } from '../lib/utils';
@@ -16,7 +16,6 @@ const ProjectNavbar = ({
   projectId,
   projectTimezone,
   fetchProjectData,
-  fetchIssuesData,
   onAddMember,
   onEditBoard,
   onEditIssueTypes,
@@ -44,6 +43,7 @@ const ProjectNavbar = ({
     { id: 'backlog', label: 'Backlog', icon: Scroll, path: `${basePath}/backlog`, fixed: true },
     { id: 'process-flow', label: 'Process Flow', icon: GitBranch, path: `${basePath}/process-flow`, fixed: true },
     { id: 'list', label: 'List', icon: LayoutList, path: `${basePath}/list`, fixed: true },
+    { id: 'calendar', label: 'Calendar', icon: CalendarDays, path: `${basePath}/calendar`, fixed: true },
     { id: 'chart', label: 'Chart', icon: BarChart2, path: `${basePath}/chart`, fixed: true },
 
     // Các tùy chọn nâng cao có thể Pin / Unpin
@@ -77,7 +77,6 @@ const ProjectNavbar = ({
       if (res?.EC === 0) {
         toast.success(res.EM || 'Timezone updated');
         fetchProjectData();
-        fetchIssuesData();
       } else {
         toast.error(res?.EM || 'Failed to update timezone');
       }

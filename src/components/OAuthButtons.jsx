@@ -5,7 +5,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../context/auth.context';
-import { googleLoginApi, githubLoginApi } from '../utils/Api/accountApi';
+import { googleLoginApi } from '../utils/Api/accountApi';
 import { toast } from 'react-toastify';
 import useDarkMode from '../hooks/useDarkMode';
 

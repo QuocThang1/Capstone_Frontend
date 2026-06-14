@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { getBurndownChartApi, getIssueTypeChartApi, getWorkloadChartApi, getVelocityChartApi } from '../../../../utils/Api/chartApi';
@@ -12,14 +12,15 @@ import { Activity, Calendar, PieChart, BarChart2, Users, TrendingUp } from 'luci
 import SelectDropdown from '../../../../components/selectDropdown';
 
 const ChartPage = () => {
-    const { projectId } = useParams();
+    const { project } = useOutletContext();
     const [loading, setLoading] = useState(true);
     const [chartData, setChartData] = useState(null);
     const [sprintId, setSprintId] = useState(null);
     const [allSprints, setAllSprints] = useState([]);
     const [chartType, setChartType] = useState('burndown'); // 'burndown' | 'issue-type'
 
-    const fetchChartData = async (selectedSprintId = null, selectedType = 'burndown') => {
+    const fetchChartData = useCallback(async (selectedSprintId = null, selectedType = 'burndown') => {
+        if (!project?._id) return;
         setLoading(true);
         try {
             let apiCall = getBurndownChartApi;
@@ -27,7 +28,7 @@ const ChartPage = () => {
             else if (selectedType === 'workload') apiCall = getWorkloadChartApi;
             else if (selectedType === 'velocity') apiCall = getVelocityChartApi;
 
-            const res = await apiCall(projectId, selectedSprintId);
+            const res = await apiCall(project._id, selectedSprintId);
             if (res && res.EC === 0) {
                 if (res.data.noData) {
                     setChartData(null);
@@ -51,13 +52,13 @@ const ChartPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [project]);
 
     useEffect(() => {
-        if (projectId) {
+        if (project?._id) {
             fetchChartData(sprintId, chartType);
         }
-    }, [projectId, sprintId, chartType]);
+    }, [fetchChartData, sprintId, chartType, project?._id]);
 
     const handleSprintChange = (val) => {
         if (val !== sprintId) {

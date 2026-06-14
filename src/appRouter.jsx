@@ -17,6 +17,7 @@ import AuditLogsPage from "./pages/Admin/AuditLogsPage";
 import RolesPermissionsPage from "./pages/Admin/RolesPermissionsPage";
 import SystemSettingsPage from "./pages/Admin/SystemSettingsPage";
 import ForYou from "./pages/Project/forYou";
+import GettingStarted from "./pages/Project/gettingStarted";
 import ProjectManagement from "./pages/Project/ProjectManagement/projectManagement";
 import AcceptInvite from "./pages/acceptInvite";
 import ProjectDetailsLayout from "./layout/projectDetailsLayout";
@@ -30,6 +31,7 @@ import RealTimeEventLog from "./pages/Project/ProjectDetail/EventLog/RealTimeEve
 import AutomationRules from "./pages/Project/ProjectDetail/AutomationRules/automationRules";
 import OverviewDashboard from "./pages/Project/ProjectDetail/Summary/OverviewDashboard";
 import ChartPage from "./pages/Project/ProjectDetail/Chart/chartPage";
+import Calendar from "./pages/Project/ProjectDetail/Calendar/calendar";
 import GitHubCallback from "./pages/auth/GitHubCallback";
 import GoogleCallback from "./pages/auth/GoogleCallback";
 
@@ -160,6 +162,17 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
+        element: <Navigate to="getting-started" replace />
+      },
+      {
+        path: "getting-started",
+        element:
+          <ProtectedRoute allowedRoles={["admin", "user"]}>
+            <GettingStarted />
+          </ProtectedRoute>
+      },
+      {
+        path: "for-you",
         element:
           <ProtectedRoute allowedRoles={["admin", "user"]}>
             <ForYou />
@@ -218,6 +231,13 @@ const router = createBrowserRouter([
             element:
               <ProtectedRoute allowedRoles={["admin", "user"]}>
                 <ChartPage />
+              </ProtectedRoute>
+          },
+          {
+            path: "calendar",
+            element:
+              <ProtectedRoute allowedRoles={["admin", "user"]}>
+                <Calendar />
               </ProtectedRoute>
           },
           {

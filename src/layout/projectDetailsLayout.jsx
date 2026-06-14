@@ -2,7 +2,6 @@ import { useState, useEffect, useContext } from 'react';
 import { useParams, Outlet } from 'react-router-dom';
 import { AuthContext } from '../context/auth.context';
 import { getProjectByIdApi } from '../utils/Api/projectApi';
-import { getIssuesByProjectApi } from '../utils/Api/issueApi';
 import { getStarredProjectsApi, toggleStarProjectApi } from '../utils/Api/accountApi';
 import Spinner from '../components/spinner';
 import { toast } from 'react-toastify';
@@ -20,7 +19,6 @@ const ProjectDetailsLayout = () => {
     const currentUserId = auth?.user?.id;
 
     const [project, setProject] = useState(null);
-    const [issues, setIssues] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -43,21 +41,10 @@ const ProjectDetailsLayout = () => {
         }
     };
 
-    const fetchIssuesData = async () => {
-        try {
-            const issuesRes = await getIssuesByProjectApi(projectId);
-            if (issuesRes && issuesRes.EC === 0) {
-                setIssues(issuesRes.data || []);
-            } else { throw new Error(issuesRes.EM || 'Failed to fetch issues.'); }
-        } catch (err) {
-            toast.error(err.message || 'Failed to fetch issues.');
-        }
-    };
-
     useEffect(() => {
         const fetchInitialData = async () => {
             setLoading(true);
-            await Promise.all([fetchProjectData(), fetchIssuesData()]);
+            await fetchProjectData();
             try {
                 const starredRes = await getStarredProjectsApi();
                 if (starredRes && starredRes.EC === 0) {
@@ -97,17 +84,14 @@ const ProjectDetailsLayout = () => {
 
     const handleColumnsUpdate = () => {
         fetchProjectData();
-        fetchIssuesData();
     };
 
     const handleTypesUpdate = () => {
         fetchProjectData();
-        fetchIssuesData();
     };
 
     const handleMemberUpdate = () => {
         fetchProjectData();
-        fetchIssuesData();
     }
 
     if (loading) {
@@ -139,7 +123,6 @@ const ProjectDetailsLayout = () => {
                         projectId={project._id}
                         projectTimezone={project.timezone}
                         fetchProjectData={fetchProjectData}
-                        fetchIssuesData={fetchIssuesData}
                         onAddMember={() => setAddMemberModalOpen(true)}
                         onEditBoard={() => setEditBoardModalOpen(true)}
                         onEditIssueTypes={() => setEditIssueTypesModalOpen(true)}
@@ -148,8 +131,8 @@ const ProjectDetailsLayout = () => {
                         starLoading={starLoading}
                         isLeader={isLeader}
                     />
-                    <main className="flex-1 overflow-y-auto p-4 lg:p-4 relative">
-                        <Outlet context={{ project, setProject, issues, setIssues, fetchProjectData, fetchIssuesData, socket, isLeader }} />
+                    <main className="flex-1 overflow-y-auto p-4 lg:p-4 pb-10 lg:pb-12 relative">
+                        <Outlet context={{ project, setProject, fetchProjectData, socket, isLeader }} />
                     </main>
                     <FloatingReviewBanner project={project} fetchProjectData={fetchProjectData} />
                 </div>

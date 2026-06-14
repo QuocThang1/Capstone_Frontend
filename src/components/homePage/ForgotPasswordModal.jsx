@@ -245,7 +245,7 @@ export const ForgotPasswordModal = ({ isOpen, onClose, isInsideOverlay = false }
       setIsSubmitting(true);
 
       try {
-        const res = await sendOtpApi(formData.email);
+        const res = await sendOtpApi(formData.email, 'forgot_password');
 
         if (res.EC === 0) {
           toast.success(res.EM || "OTP sent to your email.");
