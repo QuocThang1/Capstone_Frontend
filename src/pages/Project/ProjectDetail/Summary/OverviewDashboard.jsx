@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import ProgressScore from "../../../../components/projectPage/Summary/ProgressScore";
 import StatusOverview from "../../../../components/projectPage/Summary/StatusOverview";
 import TypesOfWork from "../../../../components/projectPage/Summary/TypesOfWork";
-import TeamWorkload from "../../../../components/projectPage/Summary/TeamWorkload";
+import TeamWorkload from "../../../../components/projectPage/Summary/TeamWorkLoad";
 import SummaryBottlenecks from "../../../../components/projectPage/Summary/SummaryBottlenecks";
 import SummaryEvents from "../../../../components/projectPage/Summary/SummaryEvents";
 import MyWorkSection from "../../../../components/projectPage/Summary/MyWorkSection";

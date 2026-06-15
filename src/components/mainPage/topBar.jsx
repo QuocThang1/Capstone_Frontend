@@ -6,7 +6,7 @@ import { AuthContext } from "../../context/auth.context";
 import useDarkMode from "../../hooks/useDarkMode";
 import { toast } from "react-toastify";
 import { Dropdown } from "antd";
-import NotificationDropdown from "./NotificationDropdown";
+import NotificationDropdown from "./notificationDropdown";
 
 // Helper function to validate URL
 function isValidUrl(str) {

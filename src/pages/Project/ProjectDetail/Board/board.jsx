@@ -10,11 +10,11 @@ import { getSprintsByProjectApi, completeSprintApi } from '../../../../utils/Api
 import { updateIssueApi } from '../../../../utils/Api/issueApi';
 import { updateBoardColumnsApi } from '../../../../utils/Api/projectApi';
 
-import Spinner from '../../../../components/Spinner';
+import Spinner from '../../../../components/spinner';
 import ButtonSpinner from '../../../../components/ButtonSpinner';
 import IssueDetailModal from './issueDetailModal';
-import BoardColumn from '../../../../components/projectPage/Board/BoardColumn';
-import IssueCard from '../../../../components/projectPage/Board/IssueCard';
+import BoardColumn from '../../../../components/projectPage/Board/boardColumn';
+import IssueCard from '../../../../components/projectPage/Board/issueCard';
 
 const containerVariants = {
     hidden: { opacity: 0 },
