@@ -107,11 +107,9 @@ const IssueList = () => {
     useEffect(() => {
         if (!project?._id) return;
 
-        fetchFilteredIssues();
-
         const delayTimer = setTimeout(() => {
             fetchFilteredIssues();
-        }, 500);
+        }, 300);
 
         return () => clearTimeout(delayTimer);
     }, [fetchFilteredIssues, project?._id]);
