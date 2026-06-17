@@ -281,58 +281,6 @@ const router = createBrowserRouter([
       }
     ],
   },
-  // Legacy routes (keep for backward compatibility)
-  {
-    path: "/",
-    element: <UserLayout />,
-    children: [
-      // Monitor Section
-      {
-        path: "overview",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <OverviewDashboard />
-          </ProtectedRoute>
-      },
-      {
-        path: "events",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <RealTimeEventLog />
-          </ProtectedRoute>
-      },
-      // Intelligence Section
-      {
-        path: "process",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <ProcessFlow />
-          </ProtectedRoute>
-      },
-      {
-        path: "bottlenecks",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <BottleneckDetector />
-          </ProtectedRoute>
-      },
-      // Management Section
-      {
-        path: "team",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <TeamHealth />
-          </ProtectedRoute>
-      },
-      {
-        path: "automation",
-        element:
-          <ProtectedRoute allowedRoles={["admin", "user"]}>
-            <AutomationRules />
-          </ProtectedRoute>
-      }
-    ],
-  },
 ]);
 
 export default function AppRouter() {

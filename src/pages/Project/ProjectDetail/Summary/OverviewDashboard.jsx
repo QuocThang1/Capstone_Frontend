@@ -70,9 +70,6 @@ const OverviewDashboard = () => {
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Project Summary</h1>
           <p className="mt-1 text-slate-500">Real-time intelligence on workflow health, distribution and bottlenecks.</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-md">
-          <DownloadCloud className="w-4 h-4" /> Generate Report
-        </button>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-min">

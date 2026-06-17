@@ -78,7 +78,7 @@ const EmailStep = ({ formData, handleInputChange, errors, handleContinue, isSubm
       type="button"
       onClick={handleContinue}
       disabled={isSubmitting}
-      className="w-full py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow"
+      className="w-full py-3 cursor-pointer rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow"
     >
       {isSubmitting ? "Sending..." : "Continue"}
     </button>
@@ -127,14 +127,14 @@ const OTPStep = ({ formData, handleInputChange, errors, handleContinue, handleBa
     <div className="flex gap-3">
       <button
         onClick={handleBack}
-        className="flex-1 py-3 rounded-lg font-semibold transition-colors text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
+        className="flex-1 py-3 cursor-pointer rounded-lg font-semibold transition-colors text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
       >
         Back
       </button>
       <button
         onClick={handleContinue}
         disabled={isSubmitting}
-        className="flex-1 py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow"
+        className="flex-1 py-3 cursor-pointer rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow"
       >
         {isSubmitting ? "Verifying..." : "Continue"}
       </button>
@@ -201,14 +201,14 @@ const PasswordStep = ({ formData, handleInputChange, errors, handleContinue, han
     <div className="flex gap-3">
       <button
         onClick={handleBack}
-        className="flex-1 py-3 rounded-lg font-semibold transition-colors text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
+        className="flex-1 py-3 cursor-pointer rounded-lg font-semibold transition-colors text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
       >
         Back
       </button>
       <button
         onClick={handleContinue}
         disabled={isSubmitting}
-        className="flex-1 py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow"
+        className="flex-1 py-3 cursor-pointer rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow"
       >
         {isSubmitting ? "Resetting..." : "Reset Password"}
       </button>
@@ -379,7 +379,7 @@ export const ForgotPasswordModal = ({ isOpen, onClose, isInsideOverlay = false }
               <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50"></h1>
               <button
                 onClick={onClose}
-                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                className="p-1 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
               >
                 <CloseOutlined className="text-slate-600 dark:text-slate-400 text-lg" />
               </button>
@@ -436,7 +436,7 @@ export const ForgotPasswordModal = ({ isOpen, onClose, isInsideOverlay = false }
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50"></h1>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+              className="p-1 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
             >
               <CloseOutlined className="text-slate-600 dark:text-slate-400 text-lg" />
             </button>
