@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { ProjectContext } from '../../../context/project.context';
 import { createSmartProjectApi } from '../../../utils/Api/projectApi';
 import { toast } from 'react-toastify';
-import ProjectWallpaper from '../../../assets/CreateProjectModel wallpaper.png';
 
 const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
     const { register, handleSubmit, formState: { errors }, reset, watch } = useForm();
@@ -154,11 +153,24 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
 
                             {/* Right Side - Illustration */}
                             <div className="w-full md:w-1/2 p-8 flex flex-col items-center justify-center border-l border-slate-200 bg-slate-50/50">
-                                <img
-                                    src={ProjectWallpaper}
-                                    alt="Project Illustration"
-                                    className="w-full h-auto object-cover rounded-xl shadow-md border border-slate-200"
-                                />
+                                <div className="w-full rounded-xl shadow-md border border-slate-200 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6">
+                                    <div className="flex items-center gap-2 mb-5">
+                                        <span className="h-3 w-3 rounded-full bg-red-400" />
+                                        <span className="h-3 w-3 rounded-full bg-amber-400" />
+                                        <span className="h-3 w-3 rounded-full bg-emerald-400" />
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {["To Do", "In Progress", "Done"].map((column) => (
+                                            <div key={column} className="rounded-lg bg-white/85 border border-slate-200 p-3 min-h-32">
+                                                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">{column}</p>
+                                                <div className="mt-3 space-y-2">
+                                                    <div className="h-8 rounded-md bg-indigo-100 border border-indigo-200" />
+                                                    <div className="h-8 rounded-md bg-slate-100 border border-slate-200" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                                 <div className="mt-6 w-full text-center bg-white border border-slate-200 text-slate-700 rounded-xl p-5 shadow-sm">
                                     <p className="font-semibold text-lg">Create a new project</p>
                                     <p className="text-sm mt-2 text-slate-500">
