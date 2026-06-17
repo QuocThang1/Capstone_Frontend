@@ -88,7 +88,7 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
           type="button"
           onClick={handleContinue}
           disabled={isSubmitting}
-          className={`${allowPasswordLogin ? "block" : "hidden"} w-full py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow`}
+          className={`${allowPasswordLogin ? "block" : "hidden"} w-full py-3 cursor-pointer rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow`}
         >
           Continue
         </button>
@@ -130,7 +130,7 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
               setModalMode("login");
               resetModal();
             }}
-            className="font-semibold transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+            className="font-semibold cursor-pointer transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
           >
             Log in
           </button>
@@ -187,13 +187,13 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
         <div className="flex gap-3">
           <button
             onClick={handleBack}
-            className="flex-1 py-3 rounded-lg font-semibold transition-colors text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
+            className="flex-1 py-3 cursor-pointer rounded-lg font-semibold transition-colors text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
           >
             Back
           </button>
           <button
             onClick={handleContinue}
-            className="flex-1 py-3 rounded-lg font-semibold text-white transition-all bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow"
+            className="flex-1 py-3 cursor-pointer rounded-lg font-semibold text-white transition-all bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow"
             disabled={otpCountdown === 0}
           >
             Continue
@@ -203,7 +203,7 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
         <p className="text-center text-sm text-slate-500 dark:text-slate-400">
           Didn't receive the code?{" "}
           <button
-            className="font-semibold transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+            className="font-semibold cursor-pointer transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
             onClick={onResendOtp}
             disabled={isSubmitting || otpCountdown > 0}
           >
@@ -295,13 +295,13 @@ const SignupSteps = ({ currentStep, formData, handleInputChange, errors, handleC
         <div className="flex gap-3">
           <button
             onClick={handleBack}
-            className="flex-1 py-3 rounded-lg font-semibold transition-colors text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
+            className="flex-1 py-3 cursor-pointer rounded-lg font-semibold transition-colors text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
           >
             Back
           </button>
           <button
             onClick={handleContinue}
-            className="flex-1 py-3 rounded-lg font-semibold text-white transition-all bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow"
+            className="flex-1 py-3 cursor-pointer rounded-lg font-semibold text-white transition-all bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow"
           >
             Create Account
           </button>
@@ -387,7 +387,7 @@ const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitt
         <button 
           type="button"
           onClick={() => setIsForgotPasswordOpen(true)}
-          className="text-sm font-semibold transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+          className="text-sm cursor-pointer font-semibold transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
         >
           Forgot password?
         </button>
@@ -398,7 +398,7 @@ const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitt
       type="button"
       onClick={handleLogin}
       disabled={isSubmitting}
-      className={`${allowPasswordLogin ? "block" : "hidden"} w-full py-3 rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow`}
+      className={`${allowPasswordLogin ? "block" : "hidden"} w-full py-3 cursor-pointer rounded-lg font-semibold text-white transition-all disabled:opacity-60 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 dark:shadow-neon-glow`}
     >
       Sign In
     </button>
@@ -441,7 +441,7 @@ const LoginStep = ({ formData, handleInputChange, errors, handleLogin, isSubmitt
           setModalMode("signup");
           resetModal();
         }}
-        className="font-semibold transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+        className="font-semibold cursor-pointer transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
       >
         Sign up
       </button>
@@ -923,7 +923,7 @@ export const AuthModal = ({ isOpen, onClose, mode = "signup", initialEmail = "",
                 {/* Close button */}
                 <button
                   onClick={onClose}
-                  className="absolute top-4 right-4 p-1 rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  className="absolute top-4 right-4 p-1 cursor-pointer rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                 >
                   <CloseOutlined />
                 </button>

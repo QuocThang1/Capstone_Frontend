@@ -10,7 +10,6 @@ import { Footer } from "../components/homePage/footer";
 const Home = () => {
   return (
     <div className="min-h-screen">
-      <Header />
       <main>
         <Hero />
         <Features />

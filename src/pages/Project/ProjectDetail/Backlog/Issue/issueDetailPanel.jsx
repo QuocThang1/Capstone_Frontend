@@ -716,7 +716,10 @@ const IssueDetailPanel = ({ project, sprints, issue, onClose, onDataUpdate, onDe
                     issue={selectedSubtask}
                     isSubtaskMode={true}
                     onClose={() => setSelectedSubtask(null)}
-                    onDataUpdate={onDataUpdate || fetchIssuesData}
+                    onDataUpdate={() => {
+                        fetchSubtasks();
+                        if (onDataUpdate) onDataUpdate();
+                    }}
                 />
             )}
         </motion.div>
