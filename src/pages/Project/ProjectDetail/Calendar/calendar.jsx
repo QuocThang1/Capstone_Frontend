@@ -211,7 +211,7 @@ const Calendar = () => {
                                     currentMonth={currentDate}
                                     sprints={sprints}
                                     issues={filteredIssues}
-                                    showAssignee={selectedAssignees.length > 0}
+                                    showAssignee={true}
                                     projectTimezone={project?.timezone}
                                 />
                             ))}
