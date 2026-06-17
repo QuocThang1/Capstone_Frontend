@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { useParams, Outlet } from 'react-router-dom';
+import { useParams, Outlet, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/auth.context';
 import { getProjectByIdApi } from '../utils/Api/projectApi';
 import { getStarredProjectsApi, toggleStarProjectApi } from '../utils/Api/accountApi';
@@ -21,6 +21,8 @@ const ProjectDetailsLayout = () => {
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [searchParams] = useSearchParams();
+    const intendedUser = searchParams.get('intendedUser');
 
     const [isStarred, setIsStarred] = useState(false);
     const [starLoading, setStarLoading] = useState(false);
@@ -100,6 +102,22 @@ const ProjectDetailsLayout = () => {
 
     if (error) {
         return <div className="flex items-center justify-center h-screen text-red-500">{error}</div>;
+    }
+
+    if (intendedUser && auth?.user?._id && intendedUser !== auth.user._id) {
+        return (
+            <div className="flex flex-col items-center justify-center h-screen bg-slate-50 dark:bg-slate-900 text-center p-4">
+                <div className="max-w-md p-8 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
+                    <h2 className="text-2xl font-bold text-rose-600 mb-4">Access Denied</h2>
+                    <p className="text-slate-600 dark:text-slate-300 mb-4">
+                        This link was intended for another user, but you are currently logged in as <strong>{auth.user.email}</strong>.
+                    </p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                        Please log out and log back in with the correct account to view this task.
+                    </p>
+                </div>
+            </div>
+        );
     }
 
     const isLeader = project?.members?.some(m => {

@@ -128,7 +128,7 @@ export const Header = () => {
           {/* Logo */}
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="flex items-center gap-2.5"
+            className="flex cursor-pointer items-center gap-2.5"
           >
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
@@ -147,7 +147,7 @@ export const Header = () => {
               <button
                 key={item.label}
                 onClick={() => scrollTo(item.id)}
-                className="px-4 py-2 rounded-lg text-sm font-semibold transition-colors hover:bg-slate-50"
+                className="px-4 py-2 cursor-pointer rounded-lg text-sm font-semibold transition-colors hover:bg-slate-50"
                 style={{ color: "#475569" }}
                 onMouseEnter={e => (e.currentTarget.style.color = "#6366F1")}
                 onMouseLeave={e => (e.currentTarget.style.color = "#475569")}
@@ -174,7 +174,7 @@ export const Header = () => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.35 }}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-slate-800/70 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200"
+                    className="flex cursor-pointer items-center gap-2 px-3 py-2 rounded-lg bg-white/80 dark:bg-slate-800/70 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200"
                   >
                     <div
                       className="w-10 h-10 rounded-full ring-1 ring-slate-20x0 dark:ring-slate-600 flex items-center justify-center font-semibold text-sm"
@@ -197,7 +197,7 @@ export const Header = () => {
                   className="flex items-center gap-3"
                 >
                   <button
-                    className="text-sm font-semibold px-4 py-2 transition-colors"
+                    className="text-sm cursor-pointer font-semibold px-4 py-2 transition-colors"
                     style={{ color: "#475569" }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = "#6366F1")}
                     onMouseLeave={(e) => (e.currentTarget.style.color = "#475569")}
@@ -207,7 +207,7 @@ export const Header = () => {
                   </button>
                   <button
                     onClick={() => setModalState({ isOpen: true, mode: "signup" })}
-                    className="btn-indigo text-sm px-5 py-2.5 rounded-lg"
+                    className="btn-indigo cursor-pointer text-sm px-5 py-2.5 rounded-lg"
                   >
                     Get Started
                   </button>
@@ -215,7 +215,7 @@ export const Header = () => {
               )}
             </AnimatePresence>
             <motion.button
-              className="text-sm font-semibold px-4 py-2 transition-colors text-slate-600 hover:text-indigo-500"
+              className="text-sm cursor-pointer font-semibold px-4 py-2 transition-colors text-slate-600 hover:text-indigo-500"
               onClick={toggleTheme}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -236,7 +236,7 @@ export const Header = () => {
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden p-2"
+            className="md:hidden p-2 cursor-pointer"
             onClick={() => setDrawerOpen(true)}
             style={{ color: "#475569" }}
           >
@@ -264,7 +264,7 @@ export const Header = () => {
             <button
               key={item.label}
               onClick={() => scrollTo(item.id)}
-              className="text-left px-4 py-3 rounded-xl text-sm font-semibold transition-colors"
+              className="text-left px-4 py-3 cursor-pointer rounded-xl text-sm font-semibold transition-colors"
               style={{ color: "#475569" }}
             >
               {item.label}
@@ -273,7 +273,7 @@ export const Header = () => {
           <div className="mt-4 pt-4" style={{ borderTop: "1px solid #E2E8F0" }}>
             {isAuthenticated && user ? (
               <button
-                className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-left"
+                className="w-full px-4 py-3 cursor-pointer rounded-xl text-sm font-semibold text-left"
                 style={{ color: "#6366F1", background: "#E0E7FF" }}
                 onClick={() => { navigate("/profile"); setDrawerOpen(false); }}
               >
@@ -281,7 +281,7 @@ export const Header = () => {
               </button>
             ) : (
               <button
-                className="w-full btn-indigo py-3 rounded-xl text-sm"
+                className="w-full btn-indigo py-3 cursor-pointer rounded-xl text-sm"
                 onClick={() => { setModalState({ isOpen: true, mode: "signup" }); setDrawerOpen(false); }}
               >
                 Get Started

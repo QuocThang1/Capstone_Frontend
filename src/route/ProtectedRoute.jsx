@@ -12,9 +12,13 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     const location = useLocation();
 
     if (!auth.isAuthenticated) {
-        if (location.pathname.includes('/invite')) {
+        const isInviteLink = location.pathname.includes('/invite');
+        const isIssueLink = location.search.includes('issueId=');
+
+        if (isInviteLink || isIssueLink) {
             return <Navigate to="/" state={{ from: location.pathname + location.search, openLogin: true }} replace />;
         }
+        
         return <Navigate to="/" replace />;
     }
 
